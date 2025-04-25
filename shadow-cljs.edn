@@ -1,0 +1,11 @@
+;; shadow-cljs configuration
+{:deps true
+
+ :builds
+ {:frontend
+  {:target :browser
+   :output-dir "public/js"
+   :asset-path "/js"
+   :modules {:main {:init-fn zi-study.frontend.core/init}}
+   :devtools {:after-load zi-study.frontend.core/reload
+              :watch-dir "public"}}}}

@@ -1,0 +1,1 @@
+npx postcss public/app.input.css -o ./public/app.output.css -w
