@@ -50,13 +50,7 @@
         [:div {:class "flex items-center justify-center mb-4"}
          [:div {:class "text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary-400)] to-[var(--color-primary-700)]"}
           "ZiStudy"]
-         [:> lucide-icons/Sparkles {:size 24 :className "ml-2 text-[var(--color-secondary)]"}]]
-
-        [:h1 {:class "text-2xl font-semibold text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]"}
-         "Welcome Back"]
-
-        [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] mt-2"}
-         "Sign in to continue to your account"]]
+         [:> lucide-icons/Sparkles {:size 24 :className "ml-2 text-[var(--color-secondary)]"}]]]
 
        ;; Login card
        [card {:variant :elevated
@@ -64,8 +58,7 @@
               :hover-effect true
               :class "w-full max-w-md animate-fade-in-up"}
 
-        [card-header
-         [:h2 {:class "text-xl font-semibold"} "Login"]]
+        [card-header {:title "Login" :icon lucide-icons/LogIn}]
 
         [card-content {}
 

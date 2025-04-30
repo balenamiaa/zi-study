@@ -32,13 +32,13 @@
     /* Deep Purple A400 */
     --color-secondary-rgb: 124, 77, 255;
 
-    /* Light Theme Colors */
-    --color-light-bg: #FFFFFF;
-    --color-light-bg-paper: #F5F5F5;
+    /* Light Theme Colors - Updated with pink tints */
+    --color-light-bg: #FDF7F9;
+    --color-light-bg-paper: #F8EEF2;
     --color-light-card: #FFFFFF;
     --color-light-text-primary: #212121;
     --color-light-text-secondary: #757575;
-    --color-light-divider: #E0E0E0;
+    --color-light-divider: #F1D8E2;
 
     /* Dark Theme Colors - Updated with pink shades */
     --color-dark-bg: #1E151D;

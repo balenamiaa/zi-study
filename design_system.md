@@ -45,16 +45,16 @@ Our secondary palette is based on Material Design's Deep Purple:
 
 ### Theme Colors
 
-#### Light Theme (Soft Blues)
+#### Light Theme (Soft Pink)
 
 | Name | Hex | Usage |
 |------|-----|-------|
-| Light Background | `#F8F9FC` | Main background with subtle blue tint |
-| Light Background Paper | `#F1F3F9` | Cards, elevated surfaces with light blue tint |
+| Light Background | `#FDF7F9` | Main background with subtle pink tint |
+| Light Background Paper | `#F8EEF2` | Cards, elevated surfaces with light pink tint |
 | Light Card | `#FFFFFF` | Card backgrounds, dialogs (remained white for contrast) |
 | Light Text Primary | `#212121` | Primary text |
 | Light Text Secondary | `#757575` | Secondary, less important text |
-| Light Divider | `#E0E0E0` | Borders, dividers |
+| Light Divider | `#F1D8E2` | Borders, dividers with soft pink tint |
 
 #### Dark Theme (Pink-Tinted)
 
@@ -306,7 +306,7 @@ Smooth transition between light and dark themes:
 - Rely on neutral colors for most UI elements
 - Ensure color is not the only means of conveying information
 - Dark theme uses pink-tinted background for brand consistency
-- Light theme uses soft blue-tinted background for a calm, modern feel
+- Light theme uses soft pink-tinted background for a calm, modern feel
 
 ## Iconography
 

@@ -142,18 +142,14 @@
            [:> lucide-icons/Sparkles {:size 24 :className "ml-2 text-[var(--color-secondary)]"}]]
 
           [:h1 {:class "text-2xl font-semibold text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]"}
-           "Create Account"]
-
-          [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] mt-2"}
-           "Sign up to start using ZiStudy"]]
+           "Create Account"]]
 
          [card {:variant :elevated
                 :elevation 2
                 :hover-effect true
                 :class "w-full max-w-md animate-fade-in-up"}
 
-          [card-header
-           [:h2 {:class "text-xl font-semibold"} "Register"]]
+          [card-header {:title "Register" :icon lucide-icons/UserPlus}]
 
           [card-content {}
 

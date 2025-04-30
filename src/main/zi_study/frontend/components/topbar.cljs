@@ -126,7 +126,8 @@
            [mobile-menu current-route]
            ;; Main navigation header
            [:header {:class (str "sticky-header animate-slide-down w-full transition-all duration-300 ease-in-out "
-                                 "bg-[var(--color-light-bg-paper)]/80 dark:bg-[var(--color-dark-bg-paper)]/90 "
+                                 "bg-[var(--color-light-bg-paper)] border-b border-[var(--color-light-divider)] "
+                                 "dark:bg-[var(--color-dark-bg-paper)]/90 dark:border-b dark:border-[rgba(255,255,255,0.1)] "
                                  (if @shrink-nav "py-2 shadow-md" "py-4"))}
 
             [:div {:class "mx-auto px-4 w-full"}
