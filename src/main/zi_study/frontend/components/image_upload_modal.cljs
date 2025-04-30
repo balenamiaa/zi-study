@@ -141,6 +141,7 @@
             @upload-error])
 
          ;; Image preview & Loading indicator
+         ^{:key "image-preview-container"}
          [:div {:class "mb-6 flex justify-center"}
           [:div {:class "relative w-32 h-32"}
            (if @image-preview
@@ -199,98 +200,98 @@
            "Paste"]]
 
          ;; Tab content based on active method
-         ^{:key (str "tab-content-" (name @active-method))}
-         (case @active-method
-           :file-system
-           [:div {:class "mt-4"}
-            [:div
-             {:class (str "border-2 border-dashed rounded-lg p-6 text-center transition-colors "
-                          (if @drag-active
-                            "border-[var(--color-primary)] bg-[var(--color-primary-50)] dark:bg-[rgba(240,98,146,0.1)]"
-                            "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]")
-                          (when @upload-loading? " opacity-50 cursor-not-allowed"))
-              :on-drag-enter #(handle-drag % true)
-              :on-drag-over #(handle-drag % true)
-              :on-drag-leave #(handle-drag % false)
-              :on-drop handle-drop
-              :on-click (when-not @upload-loading?
-                          (fn [e]
-                            (.preventDefault e)
-                            (open-file-dialog)))
-              :role "button"
-              :tab-index (when @upload-loading? -1)
-              :aria-disabled @upload-loading?
-              :aria-label "Upload image from file system"}
-             [:> lucide-icons/Upload
-              {:size 32
-               :className "mx-auto mb-2 text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]
-             [:p {:class "mb-1"} "Drag and drop your image here:"]
-             [:p {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-              "or click to browse files"]
-             [:input
-              {:type "file"
-               :accept "image/*"
-               :class "hidden"
-               :ref #(when % (reset! file-input-ref %))
-               :on-change handle-file-change
-               :required false
-               :aria-hidden true
-               :id "file-upload-input"
-               :name "file-upload"
-               :disabled @upload-loading?}]]]
+         [:div {:key (str "tab-content-" (name @active-method))}
+           (case @active-method
+             :file-system
+             [:div {:class "mt-4"}
+              [:div
+               {:class (str "border-2 border-dashed rounded-lg p-6 text-center transition-colors "
+                            (if @drag-active
+                              "border-[var(--color-primary)] bg-[var(--color-primary-50)] dark:bg-[rgba(240,98,146,0.1)]"
+                              "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]")
+                            (when @upload-loading? " opacity-50 cursor-not-allowed"))
+                :on-drag-enter #(handle-drag % true)
+                :on-drag-over #(handle-drag % true)
+                :on-drag-leave #(handle-drag % false)
+                :on-drop handle-drop
+                :on-click (when-not @upload-loading?
+                            (fn [e]
+                              (.preventDefault e)
+                              (open-file-dialog)))
+                :role "button"
+                :tab-index (when @upload-loading? -1)
+                :aria-disabled @upload-loading?
+                :aria-label "Upload image from file system"}
+               [:> lucide-icons/Upload
+                {:size 32
+                 :className "mx-auto mb-2 text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]
+               [:p {:class "mb-1"} "Drag and drop your image here:"]
+               [:p {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+                "or click to browse files"]
+               [:input
+                {:type "file"
+                 :accept "image/*"
+                 :class "hidden"
+                 :ref #(when % (reset! file-input-ref %))
+                 :on-change handle-file-change
+                 :required false
+                 :aria-hidden true
+                 :id "file-upload-input"
+                 :name "file-upload"
+                 :disabled @upload-loading?}]]]
 
-           :url
-           [:div {:class "mt-4"}
-            [text-input
-             {:type :text
-              :variant :outlined
-              :label "Image URL"
-              :placeholder "https://example.com/image.jpg"
-              :value @image-url
-              :on-change #(handle-url-change (.. % -target -value))
-              :helper-text "Enter the URL of an image"
-              :start-icon lucide-icons/Link
-              :required false
-              :full-width true
-              :disabled @upload-loading?
-              :class "mb-4"}]
+             :url
+             [:div {:class "mt-4"}
+              [text-input
+               {:type :text
+                :variant :outlined
+                :label "Image URL"
+                :placeholder "https://example.com/image.jpg"
+                :value @image-url
+                :on-change #(handle-url-change (.. % -target -value))
+                :helper-text "Enter the URL of an image"
+                :start-icon lucide-icons/Link
+                :required false
+                :full-width true
+                :disabled @upload-loading?
+                :class "mb-4"}]
 
-            [button
-             {:variant :primary
-              :size :md
-              :full-width true
-              :start-icon lucide-icons/Check
-              :disabled (or @upload-loading? (nil? @image-url) (empty? @image-url))
-              :loading @upload-loading?
-              :on-click (fn [_] (handle-url-submit))}
-             (if @upload-loading? "Uploading..." "Use this image")]]
+              [button
+               {:variant :primary
+                :size :md
+                :full-width true
+                :start-icon lucide-icons/Check
+                :disabled (or @upload-loading? (nil? @image-url) (empty? @image-url))
+                :loading (when @upload-loading? true)
+                :on-click (fn [_] (handle-url-submit))}
+               (if @upload-loading? "Uploading..." "Use this image")]]
 
-           :paste
-           [:div {:class "mt-4"}
-            [:div
-             {:class (str "border-2 border-dashed rounded-lg p-6 text-center transition-colors border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
-                          (when @upload-loading? " opacity-50 cursor-not-allowed"))
-              :tab-index (if @upload-loading? -1 0)
-              :on-paste handle-paste
-              :on-click (when-not @upload-loading?
-                          (fn [e]
-                            (.preventDefault e)
-                            (.. e -currentTarget -focus)))
-              :role "button"
-              :aria-disabled @upload-loading?
-              :aria-label "Paste image from clipboard"}
+             :paste
+             [:div {:class "mt-4"}
+              [:div
+               {:class (str "border-2 border-dashed rounded-lg p-6 text-center transition-colors border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
+                            (when @upload-loading? " opacity-50 cursor-not-allowed"))
+                :tab-index (if @upload-loading? -1 0)
+                :on-paste handle-paste
+                :on-click (when-not @upload-loading?
+                            (fn [e]
+                              (.preventDefault e)
+                              (.. e -currentTarget -focus)))
+                :role "button"
+                :aria-disabled @upload-loading?
+                :aria-label "Paste image from clipboard"}
 
-             ;; Hidden input to prevent validation
-             [:input
-              {:type "text"
-               :class "hidden"
-               :required false
-               :default-value ""
-               :aria-hidden true}]
+               ;; Hidden input to prevent validation
+               [:input
+                {:type "text"
+                 :class "hidden"
+                 :required false
+                 :default-value ""
+                 :aria-hidden true}]
 
-             [:> lucide-icons/Clipboard
-              {:size 32
-               :className "mx-auto mb-2 text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]
-             [:p {:class "mb-1"} "Click here and paste your image (Ctrl+V)"]
-             [:p {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-              "You can paste from clipboard or screenshot"]]])])})))
+               [:> lucide-icons/Clipboard
+                {:size 32
+                 :className "mx-auto mb-2 text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]
+               [:p {:class "mb-1"} "Click here and paste your image (Ctrl+V)"]
+               [:p {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+                "You can paste from clipboard or screenshot"]]])]])})))

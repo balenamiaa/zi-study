@@ -1,7 +1,6 @@
 (ns zi-study.frontend.components.popover
   (:require
-   [reagent.core :as r]
-   [reagent.dom :as rdom]))
+   [reagent.core :as r]))
 
 (defn popover
   "A popover component that displays floating content relative to a trigger element.
@@ -285,7 +284,7 @@
 
       :reagent-render
       (fn [props]
-        (let [{:keys [is-open x y class items target-ref]
+        (let [{:keys [is-open x y class items]
                :or {is-open false}} props
 
               controlled? (and (some? is-open) (some? (:on-change props)))

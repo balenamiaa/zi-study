@@ -4,6 +4,7 @@
    ["lucide-react" :as lucide-icons]
    [reitit.frontend.easy :as rfe]
    [zi-study.frontend.state :as state]
+   [zi-study.frontend.utilities.auth-core :as auth-core]
    [zi-study.frontend.components.theme-switcher :refer [theme-switcher]]
    [zi-study.frontend.components.button :refer [button]]
    [zi-study.frontend.components.badge :refer [avatar]]
@@ -101,12 +102,8 @@
                           (reset! scroll-pos current-pos)))
 
         handle-logout (fn []
-                        (.removeItem js/localStorage "auth-token")
-                        (swap! state/app-state assoc
-                               :auth/authenticated? false
-                               :auth/token nil
-                               :auth/current-user nil
-                               :auth/loading? false)
+                        (auth-core/remove-token)
+                        (state/reset-auth-state!)
                         (rfe/push-state :zi-study.frontend.core/home))]
 
     (r/create-class
@@ -119,14 +116,14 @@
         (js/window.removeEventListener "scroll" handle-scroll))
 
       :reagent-render
-      (fn [{:keys [current-route auth-state]}]
-        (let [authenticated? (:auth/authenticated? auth-state)
-              current-user (:auth/current-user auth-state)
-              auth-loading? (:auth/loading? auth-state)]
+      (fn [{:keys [current-route]}]
+        (let [auth-state (state/get-auth-state)
+              authenticated? (:authenticated? auth-state)
+              current-user (:current-user auth-state)
+              auth-loading? (:loading? auth-state)]
           [:div
            ;; Mobile menu overlay
            [mobile-menu current-route]
-
            ;; Main navigation header
            [:header {:class (str "sticky-header animate-slide-down w-full transition-all duration-300 ease-in-out "
                                  "bg-[var(--color-light-bg-paper)]/80 dark:bg-[var(--color-dark-bg-paper)]/90 "

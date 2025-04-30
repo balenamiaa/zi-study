@@ -1,12 +1,18 @@
 (ns zi-study.frontend.pages.register
-  (:require [reagent.core :as r]
-            [reitit.frontend.easy :as rfe]
-            [zi-study.frontend.components.input :refer [text-input]]
-            [zi-study.frontend.components.button :refer [button]]
-            [zi-study.frontend.components.card :refer [card card-content card-footer]]
-            [zi-study.frontend.components.alert :refer [alert]]
-            [zi-study.frontend.components.avatar-upload :refer [avatar-upload]]
-            ["lucide-react" :as lucide]))
+  (:require
+   ["lucide-react" :as lucide-icons]
+   [clojure.string :as str]
+   [reagent.core :as r]
+   [reitit.frontend.easy :as rfe]
+   [zi-study.frontend.components.alert :refer [alert]]
+   [zi-study.frontend.components.avatar-upload :refer [avatar-upload]]
+   [zi-study.frontend.components.button :refer [button]]
+   [zi-study.frontend.components.card :refer [card card-content card-footer
+                                              card-header]]
+   [zi-study.frontend.components.input :refer [text-input]]
+   [zi-study.frontend.state :as state]
+   [zi-study.frontend.utilities.auth :as auth]
+   [zi-study.frontend.utilities.validation :as validation]))
 
 (defn calculate-password-strength [password]
   (if (or (nil? password) (empty? password))
@@ -58,200 +64,227 @@
              :style {:width (str (* strength 25) "%")}}]]]))
 
 (defn register-page []
-  (let [email (r/atom "")
-        password (r/atom "")
-        confirm-password (r/atom "")
-        first-name (r/atom "")
-        last-name (r/atom "")
-        profile-image-url (r/atom nil)
+  (let [form-data (r/atom {:first-name ""
+                           :last-name ""
+                           :email ""
+                           :password ""
+                           :confirm-password ""
+                           :profile_picture_url nil})
         image-preview (r/atom nil)
-
         loading (r/atom false)
         error (r/atom nil)
-
-        password-strength (r/atom 0)
-
-        update-password-strength (fn [new-password]
-                                   (reset! password new-password)
-                                   (reset! password-strength (calculate-password-strength new-password)))
-
-        passwords-match? (fn []
-                           (and (not (empty? @password))
-                                (= @password @confirm-password)))
+        success (r/atom nil)
+        show-password (r/atom false)
+        show-confirm-password (r/atom false)
 
         handle-image-selected (fn [uploaded-url]
-                                (reset! profile-image-url uploaded-url)
+                                (swap! form-data assoc :profile_picture_url uploaded-url)
                                 (reset! image-preview uploaded-url))
+
+        validation-rules {:first-name [[validation/required? [] "First name is required"]
+                                       [validation/max-length? [50] "First name cannot exceed 50 characters"]]
+                          :last-name [[validation/required? [] "Last name is required"]
+                                      [validation/max-length? [50] "Last name cannot exceed 50 characters"]]
+                          :email [[validation/required? [] "Email is required"]
+                                  [validation/email-valid? [] "Please enter a valid email"]]
+                          :password [[validation/required? [] "Password is required"]
+                                     [validation/min-length? [8] "Password must be at least 8 characters"]
+                                     [validation/password-valid? [] "Password must contain at least one letter and one number"]]
+                          :confirm-password [[validation/required? [] "Please confirm your password"]
+                                             [(fn [value] (= value (:password @form-data))) [] "Passwords don't match"]]}
+
+        toggle-password-visibility (fn [field e]
+                                     (.preventDefault e)
+                                     (.stopPropagation e)
+                                     (case field
+                                       :password (swap! show-password not)
+                                       :confirm-password (swap! show-confirm-password not)))
+
+        update-field (fn [field e]
+                       (let [value (.. e -target -value)]
+                         (swap! form-data assoc field value)
+                         ;; If password field is updated, recalculate strength
+                         (when (= field :password)
+                           (calculate-password-strength value))))
+
+        validate-form (fn []
+                        (validation/validate-form @form-data validation-rules))
 
         handle-register (fn [e]
                           (.preventDefault e)
-                          (reset! loading true)
                           (reset! error nil)
+                          (reset! success nil)
 
-                          (let [registration-data {:email @email
-                                                   :password @password
-                                                   :first_name @first-name
-                                                   :last_name @last-name
-                                                   :profile_picture_url @profile-image-url}]
-
-                            (-> (js/fetch "/api/auth/register"
-                                          (clj->js {:method "POST"
-                                                    :headers {"Content-Type" "application/json"}
-                                                    :body (js/JSON.stringify (clj->js registration-data))}))
-                                (.then (fn [response]
-                                         (.json response)))
-                                (.then (fn [data]
-                                         (reset! loading false)
-                                         (if (.-error data)
-                                           (reset! error (.-error data))
-                                           (do
-                                             (js/alert "Account created successfully! Please sign in.")
-                                             (rfe/push-state :zi-study.frontend.core/login)))))
-                                (.catch (fn [err]
-                                          (reset! loading false)
-                                          (reset! error "Network error. Please try again later.")
-                                          (js/console.error "Registration error:" err))))))
-
-        valid-form? (fn []
-                      (and (not (empty? @email))
-                           (not (empty? @password))
-                           (not (empty? @confirm-password))
-                           (>= @password-strength 2)
-                           (passwords-match?)))]
+                          (let [validation-result (validate-form)]
+                            (if (:valid? validation-result)
+                              (do
+                                (reset! loading true)
+                                (auth/register (dissoc @form-data :confirm-password)
+                                               (fn [result]
+                                                 (reset! loading false)
+                                                 (if (:success result)
+                                                   (reset! success "Registration successful! You can now login.")
+                                                   (reset! error (:error result))))))
+                              ;; Combine error messages for clarity
+                              (reset! error (str "Please fix the form errors before submitting: "
+                                                 (str/join ", " (mapcat second (:errors validation-result))))))))]
 
     (fn []
-      [:div {:class "flex flex-col items-center justify-center min-h-[80vh] px-4 py-8 animate-fade-in"}
+      (let [validation-result (validate-form)
+            field-errors (:errors validation-result)]
 
-       ;; Title
-       [:div {:class "text-center mb-8"}
-        [:h1 {:class "text-2xl font-semibold text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]"}
-         "Create an Account"]]
+        [:div {:class "flex flex-col items-center justify-center min-h-[80vh] px-4 py-8 animate-fade-in"}
 
-       ;; Registration card
-       [card {:variant :elevated
-              :elevation 2
-              :hover-effect true
-              :class "w-full max-w-md animate-fade-in-up"}
+         [:div {:class "text-center mb-8"}
+          [:div {:class "flex items-center justify-center mb-4"}
+           [:div {:class "text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary-400)] to-[var(--color-primary-700)]"}
+            "ZiStudy"]
+           [:> lucide-icons/Sparkles {:size 24 :className "ml-2 text-[var(--color-secondary)]"}]]
 
-        [card-content {}
+          [:h1 {:class "text-2xl font-semibold text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]"}
+           "Create Account"]
 
-         ;; Error message (if any)
-         (when @error
-           [alert {:variant :soft
-                   :color :error
-                   :dismissible true
-                   :on-dismiss #(reset! error nil)
-                   :class "mb-4"}
-            @error])
+          [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] mt-2"}
+           "Sign up to start using ZiStudy"]]
 
-         ;; Registration form
-         [:form {:on-submit handle-register}
+         [card {:variant :elevated
+                :elevation 2
+                :hover-effect true
+                :class "w-full max-w-md animate-fade-in-up"}
 
-          ;; Profile picture upload
-          [:div {:class "mb-6"}
-           [:div {:class "flex flex-col items-center"}
-            [avatar-upload {:src @image-preview
-                            :alt "Profile picture"
-                            :size :xl
-                            :variant :circle
-                            :color :primary
-                            :disabled @loading
-                            :on-image-selected handle-image-selected}]
+          [card-header
+           [:h2 {:class "text-xl font-semibold"} "Register"]]
 
-            [:p {:class "mt-2 text-sm text-center text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-             "Click on the avatar to upload your profile picture"]]]
+          [card-content {}
 
-          ;; Name fields (side by side)
-          [:div {:class "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4"}
-           ;; First name
-           [text-input {:type :text
-                        :variant :outlined
-                        :label "First Name"
-                        :placeholder "Your first name"
-                        :value @first-name
-                        :on-change #(reset! first-name (.. % -target -value))
-                        :start-icon lucide/User
-                        :disabled @loading}]
+           ;; Profile picture upload
+           [:div {:class "mb-6"}
+            [:div {:class "flex flex-col items-center"}
+             [avatar-upload {:src @image-preview
+                             :alt "Profile picture"
+                             :size :xl
+                             :variant :circle
+                             :color :primary
+                             :disabled @loading
+                             :on-image-selected handle-image-selected}]
 
-           ;; Last name
-           [text-input {:type :text
-                        :variant :outlined
-                        :label "Last Name"
-                        :placeholder "Your last name"
-                        :value @last-name
-                        :on-change #(reset! last-name (.. % -target -value))
-                        :start-icon lucide/User
-                        :disabled @loading}]]
+             [:p {:class "mt-2 text-sm text-center text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+              "Click on the avatar to upload your profile picture"]]]
 
-          ;; Email
-          [text-input {:type :email
-                       :variant :outlined
-                       :label "Email"
-                       :placeholder "Enter your email"
-                       :value @email
-                       :on-change #(reset! email (.. % -target -value))
-                       :start-icon lucide/Mail
-                       :required true
-                       :disabled @loading
-                       :class "mb-4"}]
+           (when @error
+             [alert {:variant :soft
+                     :color :error
+                     :dismissible true
+                     :on-dismiss #(reset! error nil)
+                     :class "mb-4"}
+              @error])
 
-          ;; Password
-          [text-input {:type :password
-                       :variant :outlined
-                       :label "Password"
-                       :placeholder "Create a password"
-                       :value @password
-                       :on-change #(update-password-strength (.. % -target -value))
-                       :helper-text "Use 8+ characters with a mix of letters, numbers & symbols"
-                       :start-icon lucide/Lock
-                       :required true
-                       :disabled @loading
-                       :class "mb-1"}]
+           (when @success
+             [alert {:variant :soft
+                     :color :success
+                     :dismissible true
+                     :on-dismiss #(reset! success nil)
+                     :class "mb-4"}
+              @success])
 
-          ;; Password strength indicator
-          [password-strength-indicator {:strength @password-strength}]
+           [:form {:on-submit handle-register}
 
-          ;; Confirm password
-          [text-input {:type :password
-                       :variant :outlined
-                       :label "Confirm Password"
-                       :placeholder "Confirm your password"
-                       :value @confirm-password
-                       :on-change #(reset! confirm-password (.. % -target -value))
-                       :error-text (when (and (not (empty? @confirm-password))
-                                              (not (= @password @confirm-password)))
-                                     "Passwords do not match")
-                       :start-icon lucide/Lock
-                       :required true
-                       :disabled @loading
-                       :class "mb-6"}]
+            [:div {:class "flex flex-col md:flex-row gap-4 mb-4"}
+             [:div {:class "flex-1"}
+              [text-input {:type :text
+                           :variant :outlined
+                           :label "First Name"
+                           :placeholder "Enter your first name"
+                           :value (:first-name @form-data)
+                           :on-change #(update-field :first-name %)
+                           :start-icon lucide-icons/User
+                           :required true
+                           :error-text (first (get field-errors :first-name))
+                           :disabled @loading}]]
 
-          ;; Register button
-          [button {:variant :primary
-                   :size :lg
-                   :full-width true
-                   :start-icon lucide/UserPlus
-                   :disabled (or (not (valid-form?)) @loading)
-                   :class "mb-4"}
+             [:div {:class "flex-1"}
+              [text-input {:type :text
+                           :variant :outlined
+                           :label "Last Name"
+                           :placeholder "Enter your last name"
+                           :value (:last-name @form-data)
+                           :on-change #(update-field :last-name %)
+                           :start-icon lucide-icons/User
+                           :required true
+                           :error-text (first (get field-errors :last-name))
+                           :disabled @loading}]]]
 
-           (if @loading
-             [:span
-              [:span {:class "inline-block animate-spin mr-2"}
-               [:> lucide/Loader {:size 16}]]
-              "Creating account..."]
-             "Create account")]]]
+            [text-input {:type :email
+                         :variant :outlined
+                         :label "Email"
+                         :placeholder "Enter your email"
+                         :value (:email @form-data)
+                         :on-change #(update-field :email %)
+                         :start-icon lucide-icons/Mail
+                         :required true
+                         :error-text (first (get field-errors :email))
+                         :disabled @loading
+                         :class "mb-4"}]
 
-        ;; Card footer with login link
-        [card-footer {:align :center}
-         [:div {:class "w-full"}
-          [:div {:class "text-center mb-4 text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-           "Already have an account?"]
+            [text-input {:type (if @show-password :text :password)
+                         :variant :outlined
+                         :label "Password"
+                         :placeholder "Create a strong password"
+                         :value (:password @form-data)
+                         :on-change #(update-field :password %)
+                         :start-icon lucide-icons/Lock
+                         :end-icon (if @show-password lucide-icons/EyeOff lucide-icons/Eye)
+                         :on-end-icon-click #(toggle-password-visibility :password %)
+                         :required true
+                         :error-text (first (get field-errors :password))
+                         :disabled @loading
+                         :class "mb-4"}]
 
-          ;; Login button
-          [button {:variant :outlined
-                   :size :lg
-                   :full-width true
-                   :start-icon lucide/LogIn
-                   :disabled @loading
-                   :on-click #(rfe/push-state :zi-study.frontend.core/login)}
-           "Sign in"]]]]])))
+            [password-strength-indicator {:strength (calculate-password-strength (:password @form-data))}]
+
+            [text-input {:type (if @show-confirm-password :text :password)
+                         :variant :outlined
+                         :label "Confirm Password"
+                         :placeholder "Confirm your password"
+                         :value (:confirm-password @form-data)
+                         :on-change #(update-field :confirm-password %)
+                         :start-icon lucide-icons/Shield
+                         :end-icon (if @show-confirm-password lucide-icons/EyeOff lucide-icons/Eye)
+                         :on-end-icon-click #(toggle-password-visibility :confirm-password %)
+                         :required true
+                         :error-text (first (get field-errors :confirm-password))
+                         :disabled @loading
+                         :class "mb-6"}]
+
+            [button {:variant :primary
+                     :size :lg
+                     :full-width true
+                     :start-icon lucide-icons/UserPlus
+                     :disabled (or (not (:valid? validation-result)) @loading)
+                     :class "mb-4"}
+
+             (if @loading
+               [:span
+                [:span {:class "inline-block animate-spin mr-2"}
+                 [:> lucide-icons/Loader {:size 16}]]
+                "Creating account..."]
+               "Create account")]]]
+
+          [card-footer {:align :center}
+           [:div {:class "w-full"}
+            [:div {:class "text-center mb-4 text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+             "Already have an account?"]
+
+            [button {:variant :outlined
+                     :size :lg
+                     :full-width true
+                     :start-icon lucide-icons/LogIn
+                     :disabled @loading
+                     :on-click #(rfe/push-state :zi-study.frontend.core/login)}
+             "Sign in"]]]]
+
+         [:div {:class "mt-6 text-center text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+          [:span "By registering, you agree to our "]
+          [:a {:class "hover:underline text-[var(--color-primary)]" :href "#"} "Terms of Service"]
+          [:span " and "]
+          [:a {:class "hover:underline text-[var(--color-primary)]" :href "#"} "Privacy Policy"]]]))))

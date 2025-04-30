@@ -1,14 +1,16 @@
 (ns zi-study.frontend.pages.login
   (:require [reagent.core :as r]
-            [reagent.dom :as rdom]
             [reitit.frontend.easy :as rfe]
             [zi-study.frontend.components.input :refer [text-input]]
             [zi-study.frontend.components.button :refer [button]]
             [zi-study.frontend.components.card :refer [card card-header card-content card-footer]]
             [zi-study.frontend.components.alert :refer [alert]]
-            [zi-study.frontend.state :refer [app-state]]
-            ["lucide-react" :as lucide-icons]
-            [goog.object :as gobj]))
+            [zi-study.frontend.state :as state]
+            [zi-study.frontend.utilities.auth :as auth]
+            ["lucide-react" :as lucide-icons]))
+
+(defn email-valid? [email]
+  (re-matches #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" email))
 
 (defn login-page []
   (let [email (r/atom "")
@@ -16,11 +18,6 @@
         show-password (r/atom false)
         loading (r/atom false)
         error (r/atom nil)
-
-        ;; Basic email validation regex
-        email-regex #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-        is-valid-email? (fn [email-str]
-                          (re-matches email-regex email-str))
 
         toggle-password-visibility (fn [e]
                                      (.preventDefault e)
@@ -32,41 +29,18 @@
                        (reset! error nil)
                        (reset! loading true)
 
-                       (-> (js/fetch "/api/auth/login"
-                                     (clj->js {:method "POST"
-                                               :headers {"Content-Type" "application/json"}
-                                               :body (js/JSON.stringify #js {:email @email :password @password})}))
-                           (.then (fn [response]
-                                    (if (.-ok response)
-                                      (.json response)
-                                      (js/Promise.reject "Invalid email or password"))))
-                           (.then (fn [data]
-                                    (reset! loading false)
-                                    (if-let [token (gobj/get data "token")]
-                                      (let [user (gobj/get data "user")]
-                                        (.setItem js/localStorage "auth-token" token)
-
-                                        ;; Update central app state
-                                        (swap! app-state assoc
-                                               :auth/authenticated? true
-                                               :auth/token token
-                                               :auth/current-user (js->clj user :keywordize-keys true)
-                                               :auth/loading? false)
-
-                                        ;; Redirect to home page
-                                        (rfe/push-state :zi-study.frontend.core/home))
-                                      ;; Login failed (no token/user in response)
-                                      (reset! error (or (gobj/get data "error") "Login failed. Please check your credentials.")))))
-                           (.catch (fn [err]
+                       (auth/login @email @password
+                                   (fn [result]
                                      (reset! loading false)
-                                     (reset! error (if (string? err)
-                                                     err
-                                                     (or (gobj/get err "message") "An unexpected error occurred.")))))))
+                                     (if (:success result)
+                                       (do
+                                         (state/set-authenticated true (:token result) (:user result))
+                                         (rfe/push-state :zi-study.frontend.core/home))
+                                       (reset! error (:error result))))))
 
-        valid-form? (fn []
-                      (and (not (empty? @email))
-                           (not (empty? @password))
-                           (is-valid-email? @email)))]
+        valid-form? #(and (not (empty? @email))
+                          (not (empty? @password))
+                          (email-valid? @email))]
 
     (fn []
       [:div {:class "flex flex-col items-center justify-center min-h-[80vh] px-4 py-8 animate-fade-in"}

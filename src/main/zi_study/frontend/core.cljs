@@ -13,14 +13,17 @@
             [zi-study.frontend.pages.login :refer [login-page]]
             [zi-study.frontend.pages.register :refer [register-page]]
             [zi-study.frontend.layouts.main-layout :refer [main-layout]]
-            [zi-study.frontend.state :refer [app-state router-match]]))
+            [zi-study.frontend.state :as state]
+            [zi-study.frontend.utilities.auth :as auth]
+            [zi-study.frontend.utilities.auth-core :as auth-core]
+            [zi-study.frontend.utilities.theme :as theme]))
 
 
 
 (def routes
   [["/"
     {:name ::home
-     :view (home-page)}]
+     :view home-page}]
 
    ["/counter"
     {:name ::counter
@@ -46,50 +49,33 @@
 
 
 (defn app []
-  (let [current-route (:name (:data @router-match))
-        auth-state (select-keys @app-state [:auth/loading?
-                                            :auth/authenticated?
-                                            :auth/current-user])]
+  (let [current-match (state/get-current-route)
+        current-route (get-in current-match [:data :name])]
     [main-layout
      {:current-route current-route
-      :auth-state auth-state
-      :children (if @router-match
-                  (let [view (:view (:data @router-match))]
-                    [view @router-match])
+      :children (if current-match
+                  (let [view (get-in current-match [:data :view])]
+                    [view current-match])
                   [not-found-page])}]))
 
 (defn check-auth-status []
-  (let [token (.getItem js/localStorage "auth-token")]
-    (if (not (str/blank? token))
-      (do
-        (swap! app-state assoc :auth/token token :auth/loading? true)
-        (-> (js/fetch "/api/auth/me"
-                      (clj->js {:headers {"Authorization" (str "Bearer " token)}}))
-            (.then (fn [response]
-                     (if (.-ok response)
-                       (.json response)
-                       (js/Promise.reject "Invalid token"))))
-            (.then (fn [data]
-                     (when-let [user (gobj/get data "user")]
-                       (swap! app-state assoc
-                              :auth/authenticated? true
-                              :auth/current-user (js->clj user :keywordize-keys true)
-                              :auth/loading? false))))
-            (.catch (fn [_err]
-                      (.removeItem js/localStorage "auth-token")
-                      (swap! app-state assoc
-                             :auth/authenticated? false
-                             :auth/token nil
-                             :auth/current-user nil
-                             :auth/loading? false)))))
-      (swap! app-state assoc :auth/loading? false :auth/authenticated? false :auth/token nil :auth/current-user nil))))
+  (state/set-auth-loading true)
+  (auth/get-current-user
+   (fn [result]
+     (if (:success result)
+       (state/set-authenticated true (auth-core/get-token) (:user result))
+       (state/set-authenticated false nil nil)))))
 
 (defn init []
+  (theme/initialize-theme)
+
   (rfe/start!
    (rf/router routes {:data {:coercion rss/coercion}})
-   (fn [m] (reset! router-match m))
+   (fn [m] (state/set-current-route m))
    {:use-fragment false})
+
   (rdom/render (rdom/create-root (js/document.getElementById "app")) [app])
+
   (check-auth-status))
 
 (defn reload []
