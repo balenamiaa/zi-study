@@ -69,12 +69,65 @@ Our secondary palette is based on Material Design's Deep Purple:
 
 ### State Colors
 
+#### Success (Green)
+
 | Name | Hex | Usage |
 |------|-----|-------|
-| Success | `#4CAF50` | Success states, confirmations |
-| Warning | `#FF9800` | Warnings, alerts that need attention |
-| Error | `#F44336` | Error states, destructive actions |
-| Info | `#2196F3` | Information, neutral notifications |
+| Success 50 | `#E8F5E9` | Very light success backgrounds, hover states |
+| Success 100 | `#C8E6C9` | Light success backgrounds |
+| Success 200 | `#A5D6A7` | Success accents |
+| Success 300 | `#81C784` | Success highlights in dark mode |
+| Success 400 | `#66BB6A` | Lesser emphasis success elements |
+| Success 500 | `#4CAF50` | **Main success color** |
+| Success 600 | `#43A047` | Hover states for success elements |
+| Success 700 | `#388E3C` | Active states for success elements |
+| Success 800 | `#2E7D32` | Deep success accents |
+| Success 900 | `#1B5E20` | Very dark success accents |
+
+#### Warning (Orange)
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| Warning 50 | `#FFF3E0` | Very light warning backgrounds, hover states |
+| Warning 100 | `#FFE0B2` | Light warning backgrounds |
+| Warning 200 | `#FFCC80` | Warning accents |
+| Warning 300 | `#FFB74D` | Warning highlights in dark mode |
+| Warning 400 | `#FFA726` | Lesser emphasis warning elements |
+| Warning 500 | `#FF9800` | **Main warning color** |
+| Warning 600 | `#FB8C00` | Hover states for warning elements |
+| Warning 700 | `#F57C00` | Active states for warning elements |
+| Warning 800 | `#EF6C00` | Deep warning accents |
+| Warning 900 | `#E65100` | Very dark warning accents |
+
+#### Error (Red)
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| Error 50 | `#FFEBEE` | Very light error backgrounds, hover states |
+| Error 100 | `#FFCDD2` | Light error backgrounds |
+| Error 200 | `#EF9A9A` | Error accents |
+| Error 300 | `#E57373` | Error highlights in dark mode |
+| Error 400 | `#EF5350` | Lesser emphasis error elements |
+| Error 500 | `#F44336` | **Main error color** |
+| Error 600 | `#E53935` | Hover states for error elements |
+| Error 700 | `#D32F2F` | Active states for error elements |
+| Error 800 | `#C62828` | Deep error accents |
+| Error 900 | `#B71C1C` | Very dark error accents |
+
+#### Info (Blue)
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| Info 50 | `#E3F2FD` | Very light info backgrounds, hover states |
+| Info 100 | `#BBDEFB` | Light info backgrounds |
+| Info 200 | `#90CAF9` | Info accents |
+| Info 300 | `#64B5F6` | Info highlights in dark mode |
+| Info 400 | `#42A5F5` | Lesser emphasis info elements |
+| Info 500 | `#2196F3` | **Main info color** |
+| Info 600 | `#1E88E5` | Hover states for info elements |
+| Info 700 | `#1976D2` | Active states for info elements |
+| Info 800 | `#1565C0` | Deep info accents |
+| Info 900 | `#0D47A1` | Very dark info accents |
 
 ## Typography
 
@@ -160,8 +213,21 @@ Cards are used to group related content and actions:
 
 - **Standard**: With label, optional helper text
 - **With icons**: Leading or trailing icons
-- **States**: Normal, focus, disabled, error
+- **States**: Normal, focus, disabled, error, autofill
 - **Variants**: Outlined, filled
+
+##### Autofill Handling
+
+Form inputs have special styling to handle browser autofill functionality using Tailwind's autofill utilities:
+- Maintains dark mode background when browser autofills inputs
+- Explicitly sets text color to white in dark mode to ensure visibility
+- Ensures cursor color remains visible in autofilled fields
+- Applies consistent border styling with the rest of the design system
+- Handles combined states (autofill + focus, autofill + active)
+- Prevents the default yellow background in both light and dark modes
+- Ensures text is immediately visible without requiring user interaction
+- Uses Tailwind's autofill modifiers for consistent styling across browsers
+- Uses direct text-white class for dark mode to override browser defaults
 
 #### Selection Controls
 

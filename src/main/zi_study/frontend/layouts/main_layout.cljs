@@ -4,11 +4,12 @@
 
 
 (defn main-layout [props]
-  (let [{:keys [children current-route]} props]
+  (let [{:keys [children current-route auth-state]} props]
     [:div.min-h-screen.transition-colors.duration-300
      {:class "bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]"}
      ;; Topbar
-     [topbar {:current-route current-route}]
+     [topbar {:current-route current-route 
+              :auth-state auth-state}]
 
      ;; Main content with animation
      [:main.mt-6.animate-fade-in

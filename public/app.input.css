@@ -21,6 +21,7 @@
     --color-primary-700: #C2185B;
     --color-primary-800: #AD1457;
     --color-primary-900: #880E4F;
+    --color-primary-rgb: 233, 30, 99;
 
     /* Secondary/Accent Colors */
     --color-secondary: #7C4DFF;
@@ -29,6 +30,7 @@
     /* Deep Purple A100 */
     --color-secondary-dark: #651FFF;
     /* Deep Purple A400 */
+    --color-secondary-rgb: 124, 77, 255;
 
     /* Light Theme Colors */
     --color-light-bg: #FFFFFF;
@@ -55,10 +57,61 @@
     --color-surface-dark: #261A25;
 
     /* States */
+    /* Success - Green */
     --color-success: #4CAF50;
+    --color-success-50: #E8F5E9;
+    --color-success-100: #C8E6C9;
+    --color-success-200: #A5D6A7;
+    --color-success-300: #81C784;
+    --color-success-400: #66BB6A;
+    --color-success-500: #4CAF50;
+    --color-success-600: #43A047;
+    --color-success-700: #388E3C;
+    --color-success-800: #2E7D32;
+    --color-success-900: #1B5E20;
+    --color-success-rgb: 76, 175, 80;
+
+    /* Warning - Orange */
     --color-warning: #FF9800;
+    --color-warning-50: #FFF3E0;
+    --color-warning-100: #FFE0B2;
+    --color-warning-200: #FFCC80;
+    --color-warning-300: #FFB74D;
+    --color-warning-400: #FFA726;
+    --color-warning-500: #FF9800;
+    --color-warning-600: #FB8C00;
+    --color-warning-700: #F57C00;
+    --color-warning-800: #EF6C00;
+    --color-warning-900: #E65100;
+    --color-warning-rgb: 255, 152, 0;
+
+    /* Error - Red */
     --color-error: #F44336;
+    --color-error-50: #FFEBEE;
+    --color-error-100: #FFCDD2;
+    --color-error-200: #EF9A9A;
+    --color-error-300: #E57373;
+    --color-error-400: #EF5350;
+    --color-error-500: #F44336;
+    --color-error-600: #E53935;
+    --color-error-700: #D32F2F;
+    --color-error-800: #C62828;
+    --color-error-900: #B71C1C;
+    --color-error-rgb: 244, 67, 54;
+
+    /* Info - Blue */
     --color-info: #2196F3;
+    --color-info-50: #E3F2FD;
+    --color-info-100: #BBDEFB;
+    --color-info-200: #90CAF9;
+    --color-info-300: #64B5F6;
+    --color-info-400: #42A5F5;
+    --color-info-500: #2196F3;
+    --color-info-600: #1E88E5;
+    --color-info-700: #1976D2;
+    --color-info-800: #1565C0;
+    --color-info-900: #0D47A1;
+    --color-info-rgb: 33, 150, 243;
 
     /* Elevation Shadows */
     --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -83,6 +136,10 @@
         height: 100%;
         margin: 0;
         padding: 0;
+        background-color: var(--color-light-bg);
+        color: var(--color-light-text-primary);
+
+        @apply dark:bg-dark-bg dark:text-dark-text-primary;
     }
 
     h1,
@@ -132,39 +189,20 @@
         line-height: 1.5;
     }
 
-    body.dark {
-        background-color: var(--color-dark-bg);
-        color: var(--color-dark-text-primary);
-    }
-
-    body.light {
-        background-color: var(--color-light-bg);
-        color: var(--color-light-text-primary);
-    }
-
     a {
         color: var(--color-primary);
         text-decoration: none;
         transition: color 0.2s var(--animation-standard);
+
+        @apply dark:text-dark-text-primary;
+        @apply hover:text-primary-700;
+        @apply hover:underline;
+        @apply dark:hover:text-primary-300;
     }
 
-    a:hover {
-        color: var(--color-primary-700);
-        text-decoration: underline;
-    }
-
-    body.dark a {
-        color: var(--color-primary-300);
-    }
-
-    body.dark a:hover {
-        color: var(--color-primary-200);
-    }
 }
 
 @layer components {
-
-    /* Button Styles */
     .btn {
         @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ease-in-out focus:outline-none focus:ring-2;
         font-family: 'Inter', sans-serif;
@@ -181,44 +219,27 @@
 
     .btn-primary {
         @apply bg-[var(--color-primary)] text-white shadow-md hover:bg-[var(--color-primary-700)] focus:ring-[var(--color-primary-300)];
+        @apply hover:dark:bg-primary-700;
     }
 
     .btn-secondary {
         @apply bg-[var(--color-secondary)] text-white shadow-md hover:bg-[var(--color-secondary-dark)] focus:ring-[var(--color-secondary-light)];
+        @apply hover:dark:bg-secondary-dark;
     }
 
     .btn-outlined {
         @apply bg-transparent border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary-50)] focus:ring-[var(--color-primary)];
-    }
-
-    body.dark .btn-primary:hover {
-        background-color: var(--color-primary-600);
-    }
-
-    body.dark .btn-secondary:hover {
-        background-color: var(--color-secondary-dark);
-    }
-
-    body.dark .btn-outlined {
-        border-color: var(--color-primary-300);
-        color: var(--color-primary-300);
-    }
-
-    body.dark .btn-outlined:hover {
-        background-color: rgba(240, 98, 146, 0.12);
-        border-color: var(--color-primary-300);
+        @apply dark:border-primary-300 dark:text-primary-300;
+        @apply hover:dark:bg-primary-50 hover:dark:border-primary-300;
     }
 
     .btn-text {
         @apply bg-transparent text-[var(--color-primary)] hover:bg-[var(--color-primary-50)] focus:ring-[var(--color-primary)];
+        @apply dark:text-primary-300;
     }
 
-    body.dark .btn-text {
-        color: var(--color-primary-300);
-    }
-
-    body.dark .btn-text:hover {
-        background-color: rgba(240, 98, 146, 0.12);
+    .btn-text:hover {
+        @apply dark:bg-primary-50;
     }
 
     .ripple {
@@ -231,7 +252,7 @@
         z-index: 1;
     }
 
-    .ripple > * {
+    .ripple>* {
         position: relative;
         z-index: 2;
     }
@@ -249,11 +270,9 @@
         pointer-events: none;
         z-index: 0;
         will-change: transform, opacity;
+        @apply dark:bg-primary-50;
     }
 
-    body.dark .ripple-effect {
-        background-color: rgba(255, 255, 255, 0.2);
-    }
 
     @keyframes ripple {
         to {
@@ -268,25 +287,19 @@
         background-color: var(--color-light-card);
         box-shadow: var(--shadow-1);
         border: 1px solid var(--color-light-divider);
+        @apply dark:bg-dark-card dark:border-dark-divider;
     }
 
     .card:hover {
         box-shadow: var(--shadow-2);
     }
 
-    body.dark .card {
-        background-color: var(--color-dark-card);
-        border-color: rgba(255, 255, 255, 0.05);
-    }
-
     .card-header {
         @apply px-6 py-4 border-b;
         border-color: var(--color-light-divider);
+        @apply dark:border-dark-divider;
     }
 
-    body.dark .card-header {
-        border-color: var(--color-dark-divider);
-    }
 
     .card-body {
         @apply px-6 py-4;
@@ -295,11 +308,9 @@
     .card-footer {
         @apply px-6 py-4 border-t;
         border-color: var(--color-light-divider);
+        @apply dark:border-dark-divider;
     }
 
-    body.dark .card-footer {
-        border-color: var(--color-dark-divider);
-    }
 
     /* Form Controls */
     .input-group {
@@ -309,11 +320,9 @@
     .input-label {
         @apply block mb-2 text-sm font-medium;
         color: var(--color-light-text-secondary);
+        @apply dark:text-dark-text-secondary;
     }
 
-    body.dark .input-label {
-        color: var(--color-dark-text-secondary);
-    }
 
     .input {
         @apply w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 transition-all duration-200;
@@ -326,17 +335,16 @@
 
     .input:focus {
         @apply border-transparent;
+        @apply dark:border-primary-300;
+        @apply dark:bg-dark-bg;
+        @apply dark:text-dark-text-primary;
         box-shadow: 0 0 0 2px var(--color-primary-200);
     }
 
-    body.dark .input {
-        border-color: rgba(255, 255, 255, 0.15);
-        background-color: rgba(0, 0, 0, 0.2);
-        color: var(--color-dark-text-primary);
-    }
 
-    body.dark .input:focus {
-        box-shadow: 0 0 0 2px var(--color-primary-400);
+
+    [dark] .input:focus {
+        box-shadow: 0 0 0 2px var(--color-primary-50);
     }
 
     /* Navigation */
@@ -371,21 +379,21 @@
         display: none;
     }
 
-    body.dark .nav-link {
+    [dark] .nav-link {
         color: var(--color-dark-text-secondary);
     }
 
-    body.dark .nav-link:hover {
+    [dark] .nav-link:hover {
         color: var(--color-primary-300);
         background-color: rgba(233, 30, 99, 0.12);
     }
 
-    body.dark .nav-link.active {
+    [dark] .nav-link.active {
         color: var(--color-primary-300);
         background-color: rgba(233, 30, 99, 0.2);
     }
 
-    body.dark .nav-link.active::after {
+    [dark] .nav-link.active::after {
         background-color: var(--color-primary-300);
     }
 
@@ -403,11 +411,11 @@
         color: var(--color-primary);
     }
 
-    body.dark .theme-switcher {
+    [dark] .theme-switcher {
         color: var(--color-dark-text-secondary);
     }
 
-    body.dark .theme-switcher:hover {
+    [dark] .theme-switcher:hover {
         background-color: rgba(255, 255, 255, 0.1);
         color: var(--color-primary-300);
     }
@@ -438,73 +446,77 @@
         background-color: rgba(0, 0, 0, 0.02);
     }
 
-    body.dark .data-table th {
+    [dark] .data-table th {
         color: var(--color-dark-text-secondary);
         border-color: var(--color-dark-divider);
     }
 
-    body.dark .data-table td {
+    [dark] .data-table td {
         border-color: var(--color-dark-divider);
     }
 
-    body.dark .data-table tbody tr:hover {
+    [dark] .data-table tbody tr:hover {
         background-color: rgba(255, 255, 255, 0.05);
     }
-    
+
     /* Topbar Animation Classes */
     .animate-slide-down {
         animation: slideDown 0.5s ease-out forwards;
     }
-    
+
     @keyframes slideDown {
         from {
             transform: translateY(-100%);
             opacity: 0;
         }
+
         to {
             transform: translateY(0);
             opacity: 1;
         }
     }
-    
+
     .animate-slide-in {
         animation: slideIn 0.3s ease-out forwards;
     }
-    
+
     @keyframes slideIn {
         from {
             transform: translateX(-100%);
             opacity: 0;
         }
+
         to {
             transform: translateX(0);
             opacity: 1;
         }
     }
-    
+
     .animate-pulse-slow {
         animation: pulse 3s ease-in-out infinite;
     }
-    
+
     @keyframes pulse {
         0% {
             transform: scale(1);
         }
+
         50% {
             transform: scale(1.05);
         }
+
         100% {
             transform: scale(1);
         }
     }
-    
+
     .sticky-header {
         position: sticky;
         top: 0;
         z-index: 50;
         backdrop-filter: blur(8px);
     }
-    
+
     .ripple {
         position: absolute;
         border-radius: 50%;
@@ -513,15 +525,15 @@
         animation: rippleEffect 0.6s linear;
         pointer-events: none;
     }
-    
+
     @keyframes rippleEffect {
         to {
             transform: scale(4);
             opacity: 0;
         }
     }
-    
-    body.dark .ripple {
+
+    [dark] .ripple {
         background-color: rgba(233, 30, 99, 0.2);
     }
 }
@@ -566,14 +578,14 @@
     background-color: rgba(0, 0, 0, 0.3);
 }
 
-body.dark::-webkit-scrollbar-track {
+[dark]::-webkit-scrollbar-track {
     background: var(--color-dark-bg-paper);
 }
 
-body.dark::-webkit-scrollbar-thumb {
+[dark]::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-body.dark::-webkit-scrollbar-thumb:hover {
+[dark]::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.3);
 }
