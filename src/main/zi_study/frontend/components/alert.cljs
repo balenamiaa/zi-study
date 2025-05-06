@@ -37,44 +37,47 @@
 
           :outlined
           (case color
-            :primary "border border-[var(--color-primary)] text-[var(--color-primary)] dark:text-[var(--color-primary-300)] dark:border-[var(--color-primary-300)]"
-            :success "border border-[var(--color-success)] text-[var(--color-success)]"
-            :warning "border border-[var(--color-warning)] text-[var(--color-warning)]"
-            :error "border border-[var(--color-error)] text-[var(--color-error)]"
-            :info "border border-[var(--color-info)] text-[var(--color-info)]"
-            "border border-[var(--color-info)] text-[var(--color-info)]")
+            :primary "border border-[var(--color-primary)] text-[var(--color-primary)] dark:text-[var(--color-primary-200)] dark:border-[var(--color-primary-300)]"
+            :success "border border-[var(--color-success)] text-[var(--color-success)] dark:text-[var(--color-success-200)] dark:border-[var(--color-success-300)]"
+            :warning "border border-[var(--color-warning)] text-[var(--color-warning)] dark:text-[var(--color-warning-200)] dark:border-[var(--color-warning-300)]"
+            :error "border border-[var(--color-error)] text-[var(--color-error)] dark:text-[var(--color-error-200)] dark:border-[var(--color-error-300)]"
+            :info "border border-[var(--color-info)] text-[var(--color-info)] dark:text-[var(--color-info-200)] dark:border-[var(--color-info-300)]"
+            "border border-[var(--color-info)] text-[var(--color-info)] dark:text-[var(--color-info-200)] dark:border-[var(--color-info-300)]")
 
           :soft
           (case color
-            :primary "bg-[var(--color-primary-50)] text-[var(--color-primary-700)] dark:bg-[rgba(233,30,99,0.15)] dark:text-[var(--color-primary-300)]"
-            :success "bg-green-50 text-green-700 dark:bg-[rgba(76,175,80,0.15)] dark:text-green-300"
-            :warning "bg-orange-50 text-orange-700 dark:bg-[rgba(255,152,0,0.15)] dark:text-orange-300"
-            :error "bg-red-50 text-red-700 dark:bg-[rgba(244,67,54,0.15)] dark:text-red-300"
-            :info "bg-blue-50 text-blue-700 dark:bg-[rgba(33,150,243,0.15)] dark:text-blue-300"
-            "bg-blue-50 text-blue-700 dark:bg-[rgba(33,150,243,0.15)] dark:text-blue-300")
+            :primary "bg-[var(--color-primary-50)] text-[var(--color-primary-700)] border-l-4 border-[var(--color-primary)] dark:bg-[rgba(233,30,99,0.08)] dark:text-[var(--color-primary-100)]"
+            :success "bg-[var(--color-success-50)] text-[var(--color-success-700)] border-l-4 border-[var(--color-success)] dark:bg-[rgba(46,125,50,0.08)] dark:text-[var(--color-success-100)]"
+            :warning "bg-[var(--color-warning-50)] text-[var(--color-warning-700)] border-l-4 border-[var(--color-warning)] dark:bg-[rgba(245,124,0,0.08)] dark:text-[var(--color-warning-100)]"
+            :error "bg-[var(--color-error-50)] text-[var(--color-error-700)] border-l-4 border-[var(--color-error)] dark:bg-[rgba(211,47,47,0.08)] dark:text-[var(--color-error-100)]"
+            :info "bg-[var(--color-info-50)] text-[var(--color-info-700)] border-l-4 border-[var(--color-info)] dark:bg-[rgba(25,118,210,0.08)] dark:text-[var(--color-info-100)]"
+            "bg-[var(--color-info-50)] text-[var(--color-info-700)] border-l-4 border-[var(--color-info)] dark:bg-[rgba(25,118,210,0.08)] dark:text-[var(--color-info-100)]")
 
-          "bg-blue-50 text-blue-700 dark:bg-[rgba(33,150,243,0.15)] dark:text-blue-300")
+          "bg-[var(--color-info-50)] text-[var(--color-info-700)] border-l-4 border-[var(--color-info)] dark:bg-[rgba(25,118,210,0.08)] dark:text-[var(--color-info-100)]")
 
         icon-color
         (case variant
           :filled "text-white"
+
           :outlined
           (case color
-            :primary "text-[var(--color-primary)] dark:text-[var(--color-primary-300)]"
-            :success "text-[var(--color-success)]"
-            :warning "text-[var(--color-warning)]"
-            :error "text-[var(--color-error)]"
-            :info "text-[var(--color-info)]"
-            "text-[var(--color-info)]")
+            :primary "text-[var(--color-primary)] dark:text-[var(--color-primary-200)]"
+            :success "text-[var(--color-success)] dark:text-[var(--color-success-200)]"
+            :warning "text-[var(--color-warning)] dark:text-[var(--color-warning-200)]"
+            :error "text-[var(--color-error)] dark:text-[var(--color-error-200)]"
+            :info "text-[var(--color-info)] dark:text-[var(--color-info-200)]"
+            "text-[var(--color-info)] dark:text-[var(--color-info-200)]")
+
           :soft
           (case color
-            :primary "text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)]"
-            :success "text-green-700 dark:text-green-300"
-            :warning "text-orange-700 dark:text-orange-300"
-            :error "text-red-700 dark:text-red-300"
-            :info "text-blue-700 dark:text-blue-300"
-            "text-blue-700 dark:text-blue-300")
-          "text-blue-700 dark:text-blue-300")
+            :primary "text-[var(--color-primary-700)] dark:text-[var(--color-primary-100)]"
+            :success "text-[var(--color-success-700)] dark:text-[var(--color-success-100)]"
+            :warning "text-[var(--color-warning-700)] dark:text-[var(--color-warning-100)]"
+            :error "text-[var(--color-error-700)] dark:text-[var(--color-error-100)]"
+            :info "text-[var(--color-info-700)] dark:text-[var(--color-info-100)]"
+            "text-[var(--color-info-700)] dark:text-[var(--color-info-100)]")
+
+          "text-[var(--color-info-700)] dark:text-[var(--color-info-100)]")
 
         default-icon
         (case color
@@ -176,11 +179,11 @@
           :outlined
           (case color
             :primary "text-[var(--color-primary)] dark:text-[var(--color-primary-300)]"
-            :success "text-[var(--color-success)]"
-            :warning "text-[var(--color-warning)]"
-            :error "text-[var(--color-error)]"
-            :info "text-[var(--color-info)]"
-            "text-[var(--color-info)]")
+            :success "text-[var(--color-success)] dark:text-[var(--color-success-300)]"
+            :warning "text-[var(--color-warning)] dark:text-[var(--color-warning-300)]"
+            :error "text-[var(--color-error)] dark:text-[var(--color-error-300)]"
+            :info "text-[var(--color-info)] dark:text-[var(--color-info-300)]"
+            "text-[var(--color-info)] dark:text-[var(--color-info-300)]")
 
           :soft
           (case color

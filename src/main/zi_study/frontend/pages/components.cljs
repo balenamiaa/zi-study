@@ -8,6 +8,7 @@
    [zi-study.frontend.components.badge :refer [badge avatar]]
    [zi-study.frontend.components.alert :refer [alert toast]]
    [zi-study.frontend.components.toggle :refer [toggle checkbox radio]]
+   [zi-study.frontend.components.skeleton :refer [skeleton skeleton-text skeleton-card skeleton-avatar-with-text skeleton-table]]
    [zi-study.frontend.components.dropdown :refer [dropdown menu-item menu-divider menu-label]]))
 
 (defn section-title [title]
@@ -491,6 +492,133 @@
     [menu-item {:icon lucide-icons/Trash2
                 :danger true} "Delete Project"]]])
 
+(defn skeletons-section []
+  [:div
+   [section-title "Skeletons & Loading States"]
+
+   [:p {:class "mb-6 text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+    "Skeleton components provide beautiful loading states while content is being fetched."]
+
+   [section-subtitle "Basic Skeleton Variants"]
+   [:div {:class "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"}
+    [:div {:class "p-6 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-xl shadow-sm"}
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Text Skeleton"]
+     [skeleton {:variant :text :width "100%"}]
+     [skeleton {:variant :text :width "80%" :class "mt-2"}]
+     [skeleton {:variant :text :width "60%" :class "mt-2"}]]
+
+    [:div {:class "p-6 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-xl shadow-sm"}
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Rectangular"]
+     [skeleton {:variant :rectangular :width "100%" :height "120px"}]]
+
+    [:div {:class "p-6 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-xl shadow-sm"}
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Circular"]
+     [:div {:class "flex justify-center items-center h-[120px]"}
+      [skeleton {:variant :circular :width "80px" :height "80px"}]]]
+
+    [:div {:class "p-6 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-xl shadow-sm"}
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Avatar & Text"]
+     [skeleton-avatar-with-text {:avatar-size "3.5rem"}]]]
+
+   [section-subtitle "Animation Types"]
+   [:div {:class "grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"}
+    [:div {:class "p-6 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-xl shadow-sm"}
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Pulse Animation"]
+     [skeleton-text {:rows 3 :animation :pulse}]]
+
+    [:div {:class "p-6 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-xl shadow-sm"}
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Wave Animation"]
+     [skeleton-text {:rows 3 :animation :wave}]]
+
+    [:div {:class "p-6 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-xl shadow-sm"}
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "No Animation"]
+     [skeleton-text {:rows 3 :animation nil}]]]
+
+   [section-subtitle "Realistic Examples"]
+   [:div {:class "grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"}
+    ;; Product card loading
+    [:div
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Product Card"]
+     [card {}
+      [skeleton {:variant :rectangular :height "220px" :animation :wave}]
+      [card-content {}
+       [skeleton {:variant :text :width "70%" :height "1.5rem" :class "mb-3"}]
+       [skeleton {:variant :text :width "40%" :height "1rem" :class "mb-4"}]
+       [skeleton {:variant :text :width "90%" :class "mb-1"}]
+       [skeleton {:variant :text :width "85%" :class "mb-4"}]
+       [:div {:class "flex justify-between items-center"}
+        [skeleton {:variant :text :width "25%" :height "1.5rem"}]
+        [skeleton {:variant :rectangular :width "100px" :height "2rem" :class "rounded-lg"}]]]]]
+
+    ;; User profile loading
+    [:div
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "User Profile"]
+     [card {}
+      [card-content {}
+       [:div {:class "flex flex-col items-center mb-4"}
+        [skeleton {:variant :circular :width "100px" :height "100px" :class "mb-3"}]
+        [skeleton {:variant :text :width "40%" :height "1.5rem" :class "mb-1"}]
+        [skeleton {:variant :text :width "60%" :height "1rem"}]]
+       [:div {:class "flex justify-around mb-4"}
+        [:div {:class "flex-1 flex flex-col items-center"}
+         [skeleton {:variant :text :width "30px" :height "1.5rem" :class "mb-1"}]
+         [skeleton {:variant :text :width "40px" :height "1rem"}]]
+        [:div {:class "flex-1 flex flex-col items-center"}
+         [skeleton {:variant :text :width "30px" :height "1.5rem" :class "mb-1"}]
+         [skeleton {:variant :text :width "40px" :height "1rem"}]]
+        [:div {:class "flex-1 flex flex-col items-center"}
+         [skeleton {:variant :text :width "30px" :height "1.5rem" :class "mb-1"}]
+         [skeleton {:variant :text :width "40px" :height "1rem"}]]]
+       [:div {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] pt-4"}
+        [skeleton-text {:rows 2}]]]]]
+
+    ;; Question set card loading
+    [:div
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Question Set"]
+     [card {}
+      [card-content {}
+       [:div {:class "flex justify-between items-start mb-4"}
+        [:div {:class "flex-1"}
+         [skeleton {:variant :text :width "70%" :height "1.5rem" :class "mb-2"}]
+         [skeleton {:variant :text :width "90%" :class "mb-1"}]
+         [skeleton {:variant :text :width "85%"}]]
+        [:div {:class "flex-shrink-0 px-3 py-2 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-lg"}
+         [skeleton {:variant :text :width "40px" :height "1.5rem" :class "mb-1"}]
+         [skeleton {:variant :text :width "60px" :height "0.875rem"}]]]
+       [:div {:class "flex flex-wrap gap-1 mb-4"}
+        (for [i (range 3)]
+          ^{:key i}
+          [skeleton {:variant :rectangular :width (str (+ 40 (* i 10)) "px") :height "1.5rem" :class "rounded-full"}])]
+       [:div {:class "flex justify-between items-center text-xs"}
+        [skeleton {:variant :text :width "100px" :height "0.875rem"}]]]]]
+
+    ;; Comment section loading
+    [:div
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Comments Section"]
+     [card {}
+      [card-header {:title "Comments"
+                    :subtitle [skeleton {:variant :text :width "40%" :height "1rem"}]}]
+      [card-content {}
+       [:div {:class "space-y-4"}
+        [skeleton-avatar-with-text {:rows 2 :avatar-size "2.5rem"}]
+        [skeleton-avatar-with-text {:rows 1 :avatar-size "2.5rem"}]
+        [skeleton-avatar-with-text {:rows 3 :avatar-size "2.5rem"}]
+        [:div {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] pt-4 mt-6"}
+         [:div {:class "flex gap-3"}
+          [skeleton {:variant :circular :width "2.5rem" :height "2.5rem"}]
+          [skeleton {:variant :rectangular :width "100%" :height "4rem" :class "rounded-lg"}]]]]]]]
+
+    ;; Data table loading
+    [:div {:class "col-span-1 lg:col-span-2"}
+     [:h4 {:class "text-sm mb-3 font-medium text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Data Table"]
+     [card {}
+      [card-header {:title "Study Sessions"
+                    :subtitle "Recent activity"}]
+      [card-content {}
+       [skeleton-table {:rows 5 :cols 4}]
+       [:div {:class "flex justify-center mt-6"}
+        [skeleton {:variant :rectangular :width "300px" :height "2rem" :class "rounded-md"}]]]]]]])
+
 (defn components-page []
   (fn []
     [:div.container.mx-auto.px-4.py-8
@@ -507,4 +635,5 @@
      [badges-section]
      [alerts-section]
      [toggles-section]
-     [dropdowns-section]]))
+     [dropdowns-section]
+     [skeletons-section]]))

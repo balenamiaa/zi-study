@@ -1,11 +1,9 @@
 (ns zi-study.backend.auth
   (:require [buddy.hashers :as hashers]
             [clojure.string :as str]
-            [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
             [next.jdbc.result-set :as rs]
             [zi-study.backend.db :as db]
-            [zi-study.backend.uploads :as uploads]
             [ring.util.response :as resp])
   (:import [com.auth0.jwt JWT]
            [com.auth0.jwt.algorithms Algorithm]
@@ -123,7 +121,7 @@
               (resp/status 201))))))) ; Set Created status
 
 (defn login-handler [request]
-  (let [{:keys [email password]} (get-in request [:body-params])] 
+  (let [{:keys [email password]} (get-in request [:body-params])]
     (if (or (str/blank? email) (str/blank? password))
       (-> (resp/response {:error "Email and password are required."})
           (resp/status 400)) ; Set Bad Request status
@@ -144,22 +142,25 @@
   (when-let [header (get-in request [:headers "authorization"])]
     (second (re-matches #"(?i)Bearer\s+(.*)" header))))
 
+(defn- unauthorized-response [message]
+  (-> (resp/response {:error message})
+      (resp/status 401)))
+
 (defn wrap-authentication [handler]
   (fn [request]
     (if-let [token (get-bearer-token request)]
       (if-let [identity (decode-token token)]
         (handler (assoc request :identity identity))
-        ; Invalid token - pass through without identity for now
-        ; Could also return 401 here if auth is strictly required
-        (handler request))
-      ; No token - pass through
-      (handler request))))
+        (unauthorized-response "Invalid or expired token."))
+      (unauthorized-response "Authentication required."))))
 
 (defn current-user-handler [request]
   (if-let [identity (:identity request)]
     (resp/response {:user identity})
-    (-> (resp/response {:error "Authentication required."})
-        (resp/status 401))))
+    ;; This case should theoretically not be reached if middleware is applied correctly
+    ;; But keep it as a safeguard or for direct testing.
+    (-> (resp/response {:error "Authentication identity missing after middleware."}) ; More specific error
+        (resp/status 500)))) ; Internal server error might be more appropriate here
 
 
 

@@ -12,6 +12,9 @@
             [zi-study.frontend.pages.not-found :refer [not-found-page]]
             [zi-study.frontend.pages.login :refer [login-page]]
             [zi-study.frontend.pages.register :refer [register-page]]
+            [zi-study.frontend.pages.question-sets :refer [question-sets-page]]
+            [zi-study.frontend.pages.set-page :refer [set-page]]
+            [zi-study.frontend.pages.bookmarks :refer [bookmarks-page]]
             [zi-study.frontend.layouts.main-layout :refer [main-layout]]
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.auth :as auth]
@@ -45,7 +48,20 @@
     {:name ::item
      :view demo-item-page
      :parameters {:path {:id int?}
-                  :query map?}}]])
+                  :query map?}}]
+
+   ["/question-sets"
+    {:name ::question-sets
+     :view question-sets-page}]
+
+   ["/question-sets/:set-id"
+    {:name ::set-page
+     :view set-page
+     :parameters {:path {:set-id int?}}}]
+
+   ["/bookmarks"
+    {:name ::bookmarks
+     :view bookmarks-page}]])
 
 
 (defn app []

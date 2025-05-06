@@ -180,32 +180,104 @@ ZiStudy follows a 4px grid system for spacing and layout. The following spacing 
 
 ### Buttons
 
-#### Variants
+Buttons have been redesigned for better visual impact and interaction feedback:
 
-- **Primary**: Solid buttons with primary color background, used for main actions
-- **Secondary**: Solid buttons with secondary color background, used for alternative actions
-- **Outlined**: Border only with transparent background, less emphasis than primary/secondary
-- **Text**: No border or background, used for the least emphasis or in tight spaces
+#### Button Variants
+
+- **Primary**:
+  - Beautiful gradient background
+  - Enhanced shadow with color tint
+  - Scale transform on press
+  - Smooth hover transition
+
+- **Secondary**:
+  - Deep purple gradient
+  - Consistent interaction patterns
+  - Complementary to primary actions
+
+- **Outlined**:
+  - 2px borders for better visibility
+  - Subtle hover background
+  - Maintains consistent height with other variants
+  - Color-matched focus rings
+
+- **Text**:
+  - Clean, minimal design
+  - Hover background effect
+  - Maintains consistent padding
+  - Clear active state
+
+#### Button Properties
+
+- **Size**: Larger default size for better touch targets
+- **Padding**: Horizontal: 1.5rem (24px), Vertical: 0.75rem (12px)
+- **Border Radius**: 0.5rem (8px)
+- **Font**: Inter Medium, 1rem (16px)
+- **Transitions**: 300ms with spring easing
+- **Icons**: Optional start and end icons with proper spacing
 
 #### Button States
 
-- **Normal**: Default state
 - **Hover**:
-  - Light mode: Slightly darker background (#D81B60) for primary buttons, subtle background for text/outlined variants
-  - Dark mode: Pink-tinted hover state (rgba(240, 98, 146, 0.12)) for better consistency with dark theme
-- **Active**: Darker background color, slight inset appearance
-- **Disabled**: Reduced opacity, no interaction
-- **Focus**: Focus ring using primary color at reduced opacity
+  - Gradient shift
+  - Scale transform (1.02)
+  - Shadow enhancement
+
+- **Active**:
+  - Scale down (0.99)
+  - Darker gradient
+  - Maintains shadow
+
+- **Focus**:
+  - Visible ring with offset
+  - Color-matched to variant
+  - High contrast in dark mode
+
+- **Disabled**:
+  - Reduced opacity
+  - Removed hover effects
+  - Maintained visual structure
 
 ### Cards
 
-Cards are used to group related content and actions:
+Cards are used to group related content and actions. They feature beautiful gradients, smooth transitions, and thoughtful spacing:
 
-- **Standard card**: Basic container with padding and light border
-- **Card with header**: Includes a title area with optional subtitle
-- **Card with icon**: Header can include an icon for visual interest
-- **Card with footer**: Contains actions at the bottom
-- **Elevated card**: With shadow levels (1-5) for visual hierarchy
+#### Card Variants
+
+- **Standard Card**: 
+  - Elegant shadow with subtle pink-tinted border
+  - Smooth hover transition with enhanced elevation
+  - Increased font size (1.05rem) for better readability
+  - Generous padding (2rem) for content breathing room
+
+- **Card Header**:
+  - Gradient background from white to soft pink (dark mode: dark gradient with pink tint)
+  - Beautiful text gradient on titles
+  - Left accent border option for visual hierarchy
+  - Optional icon with soft background
+
+- **Card Content**:
+  - Clean, well-spaced layout
+  - Optimized line height (1.6) for readability
+  - Consistent padding across all sections
+
+- **Card Footer**:
+  - Subtle gradient background
+  - Clear separation with refined border
+  - Flexible alignment options for actions
+
+#### Card Interactions
+
+- **Hover Effects**:
+  - Subtle elevation increase
+  - Border color enhancement
+  - Smooth transition (300ms)
+  - Optional scale transform
+
+- **Dark Mode**:
+  - Rich, pink-tinted dark backgrounds
+  - Preserved readability with optimized contrast
+  - Consistent interaction patterns
 
 ### Form Controls
 
@@ -397,3 +469,52 @@ This approach applies to:
 - The overall experience feels cohesive and thoughtful
 
 This design system is a living document and will evolve as ZiStudy grows and develops.
+
+### Toggle Switch
+
+The toggle switch has been completely redesigned for a more modern and engaging experience:
+
+#### Visual Design
+
+- **Track**:
+  - Width: 3.5rem (56px)
+  - Height: 1.75rem (28px)
+  - Rounded pill shape
+  - Beautiful gradient when active
+  - Subtle background when inactive
+
+- **Thumb**:
+  - Size: 1.25rem (20px)
+  - Pure white circle
+  - Elevated with shadow
+  - Glow effect when active
+  - Spring animation on toggle
+
+#### Interactions
+
+- **Toggle Animation**:
+  - Smooth slide transition (300ms)
+  - Spring effect on the thumb
+  - Scale animation on hover
+  - Glow effect when active
+
+- **States**:
+  - Unchecked: Subtle gray track
+  - Checked: Gradient from primary colors
+  - Hover: Thumb scale (1.05)
+  - Active: Enhanced glow effect
+  - Disabled: Reduced opacity
+
+#### Accessibility
+
+- **Keyboard Navigation**:
+  - Clear focus indicators
+  - Spacebar toggle support
+  - ARIA attributes
+  - Role="switch"
+
+- **Labels**:
+  - Optional left or right position
+  - Clear connection to toggle
+  - Proper spacing and alignment
+  - Clickable area includes label

@@ -18,15 +18,8 @@
             [ring.middleware.nested-params :refer [wrap-nested-params]]
             [zi-study.backend.db :as db]
             [zi-study.backend.auth :as auth]
-            [zi-study.backend.uploads :as uploads]))
-
-(defn hello-handler [req]
-  {:status 200
-   :body {:message "Hello from the other side!"}})
-
-(defn echo-handler [{{:keys [message]} :path-params}]
-  {:status 200
-   :body {:echo message}})
+            [zi-study.backend.uploads :as uploads]
+            [zi-study.backend.handlers.question-bank-handlers :as qb]))
 
 (defn index-handler [_]
   (let [response (resp/file-response "index.html" {:root "public"})]
@@ -36,8 +29,6 @@
 
 (def routes
   [["/" {:get index-handler}]
-   ["/api/hello" {:get hello-handler}]
-   ["/api/echo/:message" {:get echo-handler}]
    ["/api/auth" {}
     ["/register" {:post {:handler auth/register-handler
                          :middleware [parameters-middleware
@@ -49,13 +40,19 @@
    ["/api/uploads" {}
     ["/profile-picture" {:post {:handler uploads/profile-picture-upload-handler
                                 :middleware [multipart-params/wrap-multipart-params]}}]]
-   ;; Serve uploaded profile pictures (ensure this comes before general public wrap-file if needed)
-   ;; Alternatively, rely on wrap-file below to handle it correctly.
-   ; ["/uploads/profiles/:filename" 
-   ;  {:get (fn [{{:keys [filename]} :path-params}] 
-   ;          (-> (resp/file-response filename {:root "public/uploads/profiles"})
-   ;              (resp/content-type "image/jpeg")))}]; TODO: Determine actual content type
-   ])
+   ["/api" {:middleware [auth/wrap-authentication]}
+    ["/tags" {:get {:handler qb/list-tags-handler}}]
+    ["/question-sets" {:get {:handler qb/list-sets-handler}}]
+    ["/question-sets/:set-id"
+     ["" {:get {:handler qb/get-set-details-handler}}]
+     ["/questions" {:get {:handler qb/get-set-questions-handler}}]
+     ["/answers" {:delete {:handler qb/delete-set-answers-handler}}]]
+    ["/questions/:question-id" {}
+     ["/answer" {:post {:handler qb/submit-answer-handler}
+                 :delete {:handler qb/delete-answer-handler}}]
+     ["/self-evaluate" {:post {:handler qb/self-evaluate-handler}}]
+     ["/bookmark" {:post {:handler qb/toggle-bookmark-handler}}]]
+    ["/bookmarks" {:get {:handler qb/list-bookmarks-handler}}]]])
 
 
 (def app
