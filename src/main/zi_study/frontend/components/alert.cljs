@@ -1,7 +1,8 @@
 (ns zi-study.frontend.components.alert
   (:require
    [reagent.core :as r]
-   ["lucide-react" :as lucide-icons]))
+   ["lucide-react" :as lucide-icons]
+   [zi-study.frontend.utilities :refer [cx]]))
 
 (defn alert
   "A beautiful, customizable alert component.
@@ -37,12 +38,12 @@
 
           :outlined
           (case color
-            :primary "border border-[var(--color-primary)] text-[var(--color-primary)] dark:text-[var(--color-primary-200)] dark:border-[var(--color-primary-300)]"
-            :success "border border-[var(--color-success)] text-[var(--color-success)] dark:text-[var(--color-success-200)] dark:border-[var(--color-success-300)]"
-            :warning "border border-[var(--color-warning)] text-[var(--color-warning)] dark:text-[var(--color-warning-200)] dark:border-[var(--color-warning-300)]"
-            :error "border border-[var(--color-error)] text-[var(--color-error)] dark:text-[var(--color-error-200)] dark:border-[var(--color-error-300)]"
-            :info "border border-[var(--color-info)] text-[var(--color-info)] dark:text-[var(--color-info-200)] dark:border-[var(--color-info-300)]"
-            "border border-[var(--color-info)] text-[var(--color-info)] dark:text-[var(--color-info-200)] dark:border-[var(--color-info-300)]")
+            :primary "border border-[var(--color-primary)] text-[var(--color-primary)] dark:text-[var(--color-primary-300)] dark:border-[var(--color-primary-300)]"
+            :success "border border-[var(--color-success)] text-[var(--color-success)] dark:text-[var(--color-success-300)] dark:border-[var(--color-success-300)]"
+            :warning "border border-[var(--color-warning)] text-[var(--color-warning)] dark:text-[var(--color-warning-300)] dark:border-[var(--color-warning-300)]"
+            :error "border border-[var(--color-error)] text-[var(--color-error)] dark:text-[var(--color-error-300)] dark:border-[var(--color-error-300)]"
+            :info "border border-[var(--color-info)] text-[var(--color-info)] dark:text-[var(--color-info-300)] dark:border-[var(--color-info-300)]"
+            "border border-[var(--color-info)] text-[var(--color-info)] dark:text-[var(--color-info-300)] dark:border-[var(--color-info-300)]")
 
           :soft
           (case color
@@ -61,12 +62,12 @@
 
           :outlined
           (case color
-            :primary "text-[var(--color-primary)] dark:text-[var(--color-primary-200)]"
-            :success "text-[var(--color-success)] dark:text-[var(--color-success-200)]"
-            :warning "text-[var(--color-warning)] dark:text-[var(--color-warning-200)]"
-            :error "text-[var(--color-error)] dark:text-[var(--color-error-200)]"
-            :info "text-[var(--color-info)] dark:text-[var(--color-info-200)]"
-            "text-[var(--color-info)] dark:text-[var(--color-info-200)]")
+            :primary "text-[var(--color-primary)] dark:text-[var(--color-primary-300)]"
+            :success "text-[var(--color-success)] dark:text-[var(--color-success-300)]"
+            :warning "text-[var(--color-warning)] dark:text-[var(--color-warning-300)]"
+            :error "text-[var(--color-error)] dark:text-[var(--color-error-300)]"
+            :info "text-[var(--color-info)] dark:text-[var(--color-info-300)]"
+            "text-[var(--color-info)] dark:text-[var(--color-info-300)]")
 
           :soft
           (case color
@@ -90,7 +91,10 @@
 
         used-icon (or icon default-icon)
 
-        all-classes (str base-classes " " variant-colors " " (when-not @visible "opacity-0 max-h-0 py-0") " " class)
+        all-classes (cx base-classes
+                        variant-colors
+                        (when-not @visible "opacity-0 max-h-0 py-0")
+                        class)
 
         handle-dismiss (fn [_]
                          (reset! visible false)
@@ -207,12 +211,15 @@
 
         used-icon (or icon default-icon)
 
-        all-classes (str base-classes " " variant-colors " " (when-not @visible "opacity-0 scale-95") " " class)
+        all-classes (cx base-classes 
+                        variant-colors 
+                        (when-not @visible "opacity-0 scale-95") 
+                        class)
 
-        hide-toast (fn [_]
-                     (reset! visible false)
-                     (when on-hide
-                       (on-hide)))]
+        handle-hide (fn [_]
+                      (reset! visible false)
+                      (when on-hide
+                        (on-hide)))]
 
     ;; Set up auto-hide timer on mount
     (r/create-class
@@ -221,27 +228,51 @@
       :component-did-mount
       (fn []
         (when auto-hide
-          (js/setTimeout hide-toast auto-hide)))
+          (js/setTimeout handle-hide auto-hide)))
 
       :reagent-render
       (fn [_ & _]
         (if @visible
           [:div {:class all-classes}
            [:div {:class "p-4 flex gap-3"}
-
             ;; Icon
-            [:div {:class icon-color}
-             [:> used-icon {:size 20}]]
+            (when used-icon
+              [:div {:class icon-color}
+               [:> used-icon {:size 20}]])
 
             ;; Content
             [:div {:class "flex-1"}
              (into [:div] children)]
 
-            ;; Action or dismiss
-            (if action
-              action
-              [:button {:class "flex-shrink-0 text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] hover:opacity-75"
-                        :on-click hide-toast
-                        :aria-label "Dismiss"}
-               [:> lucide-icons/X {:size 16}]])]]
+            ;; Close button
+            [:button
+             {:class "flex-shrink-0 text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] hover:opacity-75"
+              :on-click handle-hide
+              :aria-label "Hide"}
+             [:> lucide-icons/X {:size 16}]]]
+
+           ;; Action area
+           (when action
+             [:div {:class "px-4 py-2 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] flex justify-end"}
+              action])]
           [:div]))})))
+
+(defn toast-container
+  "Container for toast notifications.
+
+   Options:
+   - position: :top-right, :top-left, :bottom-right, :bottom-left, :top-center, :bottom-center (default :bottom-right)
+   - class: additional CSS classes"
+  [{:keys [position class] :or {position :bottom-right}} & children]
+  (let [position-classes
+        (case position
+          :top-right "top-0 right-0"
+          :top-left "top-0 left-0"
+          :bottom-right "bottom-0 right-0"
+          :bottom-left "bottom-0 left-0"
+          :top-center "top-0 left-1/2 -translate-x-1/2"
+          :bottom-center "bottom-0 left-1/2 -translate-x-1/2"
+          "bottom-0 right-0")]
+
+    [:div {:class (cx "fixed p-4 z-50 flex flex-col gap-2" position-classes class)}
+     (into [:div] children)]))

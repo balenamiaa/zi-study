@@ -2,7 +2,8 @@
   (:require
    [reagent.core :as r]
    ["react-dom" :as react-dom]
-   ["lucide-react" :as lucide-icons]))
+   ["lucide-react" :as lucide-icons]
+   [zi-study.frontend.utilities :refer [cx]]))
 
 (defn dropdown
   "A dropdown menu component with consistent width handling.
@@ -166,11 +167,9 @@
 
       :reagent-render
       (fn [props-render & children-render]
-        (let [{:keys [open? class multi-select? transition trigger-class on-close on-apply trigger width min-width]
+        (let [{:keys [open? class multi-select? transition trigger-class on-close on-apply trigger]
                :or {multi-select? false
-                    transition :fade
-                    width "w-48"
-                    min-width nil}}
+                    transition :fade}}
               props-render
 
               processed-children
@@ -197,123 +196,99 @@
                   (react-dom/createPortal
                    (r/as-element
                     [:div {:ref #(reset! dropdown-ref %)
-                           :class (str "dropdown-menu "
-                                       (case transition
-                                         :fade "transition-opacity duration-200 ease-in-out"
-                                         :scale "transition-transform duration-200 ease-in-out transform origin-top-left scale-95 opacity-0 group-data-[state=open]:scale-100 group-data-[state=open]:opacity-100"
-                                         :slide "transition-all duration-200 ease-in-out transform -translate-y-2 opacity-0 group-data-[state=open]:translate-y-0 group-data-[state=open]:opacity-100"
-                                         "transition-opacity duration-200 ease-in-out")
-                                       " " class " "
-                                       (if @open? "opacity-100 visible" "opacity-0 invisible pointer-events-none"))}
-                     [:div {:class "py-1 max-h-60 overflow-y-auto scrollbar-thin"}
-                      processed-children]
-
+                           :class (cx "dropdown-menu"
+                                      (case transition
+                                        :scale "animate-in fade-in zoom-in-95"
+                                        :slide "animate-in fade-in slide-in-from-top-2"
+                                        :fade "animate-in fade-in"
+                                        "animate-in fade-in")
+                                      class)}
+                     (into [:div] processed-children)
                      (when multi-select?
-                       [:div {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] p-2 flex justify-between"}
-                        [:button {:class (str "text-xs px-2 py-1 rounded-md "
-                                              "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] "
-                                              "hover:bg-[var(--color-light-bg-paper)] dark:hover:bg-[var(--color-dark-bg-paper)] transition-colors duration-150")
+                       [:div {:class "border-t border-gray-200 dark:border-gray-700 p-2 flex justify-between"}
+                        [:button {:class "text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                                   :on-click (handle-clear-handler on-apply)}
                          "Clear"]
-                        [:button {:class (str "text-xs px-3 py-1 rounded-md bg-[var(--color-primary)] text-white "
-                                              "hover:bg-[var(--color-primary-600)] focus:ring-2 focus:ring-[var(--color-primary-300)] "
-                                              "active:translate-y-px transition-all duration-150")
+                        [:button {:class "text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                                   :on-click (handle-apply-handler on-apply open? on-close)}
                          "Apply"]])])
                    @portal-container)))]
 
-          [:div {:class (str "relative inline-block" (when @open? " dropdown-open"))
-                 :data-state (if @open? "open" "closed")}
+          [:div {:class (cx "inline-block" trigger-class)}
            [:div {:ref #(reset! trigger-ref %)
-                  :class (str "inline-block cursor-pointer " trigger-class)
                   :on-click (toggle-dropdown-handler open? on-close)}
             trigger]
            portal-element]))})))
 
 (defn menu-item
-  "Represents a clickable item within a dropdown menu.
+  "A menu item component for use within a dropdown.
    
-   Props:
-   - :icon - Lucide icon component to display
-   - :start-icon - Icon component to display at the start of the item
-   - :end-icon - Icon component to display at the end of the item
-   - :disabled - Whether the item is disabled
-   - :danger - Whether the item represents a dangerous action (shown in red)
-   - :on-click - Function called when the item is clicked
-   - :class - Additional CSS classes for the item
-   - :value - Value of the item (used for multi-select)
-   - :multi-select? - Whether this item is part of a multi-select dropdown
-   - :selected? - Whether this item is currently selected"
-  [{:keys [icon disabled danger on-click class value multi-select? selected?
-           start-icon end-icon]} & children]
-  (let [disabled-val (or disabled false)
-        danger-val (or danger false)
+   Options:
+   - selected?: true/false - whether this item is selected
+   - multi-select?: true/false - whether this item is in a multi-select dropdown
+   - disabled?: true/false - whether this item is disabled
+   - on-click: function to call when clicked
+   - start-icon: icon component to show at start
+   - end-icon: icon component to show at end
+   - class: additional CSS classes"
+  [{:keys [selected? multi-select? disabled? on-click start-icon end-icon class]} & children]
+  (let [base-classes "dropdown-item"
 
-        ;; Use the new dropdown-item classes
-        base-classes "dropdown-item"
+        selected-classes (when selected?
+                           "dropdown-item-selected")
 
-        ;; Add modifier classes
-        modifier-classes (str
-                          (when selected? " selected")
-                          (when disabled-val " disabled")
-                          (when danger-val " danger")
-                          " " class)
+        disabled-classes (when disabled?
+                           "dropdown-item-disabled")
+
+        all-classes (cx base-classes selected-classes disabled-classes class)
 
         handle-click (fn [e]
-                       (when (not disabled-val)
+                       (when (and on-click (not disabled?))
                          (.stopPropagation e)
-                         (when on-click
-                           (if value
-                             (on-click value e)
-                             (on-click e)))))]
+                         (on-click e)))]
 
-    [:button
-     {:class (str base-classes modifier-classes)
-      :on-click handle-click
-      :disabled disabled-val
-      :aria-disabled disabled-val
-      :role "menuitem"
-      :tabIndex (if disabled-val "-1" "0")}
-
-     ;; Start icon if provided
+    [:div {:class all-classes
+           :on-click handle-click
+           :role "menuitem"
+           :tabIndex (if disabled? -1 0)}
      (when start-icon
-       [:> start-icon {:size 16 :className "flex-shrink-0 mr-2"}])
+       [:div {:class "mr-2 flex-shrink-0"}
+        [:> start-icon {:size 16}]])
 
-     ;; Icon from icon prop (for backward compatibility)
-     (when (and icon (not start-icon))
-       [:> icon {:size 16 :className "flex-shrink-0 mr-2"}])
+     [:div {:class "flex-grow truncate"}
+      (into [:span] children)]
 
-     ;; Multi-select checkbox
-     (when multi-select?
-       [:div {:class (str "flex items-center justify-center w-4 h-4 mr-2 rounded border "
-                          "transition-colors duration-150 "
+     (cond
+       multi-select?
+       [:div {:class "ml-2 flex-shrink-0"}
+        [:div {:class (cx "w-4 h-4 rounded border flex items-center justify-center"
                           (if selected?
-                            "bg-[var(--color-primary)] border-[var(--color-primary)]"
-                            "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"))}
-        (when selected?
-          [:> lucide-icons/Check {:size 12 :class "text-white"}])])
+                            "bg-primary-500 border-primary-500"
+                            "border-gray-300 dark:border-gray-600"))}
+         (when selected?
+           [:> lucide-icons/Check {:size 12 :className "text-white"}])]]
 
-     ;; Item content
-     [:span {:class "flex-grow"} (into [:span] children)]
+       selected?
+       [:div {:class "ml-2 flex-shrink-0 text-primary-500"}
+        [:> lucide-icons/Check {:size 16}]]
 
-     ;; End icon if provided
-     (when end-icon
-       [:> end-icon {:size 16 :className "flex-shrink-0 ml-auto"}])]))
-
-(defn menu-divider
-  "A simple horizontal divider for visually separating groups of menu items." []
-  [:div {:class "h-px my-1 bg-[var(--color-light-divider)] dark:bg-[var(--color-dark-divider)]"
-         :role "separator"
-         :aria-orientation "horizontal"}])
+       end-icon
+       [:div {:class "ml-2 flex-shrink-0"}
+        [:> end-icon {:size 16}]])]))
 
 (defn menu-label
-  "A non-interactive label for describing groups of menu items.
+  "A label component for grouping menu items in a dropdown.
    
-   Props:
-   - :class - Additional CSS classes for the label" [{:keys [class]} & children]
-  [:div
-   {:class (str "px-4 py-2 text-xs font-semibold uppercase tracking-wider "
-                "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] "
-                class)
-    :role "presentation"}
+   Options:
+   - class: additional CSS classes"
+  [{:keys [class]} & children]
+  [:div {:class (cx "px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400" class)}
    (into [:span] children)])
+
+(defn menu-divider
+  "A separator line for visually dividing menu items.
+   
+   Options:
+   - class: additional CSS classes"
+  [{:keys [class]}]
+  [:div {:class (cx "h-px my-1 bg-gray-200 dark:bg-gray-700" class)}])

@@ -1,20 +1,17 @@
 (ns zi-study.frontend.components.input
   (:require
    [reagent.core :as r]
-   ["lucide-react" :as lucide]))
+   ["lucide-react" :as lucide]
+   [zi-study.frontend.utilities :refer [cx]]))
 
 (def ^:private input-base-style
-  (str "input w-full rounded transition-colors bg-transparent focus:outline-none"
-       "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] "
-       "disabled:opacity-50 disabled:cursor-not-allowed"))
+  "input w-full rounded transition-colors bg-transparent focus:outline-none text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] disabled:opacity-50 disabled:cursor-not-allowed")
 
 (def ^:private label-base-style
-  (str "block mb-1 text-xs font-medium transition-colors mx-2"
-       "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]"))
+  "block mb-1 text-xs font-medium transition-colors mx-2 text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]")
 
 (def ^:private helper-base-style
-  (str "mt-1 text-xs transition-colors "
-       "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"))
+  "mt-1 text-xs transition-colors text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]")
 
 (def ^:private error-style
   "mt-1 text-xs text-[var(--color-error)]")
@@ -82,15 +79,12 @@
                                type)
 
               variant-style (case variant
-                              :outlined (str "border "
-                                             (if error-text
-                                               "border-[var(--color-error)] focus:border-[var(--color-error)]"
-                                               (str "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] "
-                                                    "focus:border-[var(--color-primary)] dark:focus:border-[var(--color-primary-300)]")))
-                              :filled (str (if error-text
-                                             "bg-[var(--color-error-50)] focus:bg-[var(--color-error-50)]"
-                                             (str "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] "
-                                                  "focus:bg-[var(--color-light-bg)] dark:focus:bg-[var(--color-dark-bg)]"))))
+                              :outlined (if error-text
+                                          "border border-[var(--color-error)] focus:border-[var(--color-error)]"
+                                          "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] focus:border-[var(--color-primary)] dark:focus:border-[var(--color-primary-300)]")
+                              :filled (if error-text
+                                        "bg-[var(--color-error-50)] focus:bg-[var(--color-error-50)]"
+                                        "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] focus:bg-[var(--color-light-bg)] dark:focus:bg-[var(--color-dark-bg)]"))
 
               size-style (case size
                            :sm "px-3 py-1 text-sm"
@@ -121,18 +115,15 @@
                               :lg "pr-12")
                             "")
 
-              icon-wrapper-style (str "absolute top-0 bottom-0 flex items-center justify-center "
-                                      (case size
-                                        :sm "w-8"
-                                        :md "w-10"
-                                        :lg "w-12"))
+              icon-wrapper-style (cx "absolute top-0 bottom-0 flex items-center justify-center"
+                                     (case size
+                                       :sm "w-8"
+                                       :md "w-10"
+                                       :lg "w-12"))
 
-              icon-style (str "text-[var(--color-light-text-secondary)] "
-                              "dark:text-[var(--color-dark-text-secondary)]")
+              icon-style "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
 
-              active-icon-style (str "text-[var(--color-primary)] "
-                                     "dark:text-[var(--color-primary-300)] "
-                                     "cursor-pointer")
+              active-icon-style "text-[var(--color-primary)] dark:text-[var(--color-primary-300)] cursor-pointer"
 
               toggle-password-visibility (fn [e]
                                            (.preventDefault e)
@@ -160,7 +151,7 @@
                                       :start-icon :end-icon :on-end-icon-click
                                       :class :on-change :on-change-debounced)]
 
-          [:div {:class (str width-style " " class)}
+          [:div {:class (cx width-style class)}
 
            ;; Label
            (when label
@@ -175,15 +166,15 @@
 
             ;; Start icon
             (when has-start-icon
-              [:div {:class (str icon-wrapper-style " left-0")}
+              [:div {:class (cx icon-wrapper-style "left-0")}
                [:> start-icon {:size icon-size
                                :className icon-style}]])
 
             ;; End icon - debouncer, password toggle, or custom
             (when has-end-icon
-              [:div {:class (str icon-wrapper-style " right-0 "
-                                 (when (and (not @rx-is-debouncing) (or on-end-icon-click (= type :password)))
-                                   "cursor-pointer"))
+              [:div {:class (cx icon-wrapper-style "right-0"
+                                (when (and (not @rx-is-debouncing) (or on-end-icon-click (= type :password)))
+                                  "cursor-pointer"))
                      :on-click (cond
                                  @rx-is-debouncing nil
                                  (= type :password) toggle-password-visibility
@@ -191,7 +182,7 @@
                (cond
                  @rx-is-debouncing
                  [:> lucide/Loader2 {:size icon-size
-                                     :className (str icon-style " animate-spin text-[var(--color-primary)]")}]
+                                     :className (cx icon-style "animate-spin text-[var(--color-primary)]")}]
 
                  (= type :password)
                  (if @rx-show-password
@@ -202,56 +193,57 @@
 
                  end-icon
                  [:> end-icon {:size icon-size
-                               :className (if on-end-icon-click
-                                            active-icon-style
-                                            icon-style)}]
-
-                 :else nil)])
+                               :className (if on-end-icon-click active-icon-style icon-style)}])])
 
             ;; Input element
             [:input
              (merge
-              sanitized-props
               {:id input-id
                :name (or name input-id)
                :type effective-type
                :value value
-               :on-change handle-change
                :placeholder placeholder
                :disabled disabled
                :required required
-               :class (str input-base-style " " variant-style " " size-style " "
-                           start-padding " " end-padding
-                           (when error-text " border-[var(--color-error)]"))
                :autoComplete autoComplete
-               :maxLength maxLength})]]
+               :maxLength maxLength
+               :on-change handle-change
+               :class (cx input-base-style
+                          variant-style
+                          size-style
+                          start-padding
+                          end-padding
+                          (when error-text "border-[var(--color-error)] focus:border-[var(--color-error)]"))}
+              sanitized-props)]]
 
-           ;; Helper text or error message
+           ;; Helper text or error
            (cond
-             error-text [:p {:class error-style} error-text]
-             helper-text [:p {:class helper-base-style} helper-text])]))})))
+             error-text
+             [:div {:class error-style} error-text]
+
+             helper-text
+             [:div {:class helper-base-style} helper-text])]))})))
 
 ;; Textarea Component
 (defn textarea
-  "A textarea component with various styling options.
+  "A textarea component for multi-line text input.
    
    Options:
-   - id: Optional id for the textarea element
-   - name: Input name attribute
-   - label: Label text
-   - value: Textarea value
-   - on-change: Change handler function
-   - placeholder: Placeholder text
-   - disabled: Whether textarea is disabled
-   - required: Whether textarea is required
-   - helper-text: Helper text displayed below textarea
-   - error-text: Error text displayed below textarea (takes precedence over helper-text)
-   - variant: :filled or :outlined styling
-   - rows: Number of rows to display
-   - resize: :both, :horizontal, :vertical, or :none
-   - full-width: Whether textarea should take full width
-   - class: Additional CSS classes
-   - maxLength: Maximum input length"
+   - id: input id
+   - name: input name
+   - label: label text
+   - value: current value
+   - on-change: function to call when value changes
+   - placeholder: placeholder text
+   - disabled: true/false (default false)
+   - required: true/false (default false)
+   - helper-text: additional information text
+   - error-text: error message (adds error styling)
+   - variant: :outlined, :filled (default :filled)
+   - rows: number of rows (default 4)
+   - max-rows: maximum number of rows for auto-resize
+   - auto-resize: true/false - automatically resize based on content (default false)
+   - class: additional CSS classes"
   [{:keys [id
            name
            label
@@ -264,75 +256,81 @@
            error-text
            variant
            rows
-           resize
-           full-width
-           class
-           maxLength]
-    :or   {variant    :filled
-           rows       4
-           resize     :vertical
-           full-width true
-           disabled   false
-           required   false}
-    :as   props}]
+           max-rows
+           auto-resize
+           class]
+    :or {variant :filled
+         disabled false
+         required false
+         rows 4
+         auto-resize false}}]
 
   (let [input-id (format-input-id id)
+        textarea-ref (r/atom nil)
 
         variant-style (case variant
-                        :outlined (str "border "
-                                       (if error-text
-                                         "border-[var(--color-error)] focus:border-[var(--color-error)]"
-                                         (str "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] "
-                                              "focus:border-[var(--color-primary)] dark:focus:border-[var(--color-primary-300)]")))
-                        :filled (str (if error-text
-                                       "bg-[var(--color-error-50)] focus:bg-[var(--color-error-50)]"
-                                       (str "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] "
-                                            "focus:bg-[var(--color-light-bg)] dark:focus:bg-[var(--color-dark-bg)]"))))
+                        :outlined (if error-text
+                                    "border border-[var(--color-error)] focus:border-[var(--color-error)]"
+                                    "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] focus:border-[var(--color-primary)] dark:focus:border-[var(--color-primary-300)]")
+                        :filled (if error-text
+                                  "bg-[var(--color-error-50)] focus:bg-[var(--color-error-50)]"
+                                  "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] focus:bg-[var(--color-light-bg)] dark:focus:bg-[var(--color-dark-bg)]"))
 
-        size-style "px-4 py-2"
+        adjust-height (fn []
+                        (when (and auto-resize @textarea-ref)
+                          (let [el @textarea-ref]
+                            (set! (.-height (.-style el)) "auto")
+                            (let [new-height (.-scrollHeight el)
+                                  max-height (when max-rows
+                                               (* max-rows (/ (.-scrollHeight el) (count (.split (.-value el) "\n")))))]
+                              (set! (.-height (.-style el))
+                                    (if (and max-height (> new-height max-height))
+                                      (str max-height "px")
+                                      (str new-height "px")))))))]
 
-        width-style (if full-width "w-full" "w-auto")
+    (r/create-class
+     {:component-did-mount
+      (fn [_]
+        (adjust-height))
 
-        resize-style (case resize
-                       :both "resize"
-                       :horizontal "resize-x"
-                       :vertical "resize-y"
-                       :none "resize-none")
+      :component-did-update
+      (fn [_ [_ old-props]]
+        (when (not= (:value old-props) value)
+          (adjust-height)))
 
-        ;; Remove props we've handled to avoid passing them to the textarea element
-        sanitized-props (dissoc props
-                                :variant :full-width
-                                :helper-text :error-text
-                                :resize :class)]
+      :reagent-render
+      (fn []
+        [:div {:class (cx "w-full" class)}
+         ;; Label
+         (when label
+           [:label {:for input-id
+                    :class label-base-style}
+            label
+            (when required
+              [:span.ml-1 {:class "text-[var(--color-error)]"} "*"])])
 
-    [:div {:class (str width-style " " class)}
+         ;; Textarea
+         [:textarea
+          {:id input-id
+           :name (or name input-id)
+           :value value
+           :placeholder placeholder
+           :disabled disabled
+           :required required
+           :rows rows
+           :on-change (fn [e]
+                        (when on-change (on-change e))
+                        (when auto-resize (adjust-height)))
+           :ref #(reset! textarea-ref %)
+           :class (cx input-base-style
+                      variant-style
+                      "px-4 py-2 resize-none"
+                      (when error-text "border-[var(--color-error)] focus:border-[var(--color-error)]"))}]
 
-     ;; Label
-     (when label
-       [:label {:for input-id
-                :class label-base-style}
-        label
-        (when required
-          [:span.ml-1 {:class "text-[var(--color-error)]"} "*"])])
+         ;; Helper text or error
+         (cond
+           error-text
+           [:div {:class error-style} error-text]
 
-     ;; Textarea element
-     [:textarea
-      (merge
-       sanitized-props
-       {:id input-id
-        :name (or name input-id)
-        :value (or value "")
-        :on-change #(when on-change
-                      (on-change %))
-        :placeholder placeholder
-        :disabled disabled
-        :required required
-        :rows rows
-        :class (str input-base-style " " variant-style " " size-style " " resize-style
-                    (when error-text " border-[var(--color-error)]"))
-        :maxLength maxLength})]
-
-     ;; Helper text or error message
-     (cond
-       error-text [:p {:class error-style} error-text]
-       helper-text [:p {:class helper-base-style} helper-text])]))
+           helper-text
+           [:div {:class helper-base-style} helper-text])])})))

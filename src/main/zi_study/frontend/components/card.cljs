@@ -1,7 +1,8 @@
 (ns zi-study.frontend.components.card
   (:require
    [reagent.core :as r]
-   ["lucide-react" :as lucide-icons]))
+   ["lucide-react" :as lucide-icons]
+   [zi-study.frontend.utilities :refer [cx]]))
 
 (defn card
   "A card component for displaying content in a contained, styled container.
@@ -47,7 +48,7 @@
 
         cursor-class (when (:on-click props) "cursor-pointer")
         width-classes (if full-width "w-full" "")
-        all-classes (str base-classes " " variant-classes " " hover-classes " " width-classes " " cursor-class " " class)
+        all-classes (cx base-classes variant-classes hover-classes width-classes cursor-class class)
 
         ;; Remove props we've already handled to avoid React warnings
         div-props (-> props
@@ -79,10 +80,11 @@
                         "")]
 
     [:div
-     {:class (str "px-6 py-4 border-b bg-gradient-to-r from-[var(--color-light-card)] to-[#F9E4EC] "
-                  "dark:from-[var(--color-dark-card)] dark:to-[rgba(46,31,45,0.9)] "
-                  "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] "
-                  accent-styles " " class)}
+     {:class (cx "px-6 py-4 border-b bg-gradient-to-r from-[var(--color-light-card)] to-[#F9E4EC] "
+                 "dark:from-[var(--color-dark-card)] dark:to-[rgba(46,31,45,0.9)] "
+                 "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
+                 accent-styles
+                 class)}
      [:div {:class "flex items-center justify-between"}
       [:div {:class "flex items-center gap-3"}
        (when icon
@@ -108,7 +110,7 @@
   [{:keys [no-padding class] :or {no-padding false}} & children]
 
   (let [padding-class (if no-padding "" "px-6 py-5")
-        class-name (str padding-class " " class)]
+        class-name (cx padding-class class)]
     (into [:div {:class class-name}] children)))
 
 (defn card-footer
@@ -137,7 +139,7 @@
           :between "flex justify-between items-center"
           "flex justify-end items-center gap-2")
 
-        all-classes (str base-classes " " border-class " " align-class " " class)]
+        all-classes (cx base-classes border-class align-class class)]
 
     (into [:div {:class all-classes}] children)))
 
@@ -157,11 +159,11 @@
          bottom false}}]
 
   [:div
-   {:class (str "overflow-hidden "
-                (when top "rounded-t-lg ")
-                (when bottom "rounded-b-lg ")
-                class)}
+   {:class (cx "overflow-hidden"
+              (when top "rounded-t-lg")
+              (when bottom "rounded-b-lg")
+              class)}
    [:img
-    {:class (str "w-full object-cover " height)
+    {:class (cx "w-full object-cover" height)
      :src src
      :alt alt}]])

@@ -2,7 +2,7 @@
   (:require
    [reagent.core :as r]
    ["lucide-react" :as lucide-icons]
-   [zi-study.frontend.utilities :refer [add-ripple-effect]]))
+   [zi-study.frontend.utilities :refer [add-ripple-effect cx]]))
 
 (defn button
   "A beautiful, customizable button component.
@@ -30,7 +30,7 @@
 
         is-disabled (or disabled loading)
 
-        base-classes "relative overflow-hidden rounded-md font-medium inline-flex items-center justify-center transition-all duration-200 ease-in-out focus:outline-none "
+        base-classes "relative overflow-hidden rounded-md font-medium inline-flex items-center justify-center transition-all duration-200 ease-in-out focus:outline-none"
 
         variant-classes (case variant
                           :primary "bg-[var(--color-primary)] hover:bg-[var(--color-primary-600)] active:bg-[var(--color-primary-700)] text-white focus:ring-[var(--color-primary-300)] dark:focus:ring-[var(--color-primary-400)]"
@@ -53,7 +53,12 @@
                            "opacity-50 cursor-not-allowed pointer-events-none"
                            "")
 
-        all-classes (str base-classes " " variant-classes " " size-classes " " width-classes " " disabled-classes " " class)
+        all-classes (cx base-classes 
+                        variant-classes 
+                        size-classes 
+                        width-classes 
+                        disabled-classes 
+                        class)
 
         handle-click (fn [e]
                        (when (and on-click (not is-disabled))
@@ -75,7 +80,7 @@
 
      ;; The actual content, always present for layout, but opacity changed when loading.
      ;; Content is not focusable or interactive if loading via disabled_classes on parent.
-     [:span {:class (str "inline-flex gap-1 items-center justify-center w-full "
+     [:span {:class (cx "inline-flex gap-1 items-center justify-center w-full"
                          (if loading "opacity-0" "opacity-100"))}
       (when start-icon
         [:div {:class "btn-icon flex-shrink-0"}
@@ -101,7 +106,7 @@
                           :horizontal "flex-row"
                           "flex-row")
 
-        all-classes (str base-classes " " variant-classes " " class)
+        all-classes (cx base-classes variant-classes class)
 
         attrs (-> (dissoc opts :variant :class)
                   (assoc :class all-classes))]

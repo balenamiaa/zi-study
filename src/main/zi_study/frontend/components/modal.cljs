@@ -2,7 +2,8 @@
   (:require
    [reagent.core :as r]
    ["react-dom" :as react-dom]
-   ["lucide-react" :as lucide-icons]))
+   ["lucide-react" :as lucide-icons]
+   [zi-study.frontend.utilities :refer [cx]]))
 
 (defn modal
   "A modal dialog component for displaying content over the page.
@@ -30,15 +31,17 @@
                          :full "max-w-full w-full h-full m-0 rounded-none"
                          "max-w-md")
 
-          overlay-classes (str "fixed inset-0 z-50 flex items-center justify-center p-4 "
-                               "bg-black/50 transition-opacity duration-200 "
-                               (if is-open "opacity-100" "opacity-0 pointer-events-none"))
+          overlay-classes (cx "fixed inset-0 z-50 flex items-center justify-center p-4"
+                              "bg-black/50 transition-opacity duration-200"
+                              (if is-open "opacity-100" "opacity-0 pointer-events-none"))
 
-          modal-classes (str "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] "
-                             "rounded-lg shadow-lg w-full " size-classes " overflow-hidden "
-                             "transform transition-all duration-200 "
-                             (if is-open "scale-100 opacity-100" "scale-95 opacity-0") " "
-                             class)
+          modal-classes (cx "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)]"
+                            "rounded-lg shadow-lg w-full" 
+                            size-classes 
+                            "overflow-hidden"
+                            "transform transition-all duration-200"
+                            (if is-open "scale-100 opacity-100" "scale-95 opacity-0")
+                            class)
 
           ;; Define handlers inside render function to access props
           handle-close (fn []
@@ -82,7 +85,7 @@
 
                          ;; Content - wrap children in a div with a key
                          ^{:key "modal-content"}
-                         [:div {:class (str "p-6 " content-class)}
+                         [:div {:class (cx "p-6" content-class)}
                           ;; Map unique keys to each child element if children is a sequence
                           (if (sequential? (first children))
                             (map-indexed

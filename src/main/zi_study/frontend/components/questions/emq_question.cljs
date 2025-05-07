@@ -6,19 +6,20 @@
             [zi-study.frontend.components.dropdown :refer [dropdown menu-item]]
             [zi-study.frontend.components.button :refer [button]]
             [zi-study.frontend.components.badge :refer [badge]]
+            [zi-study.frontend.utilities :refer [cx]]
             ["lucide-react" :as lucide-icons]))
 
 ;; Helper component for a single premise with dropdown selector
 (defn- premise-item
   "Renders a single premise item with a dropdown for selecting an option"
-  [{:keys [index premise options selected-option-idx disabled? pending? on-selection-change is-submitted? is-correct? actual-correct-option-idx]}]
-  [:div {:class (str "mb-3 transition-all rounded-md p-3 "
-                     (cond
-                       pending? "bg-[var(--color-primary-50)] dark:bg-[rgba(233,30,99,0.1)] border border-[var(--color-primary-200)] dark:border-[rgba(233,30,99,0.2)]"
-                       (and is-submitted? is-correct?) "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] border border-[var(--color-success-200)] dark:border-[rgba(76,175,80,0.2)]"
-                       (and is-submitted? (not is-correct?)) "bg-[var(--color-error-50)] dark:bg-[rgba(244,67,54,0.1)] border border-[var(--color-error-200)] dark:border-[rgba(244,67,54,0.2)]"
-                       :else "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] dark:bg-[var(--color-dark-bg-paper)]")
-                     " transform transition-all duration-300 hover:shadow-sm")}
+  [{:keys [premise options selected-option-idx disabled? pending? on-selection-change is-submitted? is-correct? actual-correct-option-idx]}]
+  [:div {:class (cx "mb-3 transition-all rounded-md p-3"
+                    (cond
+                      pending? "bg-[var(--color-primary-50)] dark:bg-[rgba(233,30,99,0.1)] border border-[var(--color-primary-200)] dark:border-[rgba(233,30,99,0.2)]"
+                      (and is-submitted? is-correct?) "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] border border-[var(--color-success-200)] dark:border-[rgba(76,175,80,0.2)]"
+                      (and is-submitted? (not is-correct?)) "bg-[var(--color-error-50)] dark:bg-[rgba(244,67,54,0.1)] border border-[var(--color-error-200)] dark:border-[rgba(244,67,54,0.2)]"
+                      :else "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] dark:bg-[var(--color-dark-bg-paper)]")
+                    "transform transition-all duration-300 hover:shadow-sm")}
 
    ;; Responsive layout for premise and dropdown
    [:div {:class "flex flex-col md:flex-row md:items-center gap-3 items-center"}
@@ -44,8 +45,8 @@
                                 (and is-submitted? is-correct?) lucide-icons/Check
                                 (and is-submitted? (not is-correct?)) lucide-icons/X
                                 :else lucide-icons/ChevronDown)}
-                   [:span {:class (str "truncate "
-                                       (when (nil? selected-option-idx) "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"))}
+                   [:span {:class (cx "truncate"
+                                      (when (nil? selected-option-idx) "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"))}
                     (if (some? selected-option-idx)
                       (get options selected-option-idx)
                       "Select an option...")]]
@@ -67,9 +68,9 @@
    (when (and is-submitted?
               (not is-correct?)
               (some? actual-correct-option-idx))
-     [:div {:class (str "mt-2 text-sm flex items-center rounded-md p-2 "
-                        "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] "
-                        "text-[var(--color-success-700)] dark:text-[var(--color-success-300)]")}
+     [:div {:class (cx "mt-2 text-sm flex items-center rounded-md p-2"
+                       "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)]"
+                       "text-[var(--color-success-700)] dark:text-[var(--color-success-300)]")}
       [:> lucide-icons/AlertCircle {:size 16 :className "mr-2 flex-shrink-0"}]
       [:span "Correct answer: "]
       [:span {:class "font-medium ml-1"} (get options actual-correct-option-idx)]])])
@@ -182,11 +183,11 @@
                 [:span {:class "font-medium"} "Your Score"]
                 [:span {:class "font-medium"} (str correct-count "/" total-count " (" (Math/round percentage-correct) "%)")]]
                [:div {:class "h-2 w-full bg-[var(--color-light-bg-subtle)] dark:bg-[var(--color-dark-bg-subtle)] rounded-full overflow-hidden"}
-                [:div {:class (str "h-full transition-all duration-1000 ease-out "
-                                   (cond
-                                     (>= percentage-correct 80) "bg-[var(--color-success)]"
-                                     (>= percentage-correct 50) "bg-[var(--color-warning)]"
-                                     :else "bg-[var(--color-error)]"))
+                [:div {:class (cx "h-full transition-all duration-1000 ease-out"
+                                  (cond
+                                    (>= percentage-correct 80) "bg-[var(--color-success)]"
+                                    (>= percentage-correct 50) "bg-[var(--color-warning)]"
+                                    :else "bg-[var(--color-error)]"))
                        :style {:width (str percentage-correct "%")}}]]])
 
             ;; Render each premise with its dropdown

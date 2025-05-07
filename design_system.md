@@ -12,7 +12,8 @@ This document outlines the design system used in ZiStudy, including colors, typo
 6. [Effects and Animations](#effects-and-animations)
 7. [Iconography](#iconography)
 8. [Component Encapsulation](#component-encapsulation)
-9. [Design Principles](#design-principles)
+9. [Utilities](#utilities)
+10. [Design Principles](#design-principles)
 
 ## Color Palette
 
@@ -478,6 +479,12 @@ This approach applies to:
 - Selects and dropdowns
 - Cards
 - Any other reusable UI element
+
+## Utilities
+
+### Class Name Handling with `cx`
+
+ZiStudy uses a utility function called `cx` for handling class names in components. This function is a wrapper around the [clsx](https://github.com/lukeed/clsx) and [tailwind-merge](https://github.com/dcastil/tailwind-merge) libraries, providing intelligent class name handling specifically for ClojureScript.
 
 ---
 

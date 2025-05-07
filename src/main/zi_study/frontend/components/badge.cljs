@@ -1,6 +1,7 @@
 (ns zi-study.frontend.components.badge
   (:require
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [zi-study.frontend.utilities :refer [cx]]))
 
 (defn badge
   "A badge component for showing counts, notifications, or status indicators.
@@ -64,7 +65,7 @@
           :bottom-left  "absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2"
           "")
 
-        all-classes (str base-classes " " color-classes " " size-classes " " rounded-classes " " position-classes " " class)
+        all-classes (cx base-classes color-classes size-classes rounded-classes position-classes class)
 
         content
         (cond
@@ -128,7 +129,7 @@
             :info      "bg-gradient-to-br from-blue-300 to-blue-700 text-white"
             "bg-gradient-to-br from-[var(--color-primary-300)] to-[var(--color-primary-700)] text-white"))
 
-        all-classes (str base-classes " " size-classes " " variant-classes " " color-classes " " class)
+        all-classes (cx base-classes size-classes variant-classes color-classes class)
 
         status-dot-color
         (case status
@@ -149,4 +150,4 @@
 
      ;; Status indicator
      (when status
-       [:span {:class (str "absolute bottom-0 right-0 transform border-2 border-white rounded-full translate-x-1/2 translate-y-1/2 w-1/4 h-1/4 min-w-[8px] min-h-[8px] " status-dot-color)}])]))
+       [:span {:class (cx "absolute bottom-0 right-0 transform border-2 border-white rounded-full translate-x-1/2 translate-y-1/2 w-1/4 h-1/4 min-w-[8px] min-h-[8px]" status-dot-color)}])]))

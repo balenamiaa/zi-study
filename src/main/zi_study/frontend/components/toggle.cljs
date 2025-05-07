@@ -1,6 +1,7 @@
 (ns zi-study.frontend.components.toggle
   (:require
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [zi-study.frontend.utilities :refer [cx]]))
 
 (defn toggle
   "A beautiful toggle switch component for boolean selection.
@@ -35,14 +36,15 @@
                                         (= (.-key e) "Enter")))
                            (trigger-change e)))
 
-        wrapper-classes (str
+        wrapper-classes (cx
                          (case container-style
-                           :pill (str "px-3 py-2 rounded-full border transition-all duration-200 "
-                                      (if checked
-                                        "bg-[var(--color-primary-50)] dark:bg-[rgba(233,30,99,0.1)] border-[var(--color-primary-200)] dark:border-[var(--color-primary-400)]"
-                                        "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"))
+                           :pill (cx "px-3 py-2 rounded-full border transition-all duration-200"
+                                     (if checked
+                                       "bg-[var(--color-primary-50)] dark:bg-[rgba(233,30,99,0.1)] border-[var(--color-primary-200)] dark:border-[var(--color-primary-400)]"
+                                       "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"))
                            :default "")
-                         " inline-flex items-center gap-2 " class)
+                         "inline-flex items-center gap-2"
+                         class)
 
         size-classes
         (case size
@@ -58,16 +60,18 @@
           :success "checked:from-success-600 checked:to-success-500 dark:checked:from-success-500 dark:checked:to-success-400"
           "checked:from-primary-600 checked:to-primary-500 dark:checked:from-primary-500 dark:checked:to-primary-400")
 
-        track-classes (str "toggle-track " color-classes " " size-classes " "
-                           (when disabled "opacity-50 cursor-not-allowed"))
+        track-classes (cx "toggle-track"
+                          color-classes
+                          size-classes
+                          (when disabled "opacity-50 cursor-not-allowed"))
 
-        thumb-classes (str "toggle-thumb "
-                           (when disabled "opacity-50 cursor-not-allowed"))
+        thumb-classes (cx "toggle-thumb"
+                          (when disabled "opacity-50 cursor-not-allowed"))
 
-        label-classes (str "toggle-label select-none text-sm "
-                           (cond 
-                             (and checked (not disabled)) "text-[var(--color-primary)] dark:text-[var(--color-primary-300)] font-medium "
-                             disabled "opacity-50 cursor-not-allowed"))]
+        label-classes (cx "toggle-label select-none text-sm"
+                          (cond
+                            (and checked (not disabled)) "text-[var(--color-primary)] dark:text-[var(--color-primary-300)] font-medium"
+                            disabled "opacity-50 cursor-not-allowed"))]
 
     [:div {:class wrapper-classes}
      ;; Label before toggle if position is :left
@@ -118,9 +122,7 @@
 
         base-classes "relative inline-flex items-center"
 
-        checkbox-base (str "appearance-none transition-colors duration-200 ease-in-out "
-                           "focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 "
-                           "disabled:cursor-not-allowed border-2")
+        checkbox-base "appearance-none transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed border-2"
 
         size-classes
         (case size
@@ -152,16 +154,16 @@
                          "checked:border-[var(--color-primary)] dark:checked:border-[var(--color-primary)]")
            :ring "focus:ring-[var(--color-primary-300)] dark:focus:ring-[var(--color-primary-700)]"})
 
-        checkbox-classes (str checkbox-base " "
-                              (:checkbox size-classes) " "
-                              (:border color-classes) " "
-                              (:checked color-classes) " "
-                              (:ring color-classes) " "
-                              "rounded bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] "
-                              "checked:bg-no-repeat checked:bg-center "
-                              input-class)
+        checkbox-classes (cx checkbox-base
+                             (:checkbox size-classes)
+                             (:border color-classes)
+                             (:checked color-classes)
+                             (:ring color-classes)
+                             "rounded bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)]"
+                             "checked:bg-no-repeat checked:bg-center"
+                             input-class)
 
-        container-classes (str base-classes " " (:container size-classes) " " class)
+        container-classes (cx base-classes (:container size-classes) class)
 
         label-classes "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] select-none"
 
@@ -196,7 +198,7 @@
               :ref #(when % (reset! input-ref %))}]
 
      (when label
-       [:label {:class (str "ml-2 " label-classes " cursor-pointer")
+       [:label {:class (cx "ml-2" label-classes "cursor-pointer")
                 :on-click trigger-change}
         label])]))
 
