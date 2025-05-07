@@ -22,7 +22,7 @@
     (str "input-" (random-uuid))))
 
 ;; Text Input Component (Form-2 for Debouncing)
-(def text-input
+(defn text-input [_]
   (let [rx-timer-id (r/atom nil)
         rx-show-password (r/atom false)
         rx-is-debouncing (r/atom false)]
@@ -166,13 +166,13 @@
 
             ;; Start icon
             (when has-start-icon
-              [:div {:class (cx icon-wrapper-style "left-0")}
+              [:div {:class (cx icon-wrapper-style "left-0 select-none")}
                [:> start-icon {:size icon-size
                                :className icon-style}]])
 
             ;; End icon - debouncer, password toggle, or custom
             (when has-end-icon
-              [:div {:class (cx icon-wrapper-style "right-0"
+              [:div {:class (cx icon-wrapper-style "right-0 select-none"
                                 (when (and (not @rx-is-debouncing) (or on-end-icon-click (= type :password)))
                                   "cursor-pointer"))
                      :on-click (cond
@@ -198,6 +198,7 @@
             ;; Input element
             [:input
              (merge
+              sanitized-props
               {:id input-id
                :name (or name input-id)
                :type effective-type
@@ -213,8 +214,7 @@
                           size-style
                           start-padding
                           end-padding
-                          (when error-text "border-[var(--color-error)] focus:border-[var(--color-error)]"))}
-              sanitized-props)]]
+                          (when error-text "border-[var(--color-error)] focus:border-[var(--color-error)]"))})]]
 
            ;; Helper text or error
            (cond

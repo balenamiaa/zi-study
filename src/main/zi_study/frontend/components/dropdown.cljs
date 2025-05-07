@@ -11,27 +11,30 @@
    Options:
    - open?: atom containing boolean state (default: new atom with false)
    - placement: :bottom-left, :bottom-right, :top-left, :top-right (default :bottom-left)
-   - width: Set dropdown width - string CSS value, or :match-trigger to match trigger width (default \"w-48\")
-   - min-width: Minimum width for the dropdown (optional)
+   - width: Tailwind CSS width class (e.g., \"w-48\", \"w-64\"), or :match-trigger to match trigger width (default \"w-48\")
+   - min-width: Minimum width for the dropdown (Tailwind class or CSS value) (optional)
+   - offset: Pixel offset from the trigger, primarily affecting the top position (default 4)
    - multi-select?: true/false to enable multi-select mode (default false)
    - trigger: component that triggers the dropdown
    - trigger-class: additional CSS classes for trigger container
+   - on-open: callback when dropdown opens
    - on-close: callback when dropdown closes
    - on-apply: callback when 'Apply' is clicked in multi-select mode
    - selected-values: set of initially selected values for multi-select mode
    - class: additional CSS classes for dropdown content"
-  [{:keys [open? placement width min-width selected-values]
+  [{:keys [open? placement width min-width selected-values offset]
     :or {open? (r/atom false)
          placement :bottom-left
          width "w-48"
          min-width nil
+         offset 4
          selected-values #{}}}
    & _children-initial]
 
   (let [portal-container (r/atom nil)
         trigger-ref (r/atom nil)
         dropdown-ref (r/atom nil)
-        trigger-width (r/atom nil)  ;; Track the trigger width
+        trigger-width-cache (r/atom nil)
         temp-selections (r/atom (or selected-values #{}))
         prev-open-state (r/atom @open?)
         force-update-portal (r/atom 0)
@@ -39,45 +42,45 @@
 
         update-position (fn []
                           (when (and @trigger-ref @dropdown-ref @open?)
-                            (let [rect (.getBoundingClientRect @trigger-ref)
-                                  dropdown-el @dropdown-ref
-                                  dropdown-width (.-offsetWidth dropdown-el)
-                                  dropdown-height (.-offsetHeight dropdown-el)
-                                  scroll-x (.-scrollX js/window)
-                                  scroll-y (.-scrollY js/window)
-                                  left (.-left rect)
-                                  right (.-right rect)
-                                  top (.-top rect)
-                                  bottom (.-bottom rect)
+                            (let [dropdown-el @dropdown-ref
+                                  rect (.getBoundingClientRect @trigger-ref)]
 
-                                  ;; Update stored trigger width on position update
-                                  trigger-element-width (.-offsetWidth @trigger-ref)
-                                  _ (reset! trigger-width trigger-element-width)
+                              (when (= width :match-trigger)
+                                (let [current-trigger-width (.-offsetWidth @trigger-ref)]
+                                  (reset! trigger-width-cache current-trigger-width)
+                                  (set! (.. dropdown-el -style -width) (str current-trigger-width "px"))))
 
-                                  position (case placement
-                                             :bottom-left {:left (+ left scroll-x)
-                                                           :top (+ bottom scroll-y)}
-                                             :bottom-right {:left (+ (- right dropdown-width) scroll-x)
-                                                            :top (+ bottom scroll-y)}
-                                             :top-left {:left (+ left scroll-x)
-                                                        :top (+ (- top dropdown-height) scroll-y)}
-                                             :top-right {:left (+ (- right dropdown-width) scroll-x)
-                                                         :top (+ (- top dropdown-height) scroll-y)}
-                                             {:left (+ left scroll-x)
-                                              :top (+ bottom scroll-y)})]
-                              (set! (.. dropdown-el -style -position) "absolute")
-                              (set! (.. dropdown-el -style -zIndex) "9999")
-                              (set! (.. dropdown-el -style -left) (str (:left position) "px"))
-                              (set! (.. dropdown-el -style -top) (str (:top position) "px"))
+                              (.-offsetHeight dropdown-el)
 
-                              ;; Match dropdown width to trigger width if specified, otherwise use provided width
-                              (if (= width :match-trigger)
-                                (set! (.. dropdown-el -style -width) (str @trigger-width "px"))
-                                (set! (.. dropdown-el -style -width) width))
+                              (let [dropdown-width (.-offsetWidth dropdown-el)
+                                    dropdown-height (.-offsetHeight dropdown-el)
+                                    scroll-x (.-scrollX js/window)
+                                    scroll-y (.-scrollY js/window)
+                                    left (.-left rect)
+                                    right (.-right rect)
+                                    top (.-top rect)
+                                    bottom (.-bottom rect)
 
-                              ;; Apply minimum width if specified
-                              (when min-width
-                                (set! (.. dropdown-el -style -minWidth) min-width)))))
+                                    base-position (case placement
+                                                    :bottom-left  {:left (+ left scroll-x)                          :top (+ bottom scroll-y)}
+                                                    :bottom-right {:left (+ (- right dropdown-width) scroll-x)     :top (+ bottom scroll-y)}
+                                                    :top-left     {:left (+ left scroll-x)                          :top (+ (- top dropdown-height) scroll-y)}
+                                                    :top-right    {:left (+ (- right dropdown-width) scroll-x)     :top (+ (- top dropdown-height) scroll-y)}
+                                                    {:left (+ left scroll-x) :top (+ bottom scroll-y)})
+
+                                    final-top (cond
+                                                (or (= placement :bottom-left) (= placement :bottom-right)) (+ (:top base-position) offset)
+                                                (or (= placement :top-left) (= placement :top-right))    (- (:top base-position) offset)
+                                                :else (:top base-position))
+                                    final-left (:left base-position)]
+
+                                (set! (.. dropdown-el -style -position) "absolute")
+                                (set! (.. dropdown-el -style -zIndex) "9999")
+                                (set! (.. dropdown-el -style -left) (str final-left "px"))
+                                (set! (.. dropdown-el -style -top) (str final-top "px"))
+
+                                (when min-width
+                                  (set! (.. dropdown-el -style -minWidth) min-width))))))
 
         create-handle-outside-click (fn [current-on-close current-open-atom current-selected-values-prop]
                                       (fn [e]
@@ -95,7 +98,7 @@
                                     (.stopPropagation e)
                                     (swap! current-open-atom not)
                                     (when @current-open-atom
-                                      (js/setTimeout update-position 0))
+                                      (js/window.requestAnimationFrame update-position))
                                     (when (and (not @current-open-atom) current-on-close)
                                       (current-on-close))))
 
@@ -151,8 +154,8 @@
             (current-on-close))
           (reset! prev-open-state is-now-open)
 
-          (when @(:open? current-props)
-            (update-position))))
+          (when (and is-now-open (not was-open))
+            (js/window.requestAnimationFrame update-position))))
 
       :component-will-unmount
       (fn [_this]
@@ -167,10 +170,20 @@
 
       :reagent-render
       (fn [props-render & children-render]
-        (let [{:keys [open? class multi-select? transition trigger-class on-close on-apply trigger]
+        (let [{:keys [open? class multi-select? transition trigger-class on-open on-close on-apply trigger width]
                :or {multi-select? false
                     transition :fade}}
               props-render
+
+              dropdown-classes (cx
+                                "dropdown-menu"
+                                (when (and (string? width) (not= width :match-trigger)) width)
+                                (case transition
+                                  :scale "animate-in fade-in zoom-in-95"
+                                  :slide "animate-in fade-in slide-in-from-top-2"
+                                  :fade "animate-in fade-in"
+                                  "animate-in fade-in")
+                                class)
 
               processed-children
               (doall
@@ -196,13 +209,7 @@
                   (react-dom/createPortal
                    (r/as-element
                     [:div {:ref #(reset! dropdown-ref %)
-                           :class (cx "dropdown-menu"
-                                      (case transition
-                                        :scale "animate-in fade-in zoom-in-95"
-                                        :slide "animate-in fade-in slide-in-from-top-2"
-                                        :fade "animate-in fade-in"
-                                        "animate-in fade-in")
-                                      class)}
+                           :class dropdown-classes}
                      (into [:div] processed-children)
                      (when multi-select?
                        [:div {:class "border-t border-gray-200 dark:border-gray-700 p-2 flex justify-between"}
@@ -216,7 +223,9 @@
 
           [:div {:class (cx "inline-block" trigger-class)}
            [:div {:ref #(reset! trigger-ref %)
-                  :on-click (toggle-dropdown-handler open? on-close)}
+                  :on-click #(do
+                               ((toggle-dropdown-handler open? on-close) %)
+                               (when on-open (on-open)))}
             trigger]
            portal-element]))})))
 
@@ -227,11 +236,12 @@
    - selected?: true/false - whether this item is selected
    - multi-select?: true/false - whether this item is in a multi-select dropdown
    - disabled?: true/false - whether this item is disabled
+   - danger?: true/false - whether this is a destructive action (red styling)
    - on-click: function to call when clicked
    - start-icon: icon component to show at start
    - end-icon: icon component to show at end
    - class: additional CSS classes"
-  [{:keys [selected? multi-select? disabled? on-click start-icon end-icon class]} & children]
+  [{:keys [selected? multi-select? disabled? danger? on-click start-icon end-icon class]} & children]
   (let [base-classes "dropdown-item"
 
         selected-classes (when selected?
@@ -240,7 +250,10 @@
         disabled-classes (when disabled?
                            "dropdown-item-disabled")
 
-        all-classes (cx base-classes selected-classes disabled-classes class)
+        danger-classes (when danger?
+                         "text-[var(--color-error)] hover:bg-[var(--color-error-50)] dark:text-[var(--color-error-300)] dark:hover:bg-[rgba(var(--color-error-rgb),0.1)]")
+
+        all-classes (cx base-classes selected-classes disabled-classes danger-classes class)
 
         handle-click (fn [e]
                        (when (and on-click (not disabled?))
@@ -252,7 +265,8 @@
            :role "menuitem"
            :tabIndex (if disabled? -1 0)}
      (when start-icon
-       [:div {:class "mr-2 flex-shrink-0"}
+       [:div {:class (cx "mr-2 flex-shrink-0"
+                         (when danger? "text-[var(--color-error)] dark:text-[var(--color-error-300)]"))}
         [:> start-icon {:size 16}]])
 
      [:div {:class "flex-grow truncate"}
@@ -273,7 +287,8 @@
         [:> lucide-icons/Check {:size 16}]]
 
        end-icon
-       [:div {:class "ml-2 flex-shrink-0"}
+       [:div {:class (cx "ml-2 flex-shrink-0"
+                         (when danger? "text-[var(--color-error)] dark:text-[var(--color-error-300)]"))}
         [:> end-icon {:size 16}]])]))
 
 (defn menu-label

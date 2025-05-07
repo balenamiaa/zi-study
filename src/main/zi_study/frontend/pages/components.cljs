@@ -479,6 +479,7 @@
    [section-subtitle "Dropdown with Groups"]
    (r/with-let [open? (r/atom false)]
      [dropdown {:trigger [button "Advanced Menu"]
+                :placement :bottom-right
                 :width "w-56"
                 :open? open?
                 :on-close #(reset! open? false)}

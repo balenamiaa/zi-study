@@ -36,6 +36,21 @@
     {:size 20
      :className "text-[var(--color-secondary)] animate-pulse transition-all"}]])
 
+(defn action-button [{:keys [icon tooltip-text on-click aria-label shrink]}]
+  [tooltip {:content tooltip-text
+            :position :bottom
+            :variant :light
+            :trigger-class (when shrink "scale-90")}
+   [button {:variant :text
+            :size (if shrink :sm :md)
+            :class (cx "transition-all duration-300")
+            :on-click on-click
+            :aria-label aria-label}
+    [:> icon {:size (if shrink 18 20)
+              :className (cx "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
+                             "hover:text-[var(--color-primary)] dark:hover:text-[var(--color-primary-300)]"
+                             "transition-colors")}]]])
+
 ;; Mobile navigation menu
 (defn mobile-menu [current-route]
   [:div
@@ -55,6 +70,24 @@
 
    ;; Menu items
    [:nav {:class "flex flex-col items-center justify-center h-full text-xl space-y-6"}
+    ;; User info at the top (if authenticated)
+    (let [auth-state (state/get-auth-state)
+          authenticated? (:authenticated? auth-state)
+          current-user (:current-user auth-state)]
+      (when (and authenticated? current-user)
+        [:div {:class "flex flex-col items-center mb-6"}
+         [avatar {:src (:profile_picture_url current-user)
+                  :alt "User profile"
+                  :size :lg
+                  :initials (when (:email current-user)
+                              (str/upper-case (subs (:email current-user) 0 1)))
+                  :class "mb-2 border-2 border-[var(--color-primary-300)]"}]
+         [:div {:class "text-center"}
+          [:div {:class "font-medium text-base mb-0.5"}
+           (:display_name current-user (:email current-user))]
+          [:div {:class "text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+           (:email current-user)]]]))
+
     (for [{:keys [name label icon]} nav-links]
       (let [is-active (= name current-route)]
         ^{:key (str name)}
@@ -99,64 +132,55 @@
 
 ;; User menu component (for authenticated users)
 (defn user-menu [{:keys [user-info on-logout]}]
-  (let [user-trigger [:div {:class "flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"}
-                      [avatar {:src (:profile_picture_url user-info)
-                               :alt "User profile"
-                               :size :sm
-                               :initials (when (:email user-info)
-                                           (str/upper-case (subs (:email user-info) 0 1)))
-                               :class "mr-2 border-2 border-[var(--color-light-bg-paper)] dark:border-[var(--color-dark-bg-paper)]"}]
-                      [:span
-                       {:class "text-sm font-medium text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] max-w-[120px] truncate"}
-                       (:display_name user-info (:email user-info))
-                       [:> lucide-icons/ChevronDown
-                        {:size 16 :className "ml-1 inline-block text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]]]]
-    (r/with-let [open? (r/atom false)]
-      [dropdown {:trigger user-trigger
-                 :placement :bottom-right
-                 :width "w-64"
-                 :transition :scale
-                 :open? open?
-                 :class "p-2"}
+  (r/with-let [open? (r/atom false)
+               force-update (r/atom 0)
+               user-trigger [:div {:class "flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"}
+                             [avatar {:src (:profile_picture_url user-info)
+                                      :alt "User profile"
+                                      :size :sm
+                                      :initials (when (:email user-info)
+                                                  (str/upper-case (subs (:email user-info) 0 1)))
+                                      :class "mr-2 border-2 border-[var(--color-light-bg-paper)] dark:border-[var(--color-dark-bg-paper)]"}]
+                             [:span
+                              {:class "hidden sm:inline text-sm font-medium text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] max-w-[120px] truncate"}
+                              (:display_name user-info (:email user-info))
+                              [:> lucide-icons/ChevronDown
+                               {:size 16 :className "ml-1 inline-block text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]]]]
+    [dropdown {:trigger user-trigger
+               :placement :bottom-right
+               :width "w-48"
+               :transition :scale
+               :open? open?
+               :on-open #(swap! force-update inc)
+               :class "p-1.5 sm:p-2"
+               :trigger-class "relative"}
 
-       ;; User info section at top
-       [:div {:class "py-2 px-3 mb-2 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-        [:div {:class "font-medium text-sm mb-0.5 truncate"}
-         (:display_name user-info (:email user-info))]
-        [:div {:class "text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] truncate"}
-         (:email user-info)]]
+     ;; User info section at top
+     [:div {:class "py-1.5 sm:py-2 px-2 sm:px-3 mb-1.5 sm:mb-2 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
+      [:div {:class "font-medium text-sm mb-0.5 truncate"}
+       (:display_name user-info (:email user-info))]
+      [:div {:class "text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] truncate"}
+       (:email user-info)]]
 
-       ;; Menu items
-       [menu-item {:icon lucide-icons/User
-                   :on-click #(js/console.log "Profile clicked")}
-        "Profile"]
+     ;; Menu items
+     [menu-item {:icon lucide-icons/User
+                 :on-click #(js/console.log "Profile clicked")
+                 :class "py-1.5 sm:py-2 text-sm"}
+      "Profile"]
 
-       [menu-item {:icon lucide-icons/Settings
-                   :on-click #(js/console.log "Settings clicked")}
-        "Settings"]
+     [menu-item {:icon lucide-icons/Settings
+                 :on-click #(js/console.log "Settings clicked")
+                 :class "py-1.5 sm:py-2 text-sm"}
+      "Settings"]
 
-       [menu-divider]
+     [menu-divider]
 
-       [menu-item {:icon lucide-icons/LogOut
-                   :danger true
-                   :on-click on-logout}
-        "Logout"]])))
+     [menu-item {:icon lucide-icons/LogOut
+                 :danger? true
+                 :on-click on-logout
+                 :class "py-1.5 sm:py-2 text-sm"}
+      "Logout"]]))
 
-;; Action button with tooltip
-(defn action-button [{:keys [icon tooltip-text on-click aria-label shrink]}]
-  [tooltip {:content tooltip-text
-            :position :bottom
-            :variant :light
-            :trigger-class (when shrink "scale-90")}
-   [button {:variant :text
-            :size (if shrink :sm :md)
-            :class (cx "transition-all duration-300")
-            :on-click on-click
-            :aria-label aria-label}
-    [:> icon {:size (if shrink 18 20)
-              :className (cx "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
-                             "hover:text-[var(--color-primary)] dark:hover:text-[var(--color-primary-300)]"
-                             "transition-colors")}]]])
 
 ;; Main topbar component
 (defn topbar []
@@ -220,14 +244,14 @@
               ;; Right section: Actions
               [:div {:class "flex items-center space-x-2"}
 
-               ;; Search button
+               ;; Search button - visible on all screens
                [action-button
                 {:icon lucide-icons/Search
                  :tooltip-text "Search"
                  :aria-label "Search"
                  :shrink @shrink-nav}]
 
-               ;; Theme switcher component
+               ;; Theme switcher component - visible on all screens
                [:div {:class (cx "transition-all duration-300"
                                  (when @shrink-nav "scale-90"))}
                 [theme-switcher]]

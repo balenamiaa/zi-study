@@ -19,7 +19,7 @@
 
 (defn bookmark-button [{:keys [question-id bookmarked]}]
   (let [loading? (bookmark-toggle-loading? question-id)]
-    [:div {:class (str "cursor-pointer inline-flex items-center justify-center w-8 h-8 rounded-full transition-all "
+    [:div {:class (str "cursor-pointer inline-flex items-center justify-center w-8 h-8 rounded-full transition-all flex-shrink-0 "
                        (if (and bookmarked (not loading?)) ; Don't show colored bg if loading
                          "bg-[var(--color-primary-100)] dark:bg-[rgba(var(--color-primary-rgb),0.2)]"
                          "hover:bg-[var(--color-light-bg)] dark:hover:bg-[rgba(255,255,255,0.05)]"))
@@ -30,7 +30,7 @@
        [:> (if bookmarked
              lucide-icons/Bookmark
              lucide-icons/BookmarkPlus)
-        {:size 32
+        {:size 28 ; Slightly smaller icon
          :className (if bookmarked "text-[var(--color-primary)]" "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]")}])]))
 
 (defn question-number-badge [number answered? correct?]
@@ -45,7 +45,7 @@
   (when text
     [:div {:class "mt-3 px-4 py-3 rounded-md bg-[var(--color-secondary-50)] dark:bg-[rgba(var(--color-secondary-rgb),0.1)] flex items-start"}
      [:> lucide-icons/Lightbulb {:size 18 :className "text-[var(--color-secondary)] mt-0.5 mr-2 flex-shrink-0"}]
-     [:span {:class "text-sm text-[var(--color-secondary-800)] dark:text-[var(--color-secondary-200)]"} text]]))
+     [:span {:class "text-sm text-[var(--color-secondary-800)] dark:text-[var(--color-secondary-200)] flex-grow"} text]]))
 
 (defn explanation-section [{:keys [explanation show-explanation? on-toggle]}]
   (when explanation
@@ -66,15 +66,26 @@
   "Common header component for questions"
   [{:keys [index question-id text retention-aid submitted? is-correct? bookmarked clear-fn]}]
   (let [clearing (r/atom false)]
-    [:div {:class "p-5 flex items-start justify-between gap-4"}
-     [:div {:class "flex items-start flex-grow"}
-      [question-number-badge index submitted? is-correct?]
-      [:div
-       [:div {:class "font-medium text-lg mb-1"} text]
-       (when (and submitted? retention-aid)
-         [retention-hint {:text retention-aid}])]]
-     [:div {:class "flex items-center gap-2"}
-      (when submitted?
+    [:div {:class "p-4 sm:p-5"}
+     ;; Top row with question number, text, and bookmark button
+     [:div {:class "flex items-start justify-between gap-2 sm:gap-4"}
+      [:div {:class "flex items-start flex-grow min-w-0"} ; min-w-0 prevents flex children from overflowing
+       [question-number-badge index submitted? is-correct?]
+       [:div {:class "min-w-0 flex-grow"} ; min-w-0 allows text to truncate properly
+        [:div {:class "font-medium text-base sm:text-lg mb-1 break-words"} text]]]
+      
+      ;; Bookmark button - always visible
+      [:div {:class "flex-shrink-0 ml-2"}
+       [bookmark-button {:question-id question-id
+                         :bookmarked bookmarked}]]]
+     
+     ;; Middle row - retention aid (full width on mobile)
+     (when (and submitted? retention-aid)
+       [retention-hint {:text retention-aid}])
+     
+     ;; Bottom row - clear button (only when submitted)
+     (when submitted?
+       [:div {:class "flex justify-end mt-2"}
         [button {:variant :text
                  :size :sm
                  :color :error
@@ -84,6 +95,4 @@
                  :on-click (fn []
                              (reset! clearing true)
                              (clear-fn (fn [_] (reset! clearing false))))}
-         "Clear"])
-      [bookmark-button {:question-id question-id
-                        :bookmarked bookmarked}]]]))
+         "Clear"]])]))

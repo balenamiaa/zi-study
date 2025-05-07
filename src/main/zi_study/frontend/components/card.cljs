@@ -81,7 +81,7 @@
      [:div {:class "flex items-center justify-between"}
       [:div {:class "flex items-center gap-3"}
        (when icon
-         [:div {:class "text-[var(--color-primary)] dark:text-[var(--color-primary-300)] p-2 rounded-full bg-[rgba(233,30,99,0.08)] dark:bg-[rgba(233,30,99,0.15)]"}
+         [:div {:class "text-[var(--color-primary)] dark:text-[var(--color-primary-300)] p-2 rounded-full bg-[rgba(233,30,99,0.08)] dark:bg-[rgba(233,30,99,0.15)] select-none"}
           [:> icon {:size 24}]])
 
        [:div
