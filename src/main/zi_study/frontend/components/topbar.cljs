@@ -13,16 +13,12 @@
    [zi-study.frontend.utilities :refer [cx]]
    [clojure.string :as str]))
 
-
-(defonce show-mobile-menu (r/atom false))
-(defonce scroll-pos (r/atom 0))
-(defonce shrink-nav (r/atom false))
-
 ;; Define navigation links internally
 (def nav-links
   [{:name :zi-study.frontend.core/home :path "/" :label "Home" :icon lucide-icons/Home}
    {:name :zi-study.frontend.core/counter :path "/counter" :label "Counter" :icon lucide-icons/Hash}
-   {:name :zi-study.frontend.core/components :path "/components" :label "Components" :icon lucide-icons/Layers}])
+   {:name :zi-study.frontend.core/components :path "/components" :label "Components" :icon lucide-icons/Layers}
+   {:name :zi-study.frontend.core/question-sets :path "/question-sets" :label "Sets" :icon lucide-icons/Library}])
 
 ;; Animated logo component
 (defn logo []
@@ -52,7 +48,7 @@
                              "transition-colors")}]]])
 
 ;; Mobile navigation menu
-(defn mobile-menu [current-route]
+(defn mobile-menu [show-mobile-menu current-route]
   [:div
    {:class (cx "fixed inset-0 z-[100] transform transition-all duration-300"
                "bg-[var(--color-light-bg-paper)]/95 dark:bg-[rgba(38,26,37,0.98)] md:hidden"
@@ -92,12 +88,12 @@
       (let [is-active (= name current-route)]
         ^{:key (str name)}
         [:a {:href (rfe/href name)
-             :class (cx "nav-link py-3 px-6 w-48 text-center flex items-center justify-center space-x-3"
-                        "transition-all duration-300 transform"
-                        "hover:translate-y-[-2px]"
-                        (when is-active "active"))
+             :class (cx "nav-link py-2 px-4 w-36 text-center flex items-center justify-center space-x-2"
+                        "transition-all duration-300 transform rounded-full"
+                        "hover:translate-y-[-2px] hover:bg-[var(--color-light-bg-elevated)] dark:hover:bg-[var(--color-dark-bg-elevated)]"
+                        (when is-active "active bg-[var(--color-light-bg-elevated)] dark:bg-[var(--color-dark-bg-elevated)]"))
              :on-click #(reset! show-mobile-menu false)}
-         [:> icon {:size 20 :className "flex-shrink-0"}]
+         [:> icon {:size 18 :className "flex-shrink-0"}]
          [:span label]]))
 
     ;; Render the same auth buttons that appear in the topbar
@@ -184,10 +180,14 @@
 
 ;; Main topbar component
 (defn topbar []
-  (let [handle-scroll (fn []
-                        (let [current-pos (.. js/window -pageYOffset)]
-                          (reset! shrink-nav (> current-pos 50))
-                          (reset! scroll-pos current-pos)))
+  (let [show-mobile-menu (r/atom false)
+        last-scroll-y (r/atom 0)
+        topbar-visible (r/atom true)
+        handle-scroll (fn []
+                        (let [current-pos (.. js/window -pageYOffset)
+                              direction (if (< @last-scroll-y current-pos) :down :up)]
+                          (reset! topbar-visible (= direction :up))
+                          (reset! last-scroll-y current-pos)))
 
         handle-logout (fn []
                         (auth-core/remove-token)
@@ -211,49 +211,57 @@
               auth-loading? (:loading? auth-state)]
           [:div
            ;; Mobile menu overlay
-           [mobile-menu current-route]
-           ;; Main navigation header
-           [:header {:class (cx "sticky-header w-full transition-all duration-300 ease-in-out z-50"
-                                "bg-[var(--color-light-bg-paper)]/90 dark:bg-[var(--color-dark-bg-paper)]/90"
+           [mobile-menu show-mobile-menu current-route]
+           ;; Main navigation header - pill design with show/hide scroll behavior
+           [:header {:class (cx "sticky-header z-50"
+                                "bg-[var(--color-light-bg-paper)]/95 dark:bg-[var(--color-dark-bg-paper)]/95"
                                 "border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
-                                (if @shrink-nav "py-1 shadow-md" "py-3"))}
+                                "mx-auto mt-2 rounded-full shadow-md max-w-6xl py-1"
+                                "transform-gpu" ;; For smoother animations
+                                (if @topbar-visible
+                                  "opacity-100 translate-y-0"
+                                  "opacity-0 -translate-y-full pointer-events-none"))
+                     :style {:position "fixed"
+                             :top "10px"
+                             :left "50%"
+                             :transform "translateX(-50%)"
+                             :width "calc(100% - 2rem)"
+                             :transition "colors 300ms ease, opacity 200ms ease, transform 200ms ease"}}
 
-            [:div {:class "mx-auto px-4 w-full max-w-7xl"}
+            [:div {:class "mx-auto px-4 w-full"}
              [:div {:class "flex items-center justify-between"}
 
               ;; Left section: Logo and desktop navigation
               [:div {:class "flex items-center"}
                ;; Logo
                [:a {:href (rfe/href :zi-study.frontend.core/home)
-                    :class (cx "mr-8 transition-transform duration-300"
-                               (when @shrink-nav "scale-95"))}
+                    :class (cx "mr-4 transition-transform duration-300 scale-95")}
                 [logo]]
 
-               ;; Desktop navigation
+               ;; Desktop navigation - more compact design
                [:nav {:class "hidden md:flex space-x-1"}
                 (for [{:keys [name label icon]} nav-links]
                   (let [is-active (= name current-route)]
                     ^{:key (str name)}
                     [:a {:href (rfe/href name)
-                         :class (cx "nav-link py-2 px-3 rounded-md flex items-center transition-all duration-200"
+                         :class (cx "nav-link py-1.5 px-2 rounded-md flex items-center text-sm transition-all duration-200"
                                     "hover:translate-y-[-2px]"
                                     (when is-active "active"))}
-                     [:> icon {:size 18 :className "mr-1.5 flex-shrink-0"}]
+                     [:> icon {:size 16 :className "mr-1 flex-shrink-0"}]
                      label]))]]
 
               ;; Right section: Actions
-              [:div {:class "flex items-center space-x-2"}
+              [:div {:class "flex items-center space-x-1"}
 
                ;; Search button - visible on all screens
                [action-button
                 {:icon lucide-icons/Search
                  :tooltip-text "Search"
                  :aria-label "Search"
-                 :shrink @shrink-nav}]
+                 :shrink true}]
 
-               ;; Theme switcher component - visible on all screens
-               [:div {:class (cx "transition-all duration-300"
-                                 (when @shrink-nav "scale-90"))}
+
+               [:div {:class (cx "transition-all duration-300 scale-90")}
                 [theme-switcher]]
 
                ;; Authentication-based UI
@@ -266,24 +274,22 @@
                  authenticated?
                  ;; User is logged in - show user menu
                  (when current-user
-                   [:div {:class (cx "transition-all duration-300"
-                                     (when @shrink-nav "scale-95"))}
+                   [:div {:class (cx "transition-all duration-300 scale-95")}
                     [user-menu {:user-info current-user
                                 :on-logout handle-logout}]])
 
                  :else
-                 ;; User is not logged in - show login/register buttons
-                 [:div {:class (cx "flex flex-shrink-0 items-center space-x-2 transition-all duration-300"
-                                   (when @shrink-nav "scale-95"))}
+                 ;; User is not logged in - show login/register buttons with more compact design
+                 [:div {:class (cx "flex flex-shrink-0 items-center space-x-1 transition-all duration-300 scale-95")}
                   [:div {:class "hidden sm:block"}
                    [button {:variant :outlined
-                            :size :sm
+                            :size :xs
                             :start-icon lucide-icons/LogIn
                             :on-click #(rfe/push-state :zi-study.frontend.core/login)}
                     "Sign in"]]
 
                   [button {:variant :primary
-                           :size :sm
+                           :size :xs
                            :start-icon lucide-icons/UserPlus
                            :class "hidden sm:block shadow-md hover:shadow-lg transition-shadow"
                            :on-click #(rfe/push-state :zi-study.frontend.core/register)}
@@ -292,10 +298,10 @@
                ;; Mobile menu toggle
                [button {:variant :text
                         :class "ml-1 md:hidden"
-                        :size (if @shrink-nav :sm :md)
+                        :size :sm
                         :on-click #(reset! show-mobile-menu true)
                         :aria-label "Open menu"
                         :aria-expanded @show-mobile-menu}
                 [:> lucide-icons/Menu
-                 {:size (if @shrink-nav 20 24)
+                 {:size 20
                   :className "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]]]]]]]))})))

@@ -5,12 +5,12 @@
 
 (defn main-layout [props]
   (let [{:keys [children current-route]} props]
-    [:div {:class "min-h-screen transition-colors duration-300 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]"}
+    [:div {:class "min-h-screen bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]"}
      ;; Topbar
      [topbar {:current-route current-route}]
 
-     ;; Main content with animation
-     [:main {:class "mt-6 animate-fade-in"}
+     ;; Main content with animation - adjust top margin to accommodate floating pill navbar
+     [:main {:class "mt-20 pt-8 animate-fade-in"}
       [:div {:class "container mx-auto p-2"}
        children]]
 

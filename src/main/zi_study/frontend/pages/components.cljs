@@ -633,10 +633,10 @@
     [:div.container.mx-auto.px-4.py-8
      [:h1.text-3xl.font-bold.mb-6
       {:class "text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)]"}
-      "Components Showcase"]
+      "Components Demo"]
      [:p.text-lg.mb-8
       {:class "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]"}
-      "A collection of beautiful, reusable UI components for your ClojureScript application."]
+      "Components for testing purposes."]
 
      [buttons-section]
      [cards-section]
