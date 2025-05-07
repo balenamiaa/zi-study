@@ -8,7 +8,7 @@
 (defn mcq-single-option
   "A single MCQ option component"
   [{:keys [option is-selected is-correct is-actually-correct answered-globally pending-globally on-click]}]
-  [:div {:class (str "mb-3 p-4 rounded-md border-2 transition-all flex items-center "
+  [:div {:class (str "mb-3 p-3 rounded-md border-2 transition-all flex items-center "
                      (if pending-globally "cursor-wait" "cursor-pointer ")
                      (cond
                        ;; Pending state for the selected item (this specific option is being submitted)
@@ -130,7 +130,7 @@
                                       :bookmarked bookmarked
                                       :clear-fn clear-fn}]
 
-           [:div {:class "px-5 pb-5"}
+           [:div {:class "px-3 pb-3"}
             (doall
              (for [[idx option-text] (map-indexed vector options)]
                (let [;; Determine if this option is the one currently visually selected by the user OR the one pending submission

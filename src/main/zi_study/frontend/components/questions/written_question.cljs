@@ -51,10 +51,10 @@
                                       :clear-fn (fn [callback]
                                                   (http/delete-answer question-id callback))}]
 
-           [:div {:class "p-5 pt-0"}
+           [:div {:class "p-3 pt-0"}
             (if (and submitted? (not self-evaluated?))
               [:div
-               [:div {:class "mb-4 p-4 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-md"}
+               [:div {:class "mb-4 p-3 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-md"}
                 [:div {:class "font-medium mb-2"} "Your answer:"]
                 [:p (get-in user-answer [:answer-data :answer])]]
 

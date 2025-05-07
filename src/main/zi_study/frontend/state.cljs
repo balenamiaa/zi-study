@@ -54,6 +54,9 @@
                         ;; :question-id-1 {:loading? true}
                         }}}))
 
+;; Track the last applied filters to avoid redundant API calls
+(defonce last-applied-filters (r/atom nil))
+
 ;; Selectors
 (defn get-auth-state []
   (:auth @app-state))
@@ -97,6 +100,10 @@
 
 (defn get-self-eval-state [question-id]
   (r/reaction (get-in @app-state [:question-bank :self-eval question-id])))
+
+(defn get-last-applied-filters []
+  "Returns an atom containing the last set of filters that were actually applied"
+  last-applied-filters)
 
 ;; Auth state updaters
 (defn set-auth-loading [loading?]
@@ -176,7 +183,7 @@
   (swap! app-state assoc-in [:question-bank :current-set :questions-error] error)
   (swap! app-state assoc-in [:question-bank :current-set :questions-loading?] false))
 
-(defn refresh-current-set-questions 
+(defn refresh-current-set-questions
   "Trigger a reload of the current set's questions using state parameters"
   []
   ;; This is a utility function that will be implemented by the HTTP layer
@@ -185,25 +192,28 @@
   nil)
 
 (defn set-current-set [set-details questions]
-  (swap! app-state update :question-bank
-         #(assoc % :current-set {:details set-details
-                                 :questions questions
-                                 :loading? false         ; For set details
-                                 :questions-loading? false ; Questions are now loaded or explicitly empty
-                                 :questions-error nil    ; Reset questions error
-                                 :error nil              ; General error for set also reset
-                                 ;; Reset filters when loading a new set
-                                 :filters {:difficulty nil
-                                           :answered nil
-                                           :correct nil
-                                           :bookmarked nil
-                                           :search ""}})))
+  (let [new-filters {:difficulty nil
+                     :answered nil
+                     :correct nil
+                     :bookmarked nil
+                     :search ""}]
+    ;; Reset last-applied-filters when loading a new set
+    (reset! last-applied-filters new-filters)
+    (swap! app-state update :question-bank
+           #(assoc % :current-set {:details set-details
+                                   :questions questions
+                                   :loading? false
+                                   :questions-loading? false
+                                   :questions-error nil
+                                   :error nil
+                                   ;; Reset filters when loading a new set
+                                   :filters new-filters}))))
 
 (defn set-current-set-questions [questions]
   (swap! app-state update-in [:question-bank :current-set]
          #(assoc % :questions questions
-                   :questions-loading? false
-                   :questions-error nil)))
+                 :questions-loading? false
+                 :questions-error nil)))
 
 (defn update-current-question [question-id updated-question-data]
   (swap! app-state update-in [:question-bank :current-set :questions]

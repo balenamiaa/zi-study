@@ -13,12 +13,14 @@
    - disabled: true/false (default false) - disables the toggle
    - size: :sm, :md, :lg (default :md) - size of the toggle
    - color: :primary, :secondary, :success (default :primary) - color theme
-   - class: additional CSS classes for the container"
-  [{:keys [checked on-change label label-position disabled size color class]
+   - class: additional CSS classes for the container
+   - container-style: :default, :pill (default :default) - container style"
+  [{:keys [checked on-change label label-position disabled size color class container-style]
     :or {label-position :right
          disabled false
          size :md
-         color :primary}}]
+         color :primary
+         container-style :default}}]
 
   (let [trigger-change (fn [e]
                          (when (and on-change (not disabled))
@@ -33,7 +35,14 @@
                                         (= (.-key e) "Enter")))
                            (trigger-change e)))
 
-        wrapper-classes (str "inline-flex items-center gap-2 " class)
+        wrapper-classes (str
+                         (case container-style
+                           :pill (str "px-3 py-2 rounded-full border transition-all duration-200 "
+                                      (if checked
+                                        "bg-[var(--color-primary-50)] dark:bg-[rgba(233,30,99,0.1)] border-[var(--color-primary-200)] dark:border-[var(--color-primary-400)]"
+                                        "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"))
+                           :default "")
+                         " inline-flex items-center gap-2 " class)
 
         size-classes
         (case size
@@ -49,13 +58,16 @@
           :success "checked:from-success-600 checked:to-success-500 dark:checked:from-success-500 dark:checked:to-success-400"
           "checked:from-primary-600 checked:to-primary-500 dark:checked:from-primary-500 dark:checked:to-primary-400")
 
-        track-classes (str "toggle-track " color-classes " " size-classes)
+        track-classes (str "toggle-track " color-classes " " size-classes " "
+                           (when disabled "opacity-50 cursor-not-allowed"))
 
         thumb-classes (str "toggle-thumb "
                            (when disabled "opacity-50 cursor-not-allowed"))
 
-        label-classes (str "toggle-label select-none "
-                           (when disabled "opacity-50 cursor-not-allowed"))]
+        label-classes (str "toggle-label select-none text-sm "
+                           (cond 
+                             (and checked (not disabled)) "text-[var(--color-primary)] dark:text-[var(--color-primary-300)] font-medium "
+                             disabled "opacity-50 cursor-not-allowed"))]
 
     [:div {:class wrapper-classes}
      ;; Label before toggle if position is :left

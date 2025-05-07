@@ -30,11 +30,11 @@
        [:> (if bookmarked
              lucide-icons/Bookmark
              lucide-icons/BookmarkPlus)
-        {:size 20
+        {:size 32
          :className (if bookmarked "text-[var(--color-primary)]" "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]")}])]))
 
 (defn question-number-badge [number answered? correct?]
-  [:div {:class (str "w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm mr-3 "
+  [:div {:class (str "w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-medium text-sm mr-3 "
                      (cond
                        (and answered? correct?) "bg-[var(--color-success-100)] text-[var(--color-success)] dark:bg-[rgba(var(--color-success-rgb),0.2)]"
                        answered? "bg-[var(--color-error-100)] text-[var(--color-error)] dark:bg-[rgba(var(--color-error-rgb),0.2)]"

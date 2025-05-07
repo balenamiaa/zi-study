@@ -236,10 +236,10 @@
 (defn- check-answer [question-type question-data-str user-answer-data]
   (try
     (let [q-data (edn/read-string question-data-str)
-          user-answer (:answer user-answer-data)] ; Common pattern
+          user-answer (:answer user-answer-data)]
       (case (keyword question-type)
         :written nil
-        :true-false (= (:is_correct_true q-data) user-answer)
+        :true-false (let [expected-correct (:is_correct_true q-data)] (= expected-correct user-answer))
         :mcq-single (= (:correct_index q-data) user-answer)
         :mcq-multi (= (set (:correct_indices q-data)) (set user-answer))
         :cloze (let [correct-answers (:answers q-data)]
@@ -267,11 +267,11 @@
         :else
         (jdbc/with-transaction [tx @db-pool {:builder-fn rs/as-unqualified-kebab-maps}]
           (try
-            (let [question (sql/find-by-keys tx :questions {:question_id question-id})]
+            (let [question (first (sql/find-by-keys tx :questions {:question_id question-id}))]
               (if-not question
                 (not-found "Question not found.")
-                (let [q-type (:question-type question)
-                      q-data-str (:question-data question)
+                (let [q-type (:questions/question_type question)
+                      q-data-str (:questions/question_data question)
                       is-correct-bool (check-answer q-type q-data-str raw-answer-data)
                       is-correct-int (cond
                                        (nil? is-correct-bool) nil

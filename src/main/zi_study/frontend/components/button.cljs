@@ -30,7 +30,7 @@
 
         is-disabled (or disabled loading)
 
-        base-classes "relative overflow-hidden rounded-md font-medium inline-flex items-center justify-center transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
+        base-classes "relative overflow-hidden rounded-md font-medium inline-flex items-center justify-center transition-all duration-200 ease-in-out focus:outline-none "
 
         variant-classes (case variant
                           :primary "bg-[var(--color-primary)] hover:bg-[var(--color-primary-600)] active:bg-[var(--color-primary-700)] text-white focus:ring-[var(--color-primary-300)] dark:focus:ring-[var(--color-primary-400)]"
@@ -75,16 +75,16 @@
 
      ;; The actual content, always present for layout, but opacity changed when loading.
      ;; Content is not focusable or interactive if loading via disabled_classes on parent.
-     [:span {:class (str "inline-flex items-center justify-center "
+     [:span {:class (str "inline-flex gap-1 items-center justify-center w-full "
                          (if loading "opacity-0" "opacity-100"))}
       (when start-icon
-        [:div {:class "btn-icon"}
+        [:div {:class "btn-icon flex-shrink-0"}
          [:> start-icon]])
 
-      [:span (into [:span] children)]
+      [:span {:class "min-w-0"} (into [:span] children)]
 
       (when end-icon
-        [:div {:class "btn-icon"}
+        [:div {:class "btn-icon flex-shrink-0"}
          [:> end-icon]])]]))
 
 (defn button-group

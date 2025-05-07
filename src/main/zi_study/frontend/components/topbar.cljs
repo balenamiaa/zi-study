@@ -70,29 +70,23 @@
                        {:class "text-sm font-medium text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] max-w-[120px] truncate"}
                        (:email user-info)]]]
 
-    [dropdown {:trigger user-trigger
-               :placement :bottom-right
-               :width "w-48"
-               :transition :scale}
+    (r/with-let [open? (r/atom false)]
+      [dropdown {:trigger user-trigger
+                 :placement :bottom-right
+                 :width "w-48"
+                 :transition :scale
+                 :open? open?}
 
-     [menu-item {:icon lucide-icons/User
-                 :on-click #(js/console.log "Profile clicked")}
-      "Profile"]
+       [menu-item {:icon lucide-icons/User
+                   :on-click #(js/console.log "Profile clicked")}
+        "Profile"]
 
-     [menu-item {:icon lucide-icons/Settings
-                 :on-click #(js/console.log "Settings clicked")}
-      "Settings"]
+       [menu-divider]
 
-     [menu-item {:icon lucide-icons/HelpCircle
-                 :on-click #(js/console.log "Help clicked")}
-      "Help"]
-
-     [menu-divider]
-
-     [menu-item {:icon lucide-icons/LogOut
-                 :danger true
-                 :on-click on-logout}
-      "Logout"]]))
+       [menu-item {:icon lucide-icons/LogOut
+                   :danger true
+                   :on-click on-logout}
+        "Logout"]])))
 
 ;; Main topbar component
 (defn topbar []

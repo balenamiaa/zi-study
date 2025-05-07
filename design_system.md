@@ -308,6 +308,51 @@ Form inputs have special styling to handle browser autofill functionality using 
 - **Switch**: For binary on/off states
 - **Dropdown**: For selecting from a list
 
+#### Dropdown Menu
+
+Dropdowns have been redesigned for a consistent and elegant experience:
+
+##### Visual Design
+
+- **Menu Container**:
+  - Clean white background (dark: themed dark card background)
+  - Subtle border with rounded corners (8px)
+  - Elegant shadow for elevation
+  - Minimum width of 180px for readable content
+  - z-index priority to appear above other content
+
+- **Menu Items**:
+  - Consistent padding (16px horizontal, 8px vertical)
+  - Standard text size (14px/0.875rem)
+  - Smooth hover transitions (150ms)
+  - Clear visual feedback states
+
+##### Item States
+
+- **Default**: Clean text on white background
+- **Selected**: 
+  - Light pink background with deeper pink text
+  - Medium font weight for emphasis
+  - Dark mode: Semi-transparent pink background with lighter pink text
+
+- **Disabled**:
+  - Reduced opacity (50%)
+  - Cursor indication (not-allowed)
+  - Secondary text color
+
+- **Danger**:
+  - Error red text color
+  - Hover state with light red background
+  - Dark mode: Lighter red text with semi-transparent hover
+
+##### Implementation
+
+- Use the `dropdown` component with consistent width handling
+- Customize with options like `width: :match-trigger` for consistent sizing
+- Support for start and end icons in menu items
+- Optional multi-select mode with clear/apply actions
+- Fixed positioning with intelligent placement around trigger elements
+
 ## Effects and Animations
 
 ### Ripple Effect

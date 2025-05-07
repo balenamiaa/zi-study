@@ -454,43 +454,51 @@
 
    [section-subtitle "Basic Dropdown"]
    [demo-row
-    [dropdown {:trigger [button {:variant :outlined} "Open Menu"]
-               :width "w-48"}
-     [menu-item {:icon lucide-icons/Edit} "Edit"]
-     [menu-item {:icon lucide-icons/Copy} "Duplicate"]
-     [menu-item {:icon lucide-icons/Share2} "Share"]
-     [menu-divider]
-     [menu-item {:icon lucide-icons/Trash2
-                 :danger true} "Delete"]]
+    (r/with-let [open? (r/atom false)]
+      [dropdown {:trigger [button {:variant :outlined} "Open Menu"]
+                 :width "w-48"
+                 :open? open?
+                 :on-close #(reset! open? false)}
+       [menu-item {:icon lucide-icons/Edit} "Edit"]
+       [menu-item {:icon lucide-icons/Copy} "Duplicate"]
+       [menu-item {:icon lucide-icons/Share2} "Share"]
+       [menu-divider]
+       [menu-item {:icon lucide-icons/Trash2
+                   :danger true} "Delete"]])
 
-    [dropdown {:trigger [button {:variant :outlined} "Placement Top"]
-               :placement :top-left
-               :width "w-48"
-               :class "ml-4"}
-     [menu-item {:icon lucide-icons/Edit} "Edit"]
-     [menu-item {:icon lucide-icons/Copy} "Duplicate"]
-     [menu-item {:icon lucide-icons/Share2} "Share"]]]
+    (r/with-let [open? (r/atom false)]
+      [dropdown {:trigger [button {:variant :outlined} "Placement Top"]
+                 :placement :top-left
+                 :width "w-48"
+                 :open? open?
+                 :on-close #(reset! open? false)}
+       [menu-item {:icon lucide-icons/Edit} "Edit"]
+       [menu-item {:icon lucide-icons/Copy} "Duplicate"]
+       [menu-item {:icon lucide-icons/Share2} "Share"]])]
 
    [section-subtitle "Dropdown with Groups"]
-   [dropdown {:trigger [button "Advanced Menu"]
-              :width "w-56"}
+   (r/with-let [open? (r/atom false)]
+     [dropdown {:trigger [button "Advanced Menu"]
+                :width "w-56"
+                :open? open?
+                :on-close #(reset! open? false)}
 
-    [menu-label {} "Actions"]
-    [menu-item {:icon lucide-icons/Edit} "Edit"]
-    [menu-item {:icon lucide-icons/Copy} "Duplicate"]
-    [menu-item {:icon lucide-icons/Share2} "Share"]
+      [menu-label {} "Actions"]
+      [menu-item {:icon lucide-icons/Edit} "Edit"]
+      [menu-item {:icon lucide-icons/Copy} "Duplicate"]
+      [menu-item {:icon lucide-icons/Share2} "Share"]
 
-    [menu-divider]
+      [menu-divider]
 
-    [menu-label {} "Export"]
-    [menu-item {:icon lucide-icons/FileText} "As PDF"]
-    [menu-item {:icon lucide-icons/Table} "As Excel"]
-    [menu-item {:icon lucide-icons/Image} "As Image"]
+      [menu-label {} "Export"]
+      [menu-item {:icon lucide-icons/FileText} "As PDF"]
+      [menu-item {:icon lucide-icons/Table} "As Excel"]
+      [menu-item {:icon lucide-icons/Image} "As Image"]
 
-    [menu-divider]
+      [menu-divider]
 
-    [menu-item {:icon lucide-icons/Trash2
-                :danger true} "Delete Project"]]])
+      [menu-item {:icon lucide-icons/Trash2
+                  :danger true} "Delete Project"]])])
 
 (defn skeletons-section []
   [:div
