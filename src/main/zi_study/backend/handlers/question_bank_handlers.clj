@@ -98,8 +98,7 @@
                                      [:qs.title :title]
                                      [:qs.description :description]
                                      [:qs.created_at :created_at]
-                                     [[:raw "GROUP_CONCAT(DISTINCT t.tag_name)"] :tags]
-                                     [[:count :q.question_id] :total_questions]
+                                     [[:raw "COUNT(DISTINCT q.question_id)"] :total_questions]
                                      [[:coalesce [:sum [:case [:<> :ua.answer_id nil] 1 :else 0]] 0] :answered_count]
                                      [[:coalesce [:sum [:case [:= :ua.is_correct 1] 1 :else 0]] 0] :correct_count])
                           (hh/from [:question_sets :qs])
@@ -135,17 +134,23 @@
             total-pages (if (pos? total-items) (int (Math/ceil (/ (double total-items) limit))) 0)
             sets-raw (execute! query-map)
 
+            sets-with-tags (mapv (fn [s]
+                                   (let [set-id (:set-id s)
+                                         tags-query ["SELECT t.tag_name FROM tags t JOIN question_set_tags qst ON t.tag_id = qst.tag_id WHERE qst.set_id = ? ORDER BY t.tag_name" set-id]
+                                         tags (mapv :tag-name (query tags-query))]
+                                     (assoc s :tags tags)))
+                                 sets-raw)
+
             sets (mapv (fn [s]
                          (let [total (:total-questions s 0)
                                answered (:answered-count s 0)
                                correct (:correct-count s 0)]
-                           (-> (assoc s :tags (if-let [tags-str (:tags s)] (str/split tags-str #",") []))
-                               (assoc :progress {:total total
-                                                 :answered answered
-                                                 :correct correct
-                                                 :answered_percent (if (pos? total) (double (/ answered total)) 0.0)
-                                                 :correct_percent (if (pos? answered) (double (/ correct answered)) 0.0)}))))
-                       sets-raw)]
+                           (assoc s :progress {:total total
+                                               :answered answered
+                                               :correct correct
+                                               :answered_percent (if (pos? total) (double (/ answered total)) 0.0)
+                                               :correct_percent (if (pos? answered) (double (/ correct answered)) 0.0)})))
+                       sets-with-tags)]
 
         (resp/response {:sets sets
                         :pagination {:page page

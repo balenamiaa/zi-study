@@ -10,7 +10,6 @@
    [zi-study.frontend.components.card :refer [card card-content card-footer
                                               card-header]]
    [zi-study.frontend.components.input :refer [text-input]]
-   [zi-study.frontend.state :as state]
    [zi-study.frontend.utilities.auth :as auth]
    [zi-study.frontend.utilities.validation :as validation]))
 
@@ -277,10 +276,4 @@
                      :start-icon lucide-icons/LogIn
                      :disabled @loading
                      :on-click #(rfe/push-state :zi-study.frontend.core/login)}
-             "Sign in"]]]]
-
-         [:div {:class "mt-6 text-center text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-          [:span "By registering, you agree to our "]
-          [:a {:class "hover:underline text-[var(--color-primary)]" :href "#"} "Terms of Service"]
-          [:span " and "]
-          [:a {:class "hover:underline text-[var(--color-primary)]" :href "#"} "Privacy Policy"]]]))))
+             "Sign in"]]]]]))))

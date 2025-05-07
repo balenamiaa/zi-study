@@ -132,6 +132,4 @@
 
        ;; Optional: Additional help links
        [:div {:class "mt-6 text-center text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-        [:a {:class "hover:underline" :href "#"} "Forgot password?"]
-        [:span {:class "mx-2"} "•"]
-        [:a {:class "hover:underline" :href "#"} "Need help?"]]])))
+        [:a {:class "hover:underline" :href "#" :on-click #(js/alert "Maybe you shouldn't be this dumb.")} "Forgot password?"]]])))

@@ -35,6 +35,8 @@
     /* Light Theme Colors - Updated with pink tints */
     --color-light-bg: #FDF7F9;
     --color-light-bg-paper: #F8EEF2;
+    --color-light-bg-hover: #F1E6EB;
+    --color-light-bg-selected: #E8DCE3;
     --color-light-card: #FFFFFF;
     --color-light-text-primary: #212121;
     --color-light-text-secondary: #757575;
@@ -45,6 +47,8 @@
     /* Dark with subtle pink tint */
     --color-dark-bg-paper: #261A25;
     /* Slightly lighter dark pink */
+    --color-dark-bg-hover: #2E222D;
+    --color-dark-bg-selected: #372A36;
     --color-dark-card: #2E1F2D;
     /* Card background with pink tint */
     --color-dark-text-primary: #FFFFFF;
@@ -112,6 +116,19 @@
     --color-info-800: #1565C0;
     --color-info-900: #0D47A1;
     --color-info-rgb: 25, 118, 210;
+
+    /* Alpha Colors for Overlays and Backgrounds */
+    --color-primary-alpha-15: rgba(233, 30, 99, 0.15);
+    --color-primary-alpha-10: rgba(233, 30, 99, 0.1);
+    --color-primary-alpha-20: rgba(233, 30, 99, 0.2);
+    --color-success-alpha-15: rgba(76, 175, 80, 0.15);
+    --color-success-alpha-10: rgba(76, 175, 80, 0.1);
+    --color-error-alpha-15: rgba(244, 67, 54, 0.15);
+    --color-error-alpha-10: rgba(244, 67, 54, 0.1);
+    --color-warning-alpha-15: rgba(255, 152, 0, 0.15);
+    --color-warning-alpha-10: rgba(255, 152, 0, 0.1);
+    --color-info-alpha-15: rgba(33, 150, 243, 0.15);
+    --color-info-alpha-10: rgba(33, 150, 243, 0.1);
 
     /* Elevation Shadows */
     --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -264,7 +281,9 @@
         @apply hover:bg-primary-50 hover:border-primary-600 hover:text-primary-700;
         @apply focus:ring-primary-300;
         @apply dark:border-primary-300 dark:text-primary-300;
-        @apply dark:hover:bg-primary-900/20 dark:hover:border-primary-200 dark:hover:text-primary-200;
+        @apply dark:hover:border-primary-200 dark:hover:text-primary-200;
+        @apply dark:hover:bg-[#331A2A];
+        /* Dark pink background with opacity */
         border-bottom-width: 4px;
     }
 
@@ -277,7 +296,8 @@
         @apply text-primary hover:bg-primary-50;
         @apply focus:ring-primary-300;
         @apply dark:text-primary-300;
-        @apply dark:hover:bg-primary-900/20;
+        @apply dark:hover:bg-[#331A2A];
+        /* Dark pink background with opacity */
     }
 
     .ripple {
@@ -321,52 +341,43 @@
 
     /* Card Styles */
     .card {
-        @apply rounded-xl overflow-hidden transition-all duration-300 ease-in-out;
+        @apply rounded-lg overflow-hidden transition-all duration-300 ease-in-out;
         background-color: var(--color-light-card);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        border: 2px solid rgba(233, 30, 99, 0.15);
-        border-bottom-width: 4px;
+        box-shadow: var(--shadow-3);
+        border: 2px solid var(--color-light-divider);
         @apply dark:bg-dark-card;
-        @apply dark:border-primary-800;
-        @apply dark:border-b-primary-700;
+        @apply dark:border-dark-divider;
         font-size: 1.05rem;
         line-height: 1.6;
     }
 
     .card:hover {
-        box-shadow: 0 10px 15px -3px rgba(233, 30, 99, 0.1), 0 4px 6px -2px rgba(233, 30, 99, 0.05);
-        border-color: rgba(233, 30, 99, 0.3);
-        border-bottom-color: var(--color-primary-400);
-        @apply dark:border-primary-600;
-        @apply dark:border-b-primary-500;
+        box-shadow: var(--shadow-4);
+        border-color: var(--color-primary-300);
+        @apply dark:border-primary-400;
     }
 
     .card-header {
-        @apply px-8 py-6 border-b-2 relative;
-        border-color: rgba(233, 30, 99, 0.15);
-        background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(249, 228, 236, 0.5));
+        @apply px-6 py-4 border-b bg-gradient-to-r from-[var(--color-light-card)] to-[#F9E4EC];
+        border-color: var(--color-light-divider);
         @apply dark:border-dark-divider;
-        @apply dark:bg-gradient-to-r dark:from-dark-card/90 dark:to-primary-900/10;
+        @apply dark:bg-gradient-to-r dark:from-dark-card/90 dark:to-[#3A1F38];
     }
 
     .card-header h3 {
-        @apply text-2xl font-semibold tracking-tight;
-        background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-500));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        @apply dark:from-primary-300 dark:to-primary-200;
+        @apply text-xl font-medium tracking-tight;
+        color: var(--color-light-text-primary);
+        @apply dark:text-dark-text-primary;
     }
 
     .card-body {
-        @apply px-8 py-6;
+        @apply px-6 py-5;
     }
 
     .card-footer {
-        @apply px-8 py-6 border-t mt-auto;
+        @apply px-6 py-4 border-t;
         border-color: var(--color-light-divider);
-        background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(249, 228, 236, 0.3));
         @apply dark:border-dark-divider;
-        @apply dark:bg-gradient-to-r dark:from-dark-card/90 dark:to-primary-900/5;
     }
 
 
@@ -403,8 +414,6 @@
         @apply dark:text-dark-text-primary;
         box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.15);
     }
-
-
 
     [dark] .input:focus {
         box-shadow: 0 0 0 2px var(--color-primary-50);
@@ -448,12 +457,14 @@
 
     [dark] .nav-link:hover {
         color: var(--color-primary-300);
-        background-color: rgba(233, 30, 99, 0.12);
+        background-color: #331A2A;
+        /* Dark pink background with opacity */
     }
 
     [dark] .nav-link.active {
         color: var(--color-primary-300);
-        background-color: rgba(233, 30, 99, 0.2);
+        background-color: #3D1F34;
+        /* Darker pink background with opacity */
     }
 
     [dark] .nav-link.active::after {
@@ -522,7 +533,7 @@
         background-color: rgba(255, 255, 255, 0.05);
     }
 
-    /* Topbar Animation Classes */
+    /* Animation Classes */
     .animate-slide-down {
         animation: slideDown 0.5s ease-out forwards;
     }
@@ -597,7 +608,8 @@
     }
 
     [dark] .ripple {
-        background-color: rgba(233, 30, 99, 0.2);
+        background-color: #F06292;
+        /* Primary-300 with low opacity */
     }
 
     /* Toggle Styles - Updated */
@@ -662,25 +674,25 @@
     .alert-info.soft {
         @apply bg-blue-50 text-blue-700;
         border-left: 4px solid var(--color-info);
-        @apply dark:bg-blue-900/20 dark:text-blue-200;
+        @apply dark:bg-[#172B4D] dark:text-blue-200;
     }
 
     .alert-error.soft {
         @apply bg-red-50 text-red-700;
         border-left: 4px solid var(--color-error);
-        @apply dark:bg-red-900/20 dark:text-red-200;
+        @apply dark:bg-[#4A1C1C] dark:text-red-200;
     }
 
     .alert-success.soft {
         @apply bg-green-50 text-green-700;
         border-left: 4px solid var(--color-success);
-        @apply dark:bg-green-900/20 dark:text-green-200;
+        @apply dark:bg-[#1A3820] dark:text-green-200;
     }
 
     .alert-warning.soft {
         @apply bg-orange-50 text-orange-700;
         border-left: 4px solid var(--color-warning);
-        @apply dark:bg-orange-900/20 dark:text-orange-200;
+        @apply dark:bg-[#4A3014] dark:text-orange-200;
     }
 
     /* Radio and Checkbox Styles - Updated */
@@ -754,7 +766,7 @@
 
     .dropdown-item.selected {
         @apply bg-primary-50 text-primary-700;
-        @apply dark:bg-[rgba(233,30,99,0.15)] dark:text-primary-300;
+        @apply dark:bg-[#331A2A] dark:text-primary-300;
         @apply font-medium;
     }
 
@@ -766,7 +778,7 @@
     .dropdown-item.danger {
         @apply text-error;
         @apply hover:bg-error-50;
-        @apply dark:text-error-300 dark:hover:bg-[rgba(244,67,54,0.15)];
+        @apply dark:text-error-300 dark:hover:bg-[#3C1818];
     }
 }
 
@@ -820,4 +832,70 @@
 
 [dark]::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Animation Utilities */
+.animate-in {
+    animation-duration: 0.2s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-fill-mode: both;
+}
+
+.fade-in {
+    animation-name: fadeIn;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.zoom-in-90 {
+    animation-name: zoomIn90;
+}
+
+@keyframes zoomIn90 {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.scale-95 {
+    transform: scale(0.95);
+}
+
+.scale-100 {
+    transform: scale(1);
+}
+
+/* Elevation Shadows */
+.shadow-1 {
+    box-shadow: var(--shadow-1);
+}
+
+.shadow-2 {
+    box-shadow: var(--shadow-2);
+}
+
+.shadow-3 {
+    box-shadow: var(--shadow-3);
+}
+
+.shadow-4 {
+    box-shadow: var(--shadow-4);
+}
+
+.shadow-5 {
+    box-shadow: var(--shadow-5);
 }

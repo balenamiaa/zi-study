@@ -211,9 +211,9 @@
 
         used-icon (or icon default-icon)
 
-        all-classes (cx base-classes 
-                        variant-colors 
-                        (when-not @visible "opacity-0 scale-95") 
+        all-classes (cx base-classes
+                        variant-colors
+                        (when-not @visible "opacity-0 scale-95")
                         class)
 
         handle-hide (fn [_]

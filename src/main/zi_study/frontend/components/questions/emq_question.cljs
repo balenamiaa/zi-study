@@ -13,19 +13,23 @@
 (defn- premise-item
   "Renders a single premise item with a dropdown for selecting an option"
   [{:keys [premise options selected-option-idx disabled? pending? on-selection-change is-submitted? is-correct? actual-correct-option-idx]}]
-  [:div {:class (cx "mb-3 transition-all rounded-md p-3"
+  [:div {:class (cx "mb-3 transition-all rounded-lg p-3 border"
                     (cond
-                      pending? "bg-[var(--color-primary-50)] dark:bg-[rgba(233,30,99,0.1)] border border-[var(--color-primary-200)] dark:border-[rgba(233,30,99,0.2)]"
-                      (and is-submitted? is-correct?) "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] border border-[var(--color-success-200)] dark:border-[rgba(76,175,80,0.2)]"
-                      (and is-submitted? (not is-correct?)) "bg-[var(--color-error-50)] dark:bg-[rgba(244,67,54,0.1)] border border-[var(--color-error-200)] dark:border-[rgba(244,67,54,0.2)]"
-                      :else "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] dark:bg-[var(--color-dark-bg-paper)]")
+                      pending? "bg-[var(--color-primary-50)] dark:bg-[rgba(233,30,99,0.1)] border-[var(--color-primary-200)] dark:border-[var(--color-primary-700)]"
+                      (and is-submitted? is-correct?) "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] border-[var(--color-success-200)] dark:border-[var(--color-success-700)]"
+                      (and is-submitted? (not is-correct?)) "bg-[var(--color-error-50)] dark:bg-[rgba(244,67,54,0.1)] border-[var(--color-error-200)] dark:border-[var(--color-error-700)]"
+                      :else "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] dark:bg-[var(--color-dark-bg-paper)] hover:border-[var(--color-primary-300)] dark:hover:border-[var(--color-primary-500)]")
                     "transform transition-all duration-300 hover:shadow-sm")}
 
    ;; Responsive layout for premise and dropdown
    [:div {:class "flex flex-col md:flex-row md:items-center gap-3 items-center"}
     ;; Premise text with letter labeling (A, B, C, etc.)
     [:div {:class "flex items-start md:w-1/2"}
-     [badge {:size :md :class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] h-[38px] py-2 px-4 text-left flex items-center justify-center font-bold"} premise]]
+     [badge {:size :md 
+             :class (cx "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]" 
+                        "h-[38px] py-2 px-4 text-left flex items-center justify-center font-bold"
+                        "bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]")}
+      premise]]
 
     ;; Dropdown selector for options
     [:div {:class "flex-grow md:w-1/2"}
@@ -38,7 +42,8 @@
                                (if (and is-submitted? (not is-correct?))
                                  :error
                                  :outlined))
-                    :class "w-full justify-between text-left"
+                    :class (cx "w-full justify-between text-left"
+                               "border-2 shadow-sm hover:shadow transition-all")
                     :disabled disabled?
                     :end-icon (cond
                                 pending? lucide-icons/Loader2
@@ -53,14 +58,16 @@
                   :open? open?
                   :width "w-full"
                   :transition :scale
-                  :class "max-h-60 shadow-lg"}
+                  :class (cx "max-h-60 shadow-lg" 
+                             "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)]")}
 
         (for [[option-idx option-text] (map-indexed vector options)]
           ^{:key (str "option-" option-idx)}
           [menu-item {:on-click #(when-not disabled?
                                    (on-selection-change option-idx)
                                    (reset! open? false))
-                      :class (when (= option-idx actual-correct-option-idx) "font-medium")
+                      :class (cx (when (= option-idx actual-correct-option-idx) "font-medium")
+                                 "hover:bg-[var(--color-primary-50)] dark:hover:bg-[rgba(233,30,99,0.15)]")
                       :end-icon (when (and is-submitted? (= option-idx actual-correct-option-idx)) lucide-icons/Check)}
            option-text])])]]
 
@@ -70,7 +77,8 @@
               (some? actual-correct-option-idx))
      [:div {:class (cx "mt-2 text-sm flex items-center rounded-md p-2"
                        "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)]"
-                       "text-[var(--color-success-700)] dark:text-[var(--color-success-300)]")}
+                       "text-[var(--color-success-700)] dark:text-[var(--color-success-300)]"
+                       "border border-[var(--color-success-200)] dark:border-[var(--color-success-700)]")}
       [:> lucide-icons/AlertCircle {:size 16 :className "mr-2 flex-shrink-0"}]
       [:span "Correct answer: "]
       [:span {:class "font-medium ml-1"} (get options actual-correct-option-idx)]])])
@@ -159,7 +167,7 @@
                                      (* 100 (/ correct-count total-count))
                                      0))]
 
-          [card {:class "mb-8 overflow-hidden" :variant :outlined}
+          [card {:class "mb-8 overflow-hidden border-2 hover:shadow-md transition-all duration-300" :variant :outlined}
            ;; Common question header with number, text, and bookmark
            [q-common/question-header {:index (inc index)
                                       :question-id question-id
@@ -174,14 +182,19 @@
                                       :clear-fn clear-answers}]
 
            ;; Main content area with the premises and dropdowns
-           [:div {:class "p-3"}
+           [:div {:class "p-4"}
 
             ;; Progress indicator (when submitted)
             (when is-submitted?
-              [:div {:class "mb-4 px-2"}
+              [:div {:class "mb-6 px-3 py-2 rounded-lg bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
                [:div {:class "flex justify-between text-sm mb-1"}
                 [:span {:class "font-medium"} "Your Score"]
-                [:span {:class "font-medium"} (str correct-count "/" total-count " (" (Math/round percentage-correct) "%)")]]
+                [:span {:class (cx "font-medium"
+                                  (cond
+                                    (>= percentage-correct 80) "text-[var(--color-success)]"
+                                    (>= percentage-correct 50) "text-[var(--color-warning)]"
+                                    :else "text-[var(--color-error)]"))} 
+                 (str correct-count "/" total-count " (" (Math/round percentage-correct) "%)")]]
                [:div {:class "h-2 w-full bg-[var(--color-light-bg-subtle)] dark:bg-[var(--color-dark-bg-subtle)] rounded-full overflow-hidden"}
                 [:div {:class (cx "h-full transition-all duration-1000 ease-out"
                                   (cond
@@ -211,12 +224,13 @@
 
             ;; Submit button (only shown if not already submitted)
             (when (and (not is-submitted?) (not pending?))
-              [:div {:class "mt-4 flex justify-end"}
+              [:div {:class "mt-6 flex justify-end"}
                [button
                 {:variant :primary
                  :disabled (not all-premises-selected?)
                  :loading pending?
-                 :on-click submit-answers}
+                 :on-click submit-answers
+                 :class "px-6 py-2 shadow-md hover:shadow-lg transition-all"}
                 "Submit Answers"]])]
 
            ;; Explanation section (only shown after submission)

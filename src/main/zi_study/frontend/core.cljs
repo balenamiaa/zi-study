@@ -3,8 +3,6 @@
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
             [reitit.coercion.spec :as rss]
-            [goog.object :as gobj]
-            [clojure.string :as str]
             [zi-study.frontend.pages.home :refer [home-page]]
             [zi-study.frontend.pages.counter :refer [counter-page]]
             [zi-study.frontend.pages.items :refer [demo-item-page]]

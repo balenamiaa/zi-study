@@ -55,36 +55,37 @@
 
 ;; --- Question Set Card Component ---
 (defn question-set-card [{:keys [set-id title description created-at total-questions tags]}]
-  [card {:hover-effect true
-         :class "h-full animate-fade-in-up transition-all duration-300 transform hover:scale-[1.02]"
-         :on-click #(rfe/push-state :zi-study.frontend.core/set-page {:set-id set-id})}
-   [:div {:class "p-6"}
-    [:div {:class "flex items-start justify-between gap-4 mb-4"}
-     [:div
-      [:h3 {:class "text-lg font-semibold text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)] mb-2"}
-       title]
-      [:p {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] line-clamp-2"}
-       description]]
-     [:div {:class "flex-shrink-0 bg-[var(--color-primary-50)] dark:bg-[rgba(var(--color-primary-rgb),0.1)] rounded-lg p-3"}
-      [:div {:class "text-center"}
-       [:div {:class "text-xl font-bold text-[var(--color-primary)]"} total-questions]
-       [:div {:class "text-xs text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Questions"]]]]
+  (let [selected-tags (:tags @(state/get-sets-filters))]
+    [card {:hover-effect true
+           :class "h-full animate-fade-in-up transition-all duration-300 transform hover:scale-[1.02]"
+           :on-click #(rfe/push-state :zi-study.frontend.core/set-page {:set-id set-id})}
+     [:div {:class "p-6"}
+      [:div {:class "flex items-start justify-between gap-4 mb-4"}
+       [:div
+        [:h3 {:class "text-lg font-semibold text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)] mb-2"}
+         title]
+        [:p {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] line-clamp-2"}
+         description]]
+       [:div {:class "flex-shrink-0 bg-[var(--color-primary-50)] dark:bg-[rgba(var(--color-primary-rgb),0.1)] rounded-lg p-3"}
+        [:div {:class "text-center"}
+         [:div {:class "text-xl font-bold text-[var(--color-primary)]"} total-questions]
+         [:div {:class "text-xs text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Questions"]]]]
 
-    [:div {:class "space-y-4"}
-     [:div {:class "flex flex-wrap gap-1"}
-      (map-indexed
-       (fn [idx tag]
-         ^{:key idx}
-         [badge {:variant :soft
-                 :size :sm
-                 :color :secondary}
-          tag])
-       tags)]
+      [:div {:class "space-y-4"}
+       [:div {:class "flex flex-wrap gap-1"}
+        (map-indexed
+         (fn [idx tag]
+           ^{:key idx}
+           [badge {:variant (if (contains? selected-tags tag) :solid :soft)
+                   :size :sm
+                   :color (if (contains? selected-tags tag) :secondary :default)}
+            tag])
+         tags)]
 
-     [:div {:class "flex items-center justify-between text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-      [:div {:class "flex items-center gap-1"}
-       [:> lucide-icons/Calendar {:size 14}]
-       (format-date created-at)]]]]])
+       [:div {:class "flex items-center justify-between text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+        [:div {:class "flex items-center gap-1"}
+         [:> lucide-icons/Calendar {:size 14}]
+         (format-date created-at)]]]]]))
 
 ;; --- Skeleton for Question Set Card ---
 (defn question-set-card-skeleton []
@@ -175,7 +176,9 @@
            (when (and (not sets-loading?) (pos? (get-in sets-state [:pagination :total_items] 0)))
              [badge
               {:color :primary
-               :variant :soft}
+               :variant :outlined
+               :size :lg
+               :class "text-xl p-3"}
               (str (get-in sets-state [:pagination :total_items]) " sets")])]
 
           ;; Search and filters section

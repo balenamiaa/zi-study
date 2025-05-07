@@ -24,7 +24,7 @@
            dot     false}}
    & children]
 
-  (let [base-classes "inline-flex items-center justify-center transition-all duration-200 ease-in-out"
+  (let [base-classes "inline-flex items-center justify-center align-middle transition-all duration-200 ease-in-out leading-none"
 
         color-classes
         (case [color variant]
@@ -50,10 +50,11 @@
             :md "w-2.5 h-2.5"
             "w-2 h-2")
           (case size
-            :xs "text-[0.65rem] px-1 min-w-[18px] h-[18px]"
-            :sm "text-xs px-1.5 min-w-[20px] h-[20px]"
-            :md "text-sm px-2 min-w-[24px] h-[24px]"
-            "text-xs px-1.5 min-w-[20px] h-[20px]"))
+            :xs "text-[0.65rem] px-1 min-w-[18px] h-[18px] flex items-center"
+            :sm "text-xs px-1.5 min-w-[20px] h-[20px] flex items-center"
+            :md "text-sm px-2 min-w-[24px] h-[24px] flex items-center"
+            :lg "text-base px-3 min-w-[28px] h-[28px] flex items-center"
+            "text-xs px-1.5 min-w-[20px] h-[20px] flex items-center"))
 
         rounded-classes (if (or rounded dot) "rounded-full" "rounded")
 

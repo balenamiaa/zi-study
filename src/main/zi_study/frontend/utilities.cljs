@@ -57,4 +57,3 @@
     (tw/twMerge (apply clsx (remove nil? (map process-arg args))))))
 
 
-(prn (cx "btn" {:primary true :disabled false} "text-red-500" "text-blue-500"))

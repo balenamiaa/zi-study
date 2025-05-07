@@ -1,7 +1,6 @@
 (ns zi-study.backend.db
   (:require [migratus.core :as migratus]
-            [clojure.java.io :as io]
-            [clojure.string :as str])
+            [clojure.java.io :as io])
   (:import [java.sql SQLException]
            [com.zaxxer.hikari HikariDataSource HikariConfig]))
 
@@ -12,15 +11,6 @@
    :migration-dir        "migrations/"
    :migration-table-name "schema_migrations"
    :db                   {:datasource @db-pool}})
-
-(defn- map-keys->camel [m]
-  "Converts map keys from kebab-case to camelCase strings for Java interop."
-  (reduce-kv
-   (fn [acc k v]
-     (let [new-k (str/replace (name k) #"-(\w)" #(str/upper-case (second %)))]
-       (assoc acc new-k v)))
-   {}
-   m))
 
 (defn- hikari-config [db-path]
   (let [config-map {; Clojure style keys

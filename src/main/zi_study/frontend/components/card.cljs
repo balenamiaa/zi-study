@@ -1,24 +1,20 @@
 (ns zi-study.frontend.components.card
   (:require
-   [reagent.core :as r]
-   ["lucide-react" :as lucide-icons]
    [zi-study.frontend.utilities :refer [cx]]))
 
 (defn card
   "A card component for displaying content in a contained, styled container.
    
    Options:
-   - variant: :outlined, :elevated (default :elevated)
-   - elevation: 1-5 (default 1) - shadow intensity for elevated cards
+   - elevation: 1-5 (default 3) - shadow intensity for the card
    - hover-effect: true/false (default false) - adds hover animation
    - full-width: true/false (default false) - makes the card take full width
    - on-click: function - click handler for the card
    - class: additional CSS classes
    
    Any additional props will be passed to the underlying div"
-  [{:keys [variant elevation hover-effect full-width class]
-    :or {variant :elevated
-         elevation 1
+  [{:keys [elevation hover-effect full-width class]
+    :or {elevation 3
          hover-effect false
          full-width false}
     :as props}
@@ -26,33 +22,30 @@
 
   (let [base-classes "rounded-lg overflow-hidden transition-all duration-300 ease-in-out dark:text-[var(--color-dark-text-primary)]"
 
-        variant-classes
-        (case variant
-          :outlined "border-2 border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)]"
-          :elevated
-          (case elevation
-            1 "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] shadow-sm border border-[#F8D0E0]"
-            2 "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] shadow border border-[#F8D0E0]"
-            3 "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] shadow-md border border-[#F8D0E0]"
-            4 "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] shadow-lg"
-            5 "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] shadow-xl"
-            "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] shadow border border-[#F8D0E0]")
-          "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] shadow-sm border border-[#F8D0E0]")
+        shadow-class
+        (case elevation
+          1 "shadow-1" 
+          2 "shadow-2"
+          3 "shadow-3"
+          4 "shadow-4"
+          5 "shadow-5"
+          "shadow-3")
+        
+        card-classes (str "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] " 
+                          shadow-class 
+                          " border-2 border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]")
 
         hover-classes
         (when hover-effect
-          (case variant
-            :outlined "hover:border-[var(--color-primary)] dark:hover:border-[var(--color-primary-300)]"
-            :elevated "hover:shadow-lg hover:-translate-y-1"
-            ""))
+          "hover:border-[var(--color-primary)] dark:hover:border-[var(--color-primary-300)] hover:shadow-4 hover:-translate-y-1")
 
         cursor-class (when (:on-click props) "cursor-pointer")
         width-classes (if full-width "w-full" "")
-        all-classes (cx base-classes variant-classes hover-classes width-classes cursor-class class)
+        all-classes (cx base-classes card-classes hover-classes width-classes cursor-class class)
 
         ;; Remove props we've already handled to avoid React warnings
         div-props (-> props
-                      (dissoc :variant :elevation :hover-effect :full-width :class)
+                      (dissoc :elevation :hover-effect :full-width :class)
                       (assoc :class all-classes))]
 
     (into [:div div-props] children)))
@@ -160,9 +153,9 @@
 
   [:div
    {:class (cx "overflow-hidden"
-              (when top "rounded-t-lg")
-              (when bottom "rounded-b-lg")
-              class)}
+               (when top "rounded-t-lg")
+               (when bottom "rounded-b-lg")
+               class)}
    [:img
     {:class (cx "w-full object-cover" height)
      :src src

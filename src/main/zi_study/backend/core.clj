@@ -21,6 +21,12 @@
             [zi-study.backend.uploads :as uploads]
             [zi-study.backend.handlers.question-bank-handlers :as qb]))
 
+
+(require '[next.jdbc])
+
+
+(next.jdbc/execute! (next.jdbc/prepare (.getConnection @db/db-pool) [(str "SELECT * FROM " "question_sets")]))
+
 (defn index-handler [_]
   (let [response (resp/file-response "index.html" {:root "public"})]
     (-> response

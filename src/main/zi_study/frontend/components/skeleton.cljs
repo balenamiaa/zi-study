@@ -1,5 +1,6 @@
 (ns zi-study.frontend.components.skeleton
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [zi-study.frontend.utilities :refer [cx]]))
 
 (defn skeleton
   "A skeleton loading component with multiple variants.
@@ -21,11 +22,11 @@
                           nil)
 
         variant-classes (case variant
-                          :text "h-4 rounded"
-                          :circular "rounded-full"
-                          :avatar "rounded-full"
-                          :card "rounded-xl"
-                          :rectangular "rounded-md")
+                          :text "h-4 rounded-md overflow-hidden"
+                          :circular "rounded-full overflow-hidden"
+                          :avatar "rounded-full overflow-hidden border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
+                          :card "rounded-xl overflow-hidden border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] shadow-sm"
+                          :rectangular "rounded-md overflow-hidden")
 
         default-height (case variant
                          :text "1rem"
@@ -41,7 +42,7 @@
                         :card "100%"
                         :rectangular "100%")]
 
-    [:div {:class (str base-classes " " variant-classes " " animation-class " " class)
+    [:div {:class (cx base-classes variant-classes animation-class class)
            :style {:width (or width default-width)
                    :height (or height default-height)}}]))
 
@@ -84,7 +85,9 @@
          footer true
          animation :pulse}}]
 
-  [:div {:class (str "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] rounded-xl overflow-hidden " class)}
+  [:div {:class (cx "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)] rounded-xl overflow-hidden shadow-sm"
+                    "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
+                    class)}
 
    ;; Media
    (when media
@@ -94,7 +97,7 @@
 
    ;; Header
    (when header
-     [:div {:class "px-6 py-4"}
+     [:div {:class "px-6 py-4 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
       [skeleton {:variant :text
                  :width "60%"
                  :height "1.5rem"
@@ -106,21 +109,23 @@
                  :animation animation}]])
 
    ;; Content
-   [:div {:class "px-6 py-3"}
+   [:div {:class "px-6 py-4"}
     [skeleton-text {:rows content-rows
                     :animation animation}]]
 
    ;; Footer
    (when footer
-     [:div {:class "px-6 py-4 flex gap-2"}
+     [:div {:class "px-6 py-4 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] flex gap-3 justify-end"}
       [skeleton {:variant :rectangular
                  :width "5rem"
                  :height "2rem"
-                 :animation animation}]
+                 :animation animation
+                 :class "rounded-md"}]
       [skeleton {:variant :rectangular
                  :width "5rem"
                  :height "2rem"
-                 :animation animation}]])])
+                 :animation animation
+                 :class "rounded-md"}]])])
 
 (defn skeleton-avatar-with-text
   "Skeleton for avatar with text lines (like a comment or user card).
@@ -135,7 +140,7 @@
          avatar-size "3rem"
          animation :pulse}}]
 
-  [:div {:class (str "flex gap-3 " class)}
+  [:div {:class (cx "flex gap-3 p-3 rounded-lg hover:bg-[var(--color-light-bg-paper)] dark:hover:bg-[var(--color-dark-bg-paper)] transition-colors" class)}
    [skeleton {:variant :avatar
               :width avatar-size
               :height avatar-size
@@ -164,9 +169,10 @@
          header true
          animation :pulse}}]
 
-  [:div {:class (str "w-full " class)}
+  [:div {:class (cx "w-full rounded-lg overflow-hidden border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]" class)}
    (when header
-     [:div {:class "flex gap-4 mb-4"}
+     [:div {:class (cx "flex gap-4 p-4 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
+                       "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)]")}
       (for [i (range cols)]
         ^{:key i}
         [skeleton {:variant :text
@@ -174,16 +180,18 @@
                    :height "1.5rem"
                    :animation animation}])])
 
-   (for [r (range rows)]
-     ^{:key r}
-     [:div {:class "flex gap-4 mb-4"}
-      (for [c (range cols)]
-        ^{:key c}
-        [skeleton {:variant :text
-                   :width (str (+ 20 (* c 5)) "%")
-                   :animation animation}])])])
+   [:div {:class "p-2"}
+    (for [r (range rows)]
+      ^{:key r}
+      [:div {:class (cx "flex gap-4 p-2 rounded-md"
+                         (when (even? r) "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)]"))}
+       (for [c (range cols)]
+         ^{:key c}
+         [skeleton {:variant :text
+                    :width (str (+ 20 (* c 5)) "%")
+                    :animation animation}])])]])
 
-;; Add a global animation style for skeleton wave effect
+;; Add a global animation style for skeleton wave effect with improved gradient
 (def ^:private wave-style
   (let [style-el (js/document.createElement "style")]
     (set! (.-textContent style-el) "
@@ -198,7 +206,16 @@
         background-image: linear-gradient(
           90deg,
           transparent,
-          rgba(var(--color-primary-rgb), 0.1),
+          rgba(var(--color-primary-rgb), 0.15), 
+          transparent
+        );
+      }
+      
+      .dark .animate-skeleton-wave {
+        background-image: linear-gradient(
+          90deg,
+          transparent,
+          rgba(var(--color-primary-rgb), 0.2),
           transparent
         );
       }

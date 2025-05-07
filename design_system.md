@@ -179,6 +179,14 @@ ZiStudy follows a 4px grid system for spacing and layout. The following spacing 
 
 ## Components
 
+### Class Name Handling
+
+All components use the `cx` utility function for managing class names, which provides:
+- Intelligent class merging based on conditions
+- Automatic conflict resolution for Tailwind classes
+- Support for conditional dynamic class application
+- Better dark/light mode theme transitions
+
 ### Buttons
 
 Buttons have been redesigned for better visual impact and interaction feedback:
@@ -216,6 +224,7 @@ Buttons have been redesigned for better visual impact and interaction feedback:
 - **Font**: Inter Medium, 1rem (16px)
 - **Transitions**: 300ms with spring easing
 - **Icons**: Optional start and end icons with proper spacing
+- **ARIA Support**: Built-in accessibility attributes
 
 #### Button States
 
@@ -238,47 +247,70 @@ Buttons have been redesigned for better visual impact and interaction feedback:
   - Reduced opacity
   - Removed hover effects
   - Maintained visual structure
+  - Cursor indication
+
+- **Loading**:
+  - Spinner animation
+  - Reduced opacity
+  - Disabled interaction
+  - Preserved layout
 
 ### Cards
 
 Cards are used to group related content and actions. They feature beautiful gradients, smooth transitions, and thoughtful spacing:
 
-#### Card Variants
+#### Card Design
 
 - **Standard Card**: 
-  - Elegant shadow with subtle pink-tinted border
+  - Combines both border and elevation styling by default
+  - Default elevation level 3 (medium shadow)
+  - 2px border with color matching the theme's divider color
+  - Rounded corners (0.5rem/8px)
   - Smooth hover transition with enhanced elevation
   - Increased font size (1.05rem) for better readability
-  - Generous padding (2rem) for content breathing room
+  - Generous padding for content breathing room
+  - Available elevation levels (1-5) for different emphasis needs
 
 - **Card Header**:
   - Gradient background from white to soft pink (dark mode: dark gradient with pink tint)
-  - Beautiful text gradient on titles
-  - Left accent border option for visual hierarchy
+  - Left accent border option for visual hierarchy and status indication
   - Optional icon with soft background
+  - Enhanced padding for better content spacing
+  - Support for title and subtitle with proper typography
 
 - **Card Content**:
   - Clean, well-spaced layout
   - Optimized line height (1.6) for readability
   - Consistent padding across all sections
+  - Option to remove padding when needed
 
 - **Card Footer**:
-  - Subtle gradient background
   - Clear separation with refined border
-  - Flexible alignment options for actions
+  - Flexible alignment options for actions (:start, :center, :end, :between)
+  - Proper spacing for button groups
+  - Option to remove border when needed
 
 #### Card Interactions
 
 - **Hover Effects**:
   - Subtle elevation increase
-  - Border color enhancement
+  - Border color enhancement to primary color
   - Smooth transition (300ms)
-  - Optional scale transform
+  - Optional scale transform with slight upward movement
+  - Shadow expansion
 
 - **Dark Mode**:
   - Rich, pink-tinted dark backgrounds
   - Preserved readability with optimized contrast
   - Consistent interaction patterns
+  - Border color shifts to match dark theme
+
+#### Card Media
+
+- Support for images with proper aspect ratio handling
+- Options for rounded corners on top, bottom, or both
+- Customizable height
+- Proper alt text support for accessibility
 
 ### Form Controls
 
@@ -288,6 +320,9 @@ Cards are used to group related content and actions. They feature beautiful grad
 - **With icons**: Leading or trailing icons
 - **States**: Normal, focus, disabled, error, autofill
 - **Variants**: Outlined, filled
+- **Enhanced Validation**: Clear visual feedback for validation states
+- **Transitions**: Smooth border transitions
+- **Focus State**: Clear visual indication with subtle shadow
 
 ##### Autofill Handling
 
@@ -305,9 +340,30 @@ Form inputs have special styling to handle browser autofill functionality using 
 #### Selection Controls
 
 - **Checkbox**: For multi-select options
+  - Clean, accessible design
+  - Clear visual states (checked, unchecked, disabled)
+  - Custom check mark animation
+  - Focus state with matching ring color
+
 - **Radio button**: For single-select options
+  - Consistent sizing with checkboxes
+  - Clear visual indication of selection
+  - Appropriate spacing in groups
+  - Custom selection animation
+
 - **Switch**: For binary on/off states
+  - Pill-shaped toggle track
+  - Circular thumb with shadow
+  - Smooth sliding animation
+  - Color gradient when active
+  - Scale animation on hover
+
 - **Dropdown**: For selecting from a list
+  - Enhanced with proper backdrop handling
+  - Smooth open/close animations
+  - Support for item grouping
+  - Keyboard navigation support
+  - Multiple selection mode
 
 #### Dropdown Menu
 
@@ -321,12 +377,16 @@ Dropdowns have been redesigned for a consistent and elegant experience:
   - Elegant shadow for elevation
   - Minimum width of 180px for readable content
   - z-index priority to appear above other content
+  - Optional backdrop blur effect
+  - Multiple transition animations (fade, scale, slide)
 
 - **Menu Items**:
   - Consistent padding (16px horizontal, 8px vertical)
   - Standard text size (14px/0.875rem)
   - Smooth hover transitions (150ms)
   - Clear visual feedback states
+  - Support for icons at start and end positions
+  - Optional description text
 
 ##### Item States
 
@@ -335,16 +395,19 @@ Dropdowns have been redesigned for a consistent and elegant experience:
   - Light pink background with deeper pink text
   - Medium font weight for emphasis
   - Dark mode: Semi-transparent pink background with lighter pink text
+  - Optional checkmark icon
 
 - **Disabled**:
   - Reduced opacity (50%)
   - Cursor indication (not-allowed)
   - Secondary text color
+  - No hover effects
 
 - **Danger**:
   - Error red text color
   - Hover state with light red background
   - Dark mode: Lighter red text with semi-transparent hover
+  - Warning icon option
 
 ##### Implementation
 
@@ -353,6 +416,71 @@ Dropdowns have been redesigned for a consistent and elegant experience:
 - Support for start and end icons in menu items
 - Optional multi-select mode with clear/apply actions
 - Fixed positioning with intelligent placement around trigger elements
+- Support for nested menus
+- Keyboard navigation support (arrows, escape, enter)
+
+### Modal/Dialog
+
+Modals provide focused content and interaction without leaving the current page:
+
+#### Visual Design
+- Clean white background in light mode
+- Dark themed background in dark mode
+- Subtle rounded corners (12px)
+- Elegant shadow for elevation
+- Proper spacing for content (32px padding)
+- Optional backdrop blur effect
+- Customizable max-width settings
+
+#### Animation
+- Smooth entrance animation (scale + fade)
+- Quick exit animation
+- Backdrop fade transition
+- Spring physics for natural feel
+
+#### Structure
+- **Header**: Title with optional close button
+- **Body**: Main content area with scrolling if needed
+- **Footer**: Action buttons with consistent alignment
+- **Overlay**: Semi-transparent backdrop that blocks interaction
+
+#### Accessibility
+- Focus trap inside modal
+- ESC key to close
+- ARIA attributes (role="dialog", aria-modal="true")
+- Focus returns to trigger element when closed
+- Prevents background scrolling
+
+### Tooltip
+
+Tooltips provide additional information on hover:
+
+#### Visual Characteristics
+- Rich dark background with slight transparency
+- Subtle rounded corners (6px)
+- Proper padding (8px 12px)
+- Small arrow pointing to the trigger
+- Maximum width for readability (250px)
+- Text wrapping for longer content
+
+#### Positioning
+- Intelligent placement based on available space
+- 8 possible positions (top, bottom, left, right, and corners)
+- Adjusts to stay within viewport
+- Consistent distance from trigger (8px)
+
+#### Behavior
+- Appears on hover or focus
+- Slight delay before showing (150ms)
+- Fade-in animation
+- Disappears when cursor leaves
+- Remains visible when hovering the tooltip itself
+
+#### Implementation
+- Simple implementation with the `tooltip` component
+- Content can be plain text or rich HTML
+- Optional custom styling
+- Control over delay timing
 
 ## Effects and Animations
 
@@ -364,6 +492,7 @@ Material-style ripple effect provides tactile feedback for interactive elements:
 - Created using the `.ripple` class
 - Works for nested elements (propagates to parent)
 - Subtle but effective visual cue for user interactions
+- Customizable color to match component theme
 
 ### Micro-interactions
 
@@ -374,6 +503,7 @@ Subtle animations that provide feedback and enhance the user experience:
 - Input focus animations with smooth border transitions
 - Success/error state animations
 - Loading indicators and progress animations
+- Dropdown and modal entrance/exit animations
 
 ### Transitions
 
@@ -394,6 +524,18 @@ Smooth transition between light and dark themes:
 - Consistent ripple effect across themes
 - Color shifts use the standard timing function
 
+### Added Animation Classes
+
+The following animation utility classes are available:
+
+- `.animate-in`: Base class for animations (200ms duration, cubic-bezier)
+- `.fade-in`: Simple opacity transition from 0 to 1
+- `.zoom-in-90`: Scale and opacity transition starting at 90%
+- `.animate-slide-down`: Elements sliding down into view
+- `.animate-slide-in`: Elements sliding in from left
+- `.animate-pulse-slow`: Slow pulsing effect for highlighting
+- `.scale-95`, `.scale-100`: Transform scale utilities
+
 ## Best Practices
 
 ### Accessibility
@@ -402,6 +544,9 @@ Smooth transition between light and dark themes:
 - Ensure all interactive elements are keyboard accessible
 - Provide text alternatives for non-text content
 - Design focus states that are clearly visible
+- Use ARIA attributes when necessary
+- Support screen readers through proper semantic markup
+- Test with keyboard-only navigation
 
 ### Responsive Design
 
@@ -409,6 +554,8 @@ Smooth transition between light and dark themes:
 - Design mobile-first, then enhance for larger screens
 - Use appropriate component sizing for touch targets (minimum 44×44px)
 - Test layouts at multiple breakpoints
+- Use appropriate font sizes across devices
+- Implement responsive spacing using the spacing system
 
 ### Visual Hierarchy
 
@@ -416,6 +563,8 @@ Smooth transition between light and dark themes:
 - Maintain consistent alignment throughout the interface
 - Group related elements visually
 - Limit the number of visual weights on a single screen
+- Use typography scale to establish content importance
+- Apply animations selectively to guide attention
 
 ### Color Usage
 
@@ -425,16 +574,27 @@ Smooth transition between light and dark themes:
 - Ensure color is not the only means of conveying information
 - Dark theme uses pink-tinted background for brand consistency
 - Light theme uses soft pink-tinted background for a calm, modern feel
+- Use CSS custom properties for consistent color application
+
+### Dark Mode
+
+- Apply appropriate color adjustments for dark mode
+- Test all components in both light and dark themes
+- Ensure adequate contrast in both modes
+- Use proper hex codes instead of rgba() for dark mode backgrounds
+- Use custom properties with proper fallbacks
+- Consider reducing visual intensity of certain elements in dark mode
 
 ## Iconography
 
 ZiStudy uses **Lucide Icons** for all iconography. Lucide provides a comprehensive, consistent set of modern, clean icons that align perfectly with our design aesthetic. All icons should use the ZiIcon component which wraps Lucide icons.
 
 ### Usage Guidelines
-- All icons should use the `ZiIcon` component with the appropriate icon from the `Icons` enum.
-- Standard size classes should be used (e.g., `text-sm`, `text-2xl`, etc.).
-- Color classes should follow our color system (e.g., `text-primary dark:text-primary-300`).
-- Icons should have appropriate aria-labels for accessibility.
+- All icons should use the appropriate icon from the Lucide library
+- Standard size classes should be used (e.g., `text-sm`, `text-2xl`, etc.)
+- Color classes should follow our color system (e.g., `text-primary dark:text-primary-300`)
+- Icons should have appropriate aria-labels for accessibility
+- Use consistent stroke width (preferably 1.5 or 2px)
 
 ### Icon Styling
 - Use consistent sizing within context (navigation, buttons, etc.)
@@ -443,50 +603,78 @@ ZiStudy uses **Lucide Icons** for all iconography. Lucide provides a comprehensi
 - Use the same weight/style throughout the application
 
 #### Common Icons (Lucide)
-| Usage | Icon Enum |
+| Usage | Icon Component |
 |-------|----------|
-| User | Icons.User |
-| Home | Icons.House |
-| Study | Icons.Book |
-| Notes | Icons.FileText |
-| Security | Icons.Shield |
-| Settings | Icons.Cog |
-| Logout | Icons.Logout |
-| Login | Icons.Login |
-| Register | Icons.UserPlus |
-| Check | Icons.CheckCircle |
-| Menu | Icons.Menu |
-| Close | Icons.X |
-| Dropdown | Icons.ChevronDown |
-| Email | Icons.Email |
-| Lightning | Icons.Zap |
-| Book | Icons.BookOpen |
-| Message | Icons.MessageSquare |
-| Sparkle | Icons.Sparkles |
+| User | lucide-icons/User |
+| Home | lucide-icons/Home |
+| Study | lucide-icons/Book |
+| Notes | lucide-icons/FileText |
+| Security | lucide-icons/Shield |
+| Settings | lucide-icons/Settings |
+| Logout | lucide-icons/LogOut |
+| Login | lucide-icons/LogIn |
+| Register | lucide-icons/UserPlus |
+| Check | lucide-icons/Check |
+| Menu | lucide-icons/Menu |
+| Close | lucide-icons/X |
+| Dropdown | lucide-icons/ChevronDown |
+| Email | lucide-icons/Mail |
+| Lightning | lucide-icons/Zap |
+| Book | lucide-icons/BookOpen |
+| Message | lucide-icons/MessageSquare |
+| Sparkle | lucide-icons/Sparkles |
+| Loading | lucide-icons/Loader2 |
 
 ## Component Encapsulation
 
 All basic UI elements (such as **inputs**, **buttons**, **selects**, etc.) must be encapsulated as reusable components. This ensures consistency, maintainability, and adherence to the design system. Each component should:
-- Encapsulate all styling, icon usage, and state logic.
-- Accept parameters for customization (e.g., label, icon, error state, etc.).
-- Use FontAwesome for any iconography.
-- Follow the patterns shown in the `Input.kt` example (see `src/webMain/kotlin/zi_study/components/Input.kt`).
-- Be placed in the `components` package/directory.
+- Encapsulate all styling, icon usage, and state logic
+- Accept parameters for customization (e.g., label, icon, error state, etc.)
+- Use Lucide for any iconography
+- Use the `cx` utility for class name handling
+- Follow established naming patterns
+- Be placed in the appropriate components directory
 
 This approach applies to:
 - Buttons (primary, secondary, outlined, text, etc.)
 - Inputs (text, password, email, etc.)
 - Selects and dropdowns
 - Cards
+- Modals and dialogs
+- Tooltips
 - Any other reusable UI element
 
 ## Utilities
 
 ### Class Name Handling with `cx`
 
-ZiStudy uses a utility function called `cx` for handling class names in components. This function is a wrapper around the [clsx](https://github.com/lukeed/clsx) and [tailwind-merge](https://github.com/dcastil/tailwind-merge) libraries, providing intelligent class name handling specifically for ClojureScript.
+ZiStudy uses a utility function called `cx` for handling class names in components. This function provides intelligent class name management:
 
----
+- Merges multiple classes intelligently
+- Handles conditional classes based on props/state
+- Resolves Tailwind class conflicts automatically
+- Supports arrays, objects, and strings as inputs
+- Creates more readable component code
+- Works seamlessly with dark/light mode theming
+- Ensures consistent styling across the application
+
+Example usage:
+```clojure
+(cx "base-class"
+    {"conditional-class" condition?
+     "another-class" (= value :expected)}
+    (when active? "active-class"))
+```
+
+### Additional CSS Utilities
+
+- **Theme Variables**: Access to theme colors and properties via CSS variables
+- **Responsive Classes**: Mobile-first utilities with responsive breakpoints
+- **Animation Classes**: Pre-defined animations and transitions
+- **Proper Dark Mode**: Automatic handling of dark/light themes
+- **Focus States**: Consistent focus styles across components
+- **Custom Scrollbars**: Themed scrollbars that match the design system
+- **Elevation**: Shadow utilities for different elevations
 
 ## Design Principles
 
