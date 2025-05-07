@@ -6,117 +6,57 @@
             [zi-study.frontend.utilities :refer [cx]]))
 
 (defn theme-switcher
-  "A theme switcher component for light and dark themes"
-  [{:keys [size class]
-    :or {size :md}}]
-  (let [btn-size-class (case size
-                         :sm "h-8 w-8"
-                         :md "h-10 w-10"
-                         :lg "h-12 w-12"
-                         "h-10 w-10")
-
-        btn-class (cx "flex items-center justify-center rounded-full"
-                      "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
-                      "hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)]"
-                      "transition-colors duration-200"
-                      btn-size-class
-                      class)]
+  "A theme switcher component that allows selecting between system, light, and dark themes.
+  The UI is a pill-shaped control with a sliding indicator for the active theme."
+  []
+  (let [current-theme-atom (r/reaction (:theme (state/get-ui-state)))
+        themes [{:value :system :icon lucide/Monitor :title "Auto (System Preference)"}
+                {:value :light  :icon lucide/Sun :title "Light Theme"}
+                {:value :dark   :icon lucide/Moon :title "Dark Theme"}]]
 
     (fn []
-      (let [current-theme (:theme (state/get-ui-state))]
-        [:button {:class btn-class
-                  :title (if (= current-theme :light)
-                           "Switch to dark theme"
-                           "Switch to light theme")
-                  :on-click (fn [_] (theme/toggle-theme))}
-         [:> (if (= current-theme :light)
-               lucide/Sun
-               lucide/Moon)
-          {:size (case size
-                   :sm 16
-                   :md 20
-                   :lg 24
-                   20)}]]))))
+      [:div {:class (cx "relative flex items-center space-x-0.5 p-0.5 rounded-full"
+                        "bg-[var(--color-light-bg-hover)] dark:bg-[var(--color-dark-bg-paper)]"
+                        "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
+                        "shadow-sm transition-colors duration-300")
+             :role "radiogroup"
+             :aria-label "Theme selection"}
 
-(defn theme-selector
-  "A dropdown selector for choosing between light and dark themes"
-  []
-  (let [open? (r/atom false)
+       ;; Sliding thumb that highlights the active selection
+       (let [active-index (case @current-theme-atom
+                            :system 0
+                            :light  1
+                            :dark   2
+                            0) ; Default to system index
+             ;; Buttons are h-8 w-8 (32px). space-x-0.5 (2px) between them.
+             ;; Container p-0.5 (2px padding). Thumb positioned with top-[2px] left-[2px].
+             ;; Movement unit for translateX = button_width (32px) + space_between_buttons (2px) = 34px.
+             thumb-transform (str "translateX(" (* active-index 34) "px)")]
+         [:div {:class (cx "absolute top-[2px] left-[2px] h-8 w-8 rounded-full"
+                           "bg-white dark:bg-[var(--color-dark-card)]" ; Thumb background
+                           "shadow-md transition-all duration-300 ease-in-out")
+                :style {:transform thumb-transform}}])
 
-        toggle-dropdown (fn [e]
-                          (.preventDefault e)
-                          (.stopPropagation e)
-                          (swap! open? not))
-
-        set-theme (fn [theme e]
-                    (.preventDefault e)
-                    (.stopPropagation e)
-                    (theme/set-theme theme)
-                    (reset! open? false))
-
-        handle-click (fn [e]
-                       (when (and @open?
-                                  (not (.contains (.getElementById js/document "theme-selector") (.-target e))))
-                         (reset! open? false)))
-
-        setup-click-handler (fn []
-                              (.addEventListener js/document "mousedown" handle-click)
-                              #(.removeEventListener js/document "mousedown" handle-click))]
-
-    (r/create-class
-     {:component-did-mount
-      (fn [_]
-        (setup-click-handler))
-
-      :component-will-unmount
-      (fn [_]
-        (.removeEventListener js/document "mousedown" handle-click))
-
-      :reagent-render
-      (fn [{:keys [class]}]
-        (let [current-theme (:theme (state/get-ui-state))
-              dropdown-class (cx "absolute right-0 top-full mt-2 w-48 rounded-md shadow-lg"
-                                 "bg-[var(--color-light-bg-elevated)] dark:bg-[var(--color-dark-bg-elevated)]"
-                                 "ring-1 ring-black ring-opacity-5"
-                                 "divide-y divide-[var(--color-light-border)] dark:divide-[var(--color-dark-border)]"
-                                 "focus:outline-none z-50"
-                                 (if @open? "block" "hidden"))]
-          [:div {:id "theme-selector"
-                 :class (cx "relative" class)}
-
-           [:button {:class (cx "flex items-center space-x-2 px-3 py-2 rounded-md text-sm"
-                                "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]"
-                                "hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)]"
-                                "focus:outline-none")
-                     :on-click toggle-dropdown}
-            [:> (if (= current-theme :light)
-                  lucide/Sun
-                  lucide/Moon) {:size 16}]
-            [:span {:class "ml-2"}
-             (if (= current-theme :light)
-               "Light"
-               "Dark")]
-            [:> lucide/ChevronDown {:size 16 :className "ml-2"}]]
-
-           [:div {:class dropdown-class :role "menu"}
-            [:div {:class "py-1" :role "none"}
-
-             [:button {:class (cx "flex items-center w-full px-4 py-2 text-sm"
-                                  (if (= current-theme :light)
-                                    "text-[var(--color-primary)] bg-[var(--color-light-bg-selected)] dark:bg-[var(--color-dark-bg-selected)]"
-                                    "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]")
-                                  "hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)]")
-                       :role "menuitem"
-                       :on-click #(set-theme :light %)}
-              [:> lucide/Sun {:size 16 :className "mr-3"}]
-              [:span "Light"]]
-
-             [:button {:class (cx "flex items-center w-full px-4 py-2 text-sm"
-                                  (if (= current-theme :dark)
-                                    "text-[var(--color-primary)] bg-[var(--color-light-bg-selected)] dark:bg-[var(--color-dark-bg-selected)]"
-                                    "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]")
-                                  "hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)]")
-                       :role "menuitem"
-                       :on-click #(set-theme :dark %)}
-              [:> lucide/Moon {:size 16 :className "mr-3"}]
-              [:span "Dark"]]]]]))})))
+       ;; Buttons for each theme option
+       (for [{:keys [value icon title]} themes]
+         ^{:key (keyword (str "theme-btn-" (name value)))}
+         [:button
+          {:title title
+           :class (cx "relative z-10 flex h-8 w-8 items-center justify-center rounded-full"
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                      "focus-visible:ring-offset-[var(--color-light-bg)] dark:focus-visible:ring-offset-[var(--color-dark-bg)]"
+                      "transition-colors duration-200")
+           :on-click #(theme/set-theme value)
+           :aria-label title
+           :role "radio"
+           :aria-checked (= @current-theme-atom value)}
+          [:> icon {:size 18 ; Slightly smaller icon for better padding within the 32px button
+                    :class (cx "transition-colors duration-200"
+                               (if (= @current-theme-atom value)
+                                 ;; Active icon color (contrasts with thumb)
+                                 "text-[var(--color-primary)] dark:text-[var(--color-primary-300)]"
+                                 ;; Inactive icon color
+                                 "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]")
+                               ;; Hover color for inactive icons (only apply if not active)
+                               (when (not= @current-theme-atom value)
+                                 "hover:text-[var(--color-light-text-primary)] dark:hover:text-[var(--color-dark-text-primary)]"))}]])])))
