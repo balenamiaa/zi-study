@@ -8,10 +8,12 @@
                   :authenticated? false
                   :current-user nil}
            :ui {:theme :system
-                :sidebar-open? false}
+                :sidebar-open? false
+                ;; Add flash messages to state
+                :flash {:messages []
+                        :counter 0}} ;; Counter for unique IDs
            :router {:current-match nil}
 
-           ;; --- New Question Bank State ---
            :question-bank
            {:sets {:list []
                    :loading? false
@@ -254,3 +256,65 @@
 ;; Self-Eval State
 (defn set-self-evaluating [question-id evaluating?]
   (swap! app-state assoc-in [:question-bank :self-eval question-id] {:loading? evaluating?}))
+
+;; Flash message state selectors
+(defn get-flash-messages []
+  (r/reaction (get-in @app-state [:ui :flash :messages])))
+
+;; Flash message state updaters
+(defn add-flash-message
+  "Add a flash message to the UI
+  
+   Options:
+   - message: (required) message text or hiccup to display
+   - color: :primary, :success, :warning, :error, :info (default :info)
+   - variant: :filled, :outlined, :soft (default :soft)
+   - auto-hide: milliseconds before auto-hiding (default 5000, nil for no auto-hide)
+   - position: :top-left, :top-center, :top-right, :bottom-left, :bottom-center, :bottom-right (default :top-right)"
+  [{:keys [message color variant auto-hide position]
+    :or {color :info
+         variant :soft
+         auto-hide 5000
+         position :top-right}
+    :as opts}]
+  (let [id (swap! app-state update-in [:ui :flash :counter] inc)]
+    (swap! app-state update-in [:ui :flash :messages]
+           conj (assoc opts
+                       :id id
+                       :color color
+                       :variant variant
+                       :auto-hide auto-hide
+                       :position position))
+    id)) ;; Return the message ID for potential reference
+
+(defn remove-flash-message
+  "Remove a flash message by ID"
+  [id]
+  (swap! app-state update-in [:ui :flash :messages]
+         (fn [messages] (vec (remove #(= (:id %) id) messages)))))
+
+(defn clear-flash-messages
+  "Clear all flash messages"
+  []
+  (swap! app-state assoc-in [:ui :flash :messages] []))
+
+;; Success/Error/Warning/Info convenience methods
+(defn flash-success
+  "Show a success flash message"
+  [message & {:as opts}]
+  (add-flash-message (merge {:message message :color :success} opts)))
+
+(defn flash-error
+  "Show an error flash message"
+  [message & {:as opts}]
+  (add-flash-message (merge {:message message :color :error} opts)))
+
+(defn flash-warning
+  "Show a warning flash message"
+  [message & {:as opts}]
+  (add-flash-message (merge {:message message :color :warning} opts)))
+
+(defn flash-info
+  "Show an info flash message"
+  [message & {:as opts}]
+  (add-flash-message (merge {:message message :color :info} opts)))

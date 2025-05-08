@@ -1,5 +1,6 @@
 (ns zi-study.frontend.layouts.main-layout
   (:require [zi-study.frontend.components.topbar :refer [topbar]]
+            [zi-study.frontend.components.flashgroup :refer [flashgroup]]
             ["lucide-react" :as lucide-icons]))
 
 
@@ -8,6 +9,9 @@
     [:div {:class "min-h-screen bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]"}
      ;; Topbar
      [topbar {:current-route current-route}]
+     
+     ;; Flash messages
+     [flashgroup {:default-position :top-right}]
 
      ;; Main content with animation - adjust top margin to accommodate floating pill navbar
      [:main {:class "mt-20 pt-8 animate-fade-in"}

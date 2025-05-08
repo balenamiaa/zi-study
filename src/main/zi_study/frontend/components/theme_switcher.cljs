@@ -18,7 +18,7 @@
       [:div {:class (cx "relative flex items-center space-x-0.5 p-0.5 rounded-full"
                         "bg-[var(--color-light-bg-hover)] dark:bg-[var(--color-dark-bg-paper)]"
                         "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
-                        "shadow-sm transition-colors duration-300")
+                        "shadow-sm ")
              :role "radiogroup"
              :aria-label "Theme selection"}
 
@@ -45,13 +45,13 @@
            :class (cx "relative z-10 flex h-8 w-8 items-center justify-center rounded-full"
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
                       "focus-visible:ring-offset-[var(--color-light-bg)] dark:focus-visible:ring-offset-[var(--color-dark-bg)]"
-                      "transition-colors duration-200")
+                      "transition-colors duration-100")
            :on-click #(theme/set-theme value)
            :aria-label title
            :role "radio"
            :aria-checked (= @current-theme-atom value)}
           [:> icon {:size 18 ; Slightly smaller icon for better padding within the 32px button
-                    :class (cx "transition-colors duration-200"
+                    :class (cx "transition-colors duration-100"
                                (if (= @current-theme-atom value)
                                  ;; Active icon color (contrasts with thumb)
                                  "text-[var(--color-primary)] dark:text-[var(--color-primary-300)]"

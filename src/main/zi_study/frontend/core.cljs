@@ -4,7 +4,6 @@
             [reitit.frontend.easy :as rfe]
             [reitit.coercion.spec :as rss]
             [zi-study.frontend.pages.home :refer [home-page]]
-            [zi-study.frontend.pages.counter :refer [counter-page]]
             [zi-study.frontend.pages.items :refer [demo-item-page]]
             [zi-study.frontend.pages.components :refer [components-page]]
             [zi-study.frontend.pages.not-found :refer [not-found-page]]
@@ -12,7 +11,6 @@
             [zi-study.frontend.pages.register :refer [register-page]]
             [zi-study.frontend.pages.question-sets :refer [question-sets-page]]
             [zi-study.frontend.pages.set-page :refer [set-page]]
-            [zi-study.frontend.pages.bookmarks :refer [bookmarks-page]]
             [zi-study.frontend.layouts.main-layout :refer [main-layout]]
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.auth :as auth]
@@ -23,12 +21,8 @@
 
 (def routes
   [["/"
-    {:name ::home
+    {:name ::homez
      :view home-page}]
-
-   ["/counter"
-    {:name ::counter
-     :view counter-page}]
 
    ["/components"
     {:name ::components
@@ -55,11 +49,7 @@
    ["/question-sets/:set-id"
     {:name ::set-page
      :view set-page
-     :parameters {:path {:set-id int?}}}]
-
-   ["/bookmarks"
-    {:name ::bookmarks
-     :view bookmarks-page}]])
+     :parameters {:path {:set-id int?}}}]])
 
 
 (defn app []

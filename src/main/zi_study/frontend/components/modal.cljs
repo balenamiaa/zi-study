@@ -105,7 +105,7 @@
                     (when show-close-button
                       [:button {:class (cx "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
                                            "hover:text-[var(--color-primary)] dark:hover:text-[var(--color-primary-300)]"
-                                           "transition-colors duration-200 p-1 rounded-full"
+                                           "transition-colors duration-150 p-1 rounded-full"
                                            "hover:bg-[var(--color-primary-50)] dark:hover:bg-[rgba(233,30,99,0.15)]")
                                 :on-click handle-close
                                 :aria-label "Close"}
@@ -117,7 +117,7 @@
                    [:div {:class "absolute top-4 right-4 z-10"}
                     [:button {:class (cx "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
                                          "hover:text-[var(--color-primary)] dark:hover:text-[var(--color-primary-300)]"
-                                         "transition-colors duration-200 p-1 rounded-full"
+                                         "transition-colors duration-150 p-1 rounded-full"
                                          "hover:bg-[var(--color-primary-50)] dark:hover:bg-[rgba(233,30,99,0.15)]")
                               :on-click handle-close
                               :aria-label "Close"}

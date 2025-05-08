@@ -2,6 +2,7 @@
   (:require
    [reagent.core :as r]
    ["lucide-react" :as lucide-icons]
+   [zi-study.frontend.state :refer [flash-success flash-error flash-warning flash-info]]
    [zi-study.frontend.components.button :refer [button button-group]]
    [zi-study.frontend.components.card :refer [card card-header card-content card-footer card-media]]
    [zi-study.frontend.components.input :refer [text-input textarea]]
@@ -24,6 +25,117 @@
 
 (defn demo-row [& children]
   (into [:div.flex.flex-wrap.gap-4.items-center.mb-6] children))
+
+
+(defn flash-section []
+  [:div {:class "card p-6 max-w-3xl mx-auto"}
+   [:h2 {:class "text-2xl font-medium mb-6"} "Flash Messages"]
+
+   [:div {:class "mb-8"}
+    [:h3 {:class "text-xl font-medium mb-4"} "Basic Messages"]
+    [:div {:class "flex flex-wrap gap-4"}
+     [button
+      {:variant :primary
+       :on-click #(flash-success "Operation completed successfully!")}
+      "Success Message"]
+
+     [button
+      {:variant :outlined
+       :color :error
+       :on-click #(flash-error "Something went wrong. Please try again.")}
+      "Error Message"]
+
+     [button
+      {:variant :outlined
+       :color :warning
+       :on-click #(flash-warning "Your session will expire in 5 minutes.")}
+      "Warning Message"]
+
+     [button
+      {:variant :outlined
+       :color :info
+       :on-click #(flash-info "Did you know? You can customize your profile.")}
+      "Info Message"]]]
+
+   [:div {:class "mb-8"}
+    [:h3 {:class "text-xl font-medium mb-4"} "Positions"]
+    [:div {:class "grid grid-cols-1 sm:grid-cols-3 gap-4"}
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Top Left Message" :position :top-left)}
+      "Top Left"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Top Center Message" :position :top-center)}
+      "Top Center"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Top Right Message" :position :top-right)}
+      "Top Right"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Bottom Left Message" :position :bottom-left)}
+      "Bottom Left"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Bottom Center Message" :position :bottom-center)}
+      "Bottom Center"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Bottom Right Message" :position :bottom-right)}
+      "Bottom Right"]]]
+
+   [:div {:class "mb-8"}
+    [:h3 {:class "text-xl font-medium mb-4"} "Variants"]
+    [:div {:class "flex flex-wrap gap-4"}
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Soft Variant (Default)" :variant :soft)}
+      "Soft Variant"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Filled Variant" :variant :filled)}
+      "Filled Variant"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Outlined Variant" :variant :outlined)}
+      "Outlined Variant"]]]
+
+   [:div
+    [:h3 {:class "text-xl font-medium mb-4"} "Timing"]
+    [:div {:class "flex flex-wrap gap-4"}
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Default timing (5s)" :position :top-center)}
+      "Default (5s)"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Quick message (2s)"
+                              :position :top-center
+                              :auto-hide 2000)}
+      "Quick (2s)"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "Long message (10s)"
+                              :position :top-center
+                              :auto-hide 10000)}
+      "Long (10s)"]
+
+     [button
+      {:variant :outlined
+       :on-click #(flash-info "No auto-hide (click X to dismiss)"
+                              :position :top-center
+                              :auto-hide nil)}
+      "No Auto-Hide"]]]])
 
 (defn buttons-section []
   [:div
@@ -634,10 +746,8 @@
      [:h1.text-3xl.font-bold.mb-6
       {:class "text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)]"}
       "Components Demo"]
-     [:p.text-lg.mb-8
-      {:class "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]"}
-      "Components for testing purposes."]
 
+     [flash-section]
      [buttons-section]
      [cards-section]
      [inputs-section]

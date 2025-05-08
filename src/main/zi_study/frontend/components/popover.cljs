@@ -174,7 +174,7 @@
   (let [disabled-val (or disabled false)
         danger-val (or danger false)
 
-        base-classes "flex items-center w-full px-3 py-2 text-sm transition-colors duration-150 gap-2"
+        base-classes "flex items-center w-full px-3 py-2 text-sm transition-colors duration-100 gap-2"
 
         state-classes
         (cond

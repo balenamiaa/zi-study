@@ -16,16 +16,13 @@
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.nested-params :refer [wrap-nested-params]]
+            [ring.middleware.gzip :as gzip]
             [zi-study.backend.db :as db]
             [zi-study.backend.auth :as auth]
             [zi-study.backend.uploads :as uploads]
             [zi-study.backend.handlers.question-bank-handlers :as qb]))
 
 
-(require '[next.jdbc])
-
-
-(next.jdbc/execute! (next.jdbc/prepare (.getConnection @db/db-pool) [(str "SELECT * FROM " "question_sets")]))
 
 (defn index-handler [_]
   (let [response (resp/file-response "index.html" {:root "public"})]
@@ -78,13 +75,23 @@
         index-handler))
       (wrap-file "public" {:index-files? false})
       (wrap-content-type)
-      (wrap-not-modified)))
+      (wrap-not-modified)
+      gzip/wrap-gzip))
 
 (defonce server-state (atom nil))
 (defonce shadow-state (atom nil))
 
 ; Forward declare stop-server
 (declare stop-server)
+
+
+(comment
+  (System/setProperty "JVM_ENV" "production")
+  (dev-mode?)
+  )
+
+(defn dev-mode? []
+  (= "development" (or (System/getProperty "JVM_ENV") "development")))
 
 (defn start-server [port]
   (println "Initializing backend...")
@@ -94,9 +101,11 @@
 
   (println "Starting shadow-cljs server and watcher...")
   (try
-    (shadow-server/start!)
-    (shadow/watch :frontend)
-    (reset! shadow-state true)
+    (when (dev-mode?)
+      (shadow-server/start!)
+      (shadow/watch :frontend)
+      (reset! shadow-state true)
+      (println "Development mode: Shadow-CLJS watcher started"))
     (catch Exception e
       (println "Error starting shadow-cljs:" (ex-message e))))
 
@@ -106,7 +115,11 @@
 
   (println "Starting http-kit server...")
   (try
-    (let [server-instance (server/run-server (wrap-reload #'app) {:port port})]
+    (let [server-instance (if (dev-mode?)
+                            (do
+                              (println "Development mode: Using wrap-reload middleware")
+                              (server/run-server (wrap-reload #'app) {:port port}))
+                            (server/run-server app {:port port}))]
       (reset! server-state server-instance)
       (println "HTTP Server started."))
     (catch Exception e
@@ -155,11 +168,13 @@
         (System/exit 1)))))
 
 (defn reload []
-  (println "\n--- Reloading backend code ---")
-  (stop-server)
-  (require 'zi-study.backend.db :reload)
-  (require 'zi-study.backend.core :reload)
-  ; Assuming -main handles restart logic correctly now
-  ; We might need a different approach if -main blocks indefinitely
-  ; For now, let's rely on restarting the process for full reload
-  (println "Code reloaded. Restart the process to apply changes or use a REPL workflow.")) 
+  (when (dev-mode?)
+    (println "\n--- Reloading backend code ---")
+    (stop-server)
+    (require 'zi-study.backend.db :reload)
+    (require 'zi-study.backend.core :reload)
+    (println "Code reloaded. Restart the process to apply changes or use a REPL workflow.")))
+
+
+(comment
+  (-main))

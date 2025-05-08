@@ -16,7 +16,6 @@
 ;; Define navigation links internally
 (def nav-links
   [{:name :zi-study.frontend.core/home :path "/" :label "Home" :icon lucide-icons/Home}
-   {:name :zi-study.frontend.core/counter :path "/counter" :label "Counter" :icon lucide-icons/Hash}
    {:name :zi-study.frontend.core/components :path "/components" :label "Components" :icon lucide-icons/Layers}
    {:name :zi-study.frontend.core/question-sets :path "/question-sets" :label "Sets" :icon lucide-icons/Library}])
 

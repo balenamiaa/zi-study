@@ -122,7 +122,7 @@
 
         base-classes "relative inline-flex items-center"
 
-        checkbox-base "appearance-none transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed border-2"
+        checkbox-base "appearance-none transition-colors duration-100 ease-in-out focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed border-2"
 
         size-classes
         (case size
@@ -223,7 +223,7 @@
 
   (let [base-classes "relative inline-flex items-center"
 
-        radio-base (str "appearance-none rounded-full transition-colors duration-200 ease-in-out "
+        radio-base (str "appearance-none rounded-full transition-colors duration-100 ease-in-out "
                         "focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 "
                         "disabled:cursor-not-allowed border-2")
 
