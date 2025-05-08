@@ -3,7 +3,7 @@
 
 ;; Core application state
 (defonce app-state
-  (r/atom {:auth {:loading? true
+  (r/atom {:auth {:loading-current-user? false
                   :token nil
                   :authenticated? false
                   :current-user nil}
@@ -106,24 +106,39 @@
   last-applied-filters)
 
 ;; Auth state updaters
-(defn set-auth-loading [loading?]
-  (swap! app-state assoc-in [:auth :loading?] loading?))
+(defn set-auth-loading-current-user [loading?]
+  (swap! app-state assoc-in [:auth :loading-current-user?] loading?))
 
-(defn set-authenticated [authenticated? token user]
+(defn set-provisionally-authenticated
+  "Sets authenticated to true based on token and cookie presence, current-user is nil initially."
+  [token]
   (swap! app-state assoc-in [:auth]
-         {:loading? false
-          :authenticated? authenticated?
+         {:loading-current-user? true ; Will load user details next
+          :authenticated? true
+          :token token
+          :current-user nil}))
+
+(defn set-fully-authenticated "Sets authenticated to true and populates current-user."
+  [token user]
+  (swap! app-state assoc-in [:auth]
+         {:loading-current-user? false
+          :authenticated? true
           :token token
           :current-user user}))
+
+(defn set-unauthenticated
+  "Sets authenticated to false and clears user/token info."
+  []
+  (swap! app-state assoc-in [:auth]
+         {:loading-current-user? false
+          :authenticated? false
+          :token nil
+          :current-user nil}))
 
 (defn reset-auth-state!
   "Resets the authentication part of the app state to initial values."
   []
-  (swap! app-state assoc-in [:auth]
-         {:loading? false
-          :authenticated? false
-          :token nil
-          :current-user nil}))
+  (set-unauthenticated))
 
 ;; Router state updaters
 (defn set-current-route [match]

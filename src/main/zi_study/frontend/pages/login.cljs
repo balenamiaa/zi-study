@@ -34,12 +34,12 @@
                                      (reset! loading false)
                                      (if (:success result)
                                        (do
-                                         (state/set-authenticated true (:token result) (:user result))
+                                         (state/set-fully-authenticated (:token result) (:user result))
                                          (rfe/push-state :zi-study.frontend.core/home))
                                        (reset! error (:error result))))))
 
-        valid-form? #(and (not (empty? @email))
-                          (not (empty? @password))
+        valid-form? #(and (seq? @email)
+                          (seq? @password)
                           (email-valid? @email))]
 
     (fn []

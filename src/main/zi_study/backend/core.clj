@@ -38,6 +38,7 @@
                                       muuntaja/format-request-middleware
                                       wrap-keyword-params]}}]
     ["/login"    {:post {:handler auth/login-handler}}]
+    ["/logout"   {:post {:handler auth/logout-handler}}]
     ["/me"       {:get {:handler auth/current-user-handler
                         :middleware [auth/wrap-authentication]}}]]
    ["/api/uploads" {}

@@ -175,91 +175,91 @@
           (r/with-let [difficulty-open? (r/atom false)]
             [:div {:class "flex-shrink-0 mb-2 sm:mb-0"}
              [dropdown {:trigger [button {:variant (if @rx-difficulty :primary :outlined)
-                                         :size :sm
-                                         :start-icon lucide-icons/BarChart2
-                                         :class "whitespace-nowrap w-[120px]"}
-                                 [:div {:class "flex items-center justify-between w-full"}
-                                  [:span {:class "truncate max-w-[75px]"}
-                                   (or (case @rx-difficulty
-                                         1 "Easy"
-                                         2 "Level 2"
-                                         3 "Medium"
-                                         4 "Level 4"
-                                         5 "Hard"
-                                         nil)
-                                       "Difficulty")]
-                                  [:span {:class "flex-shrink-0 ml-1 inline-flex"}
-                                   [:> lucide-icons/ChevronDown {:size 14}]]]]
-                       :open? difficulty-open?
-                       :width :match-trigger
-                       :min-width "120px"
-                       :on-close #(apply-filters set-id)}
+                                          :size :sm
+                                          :start-icon lucide-icons/BarChart2
+                                          :class "whitespace-nowrap w-[120px]"}
+                                  [:div {:class "flex items-center justify-between w-full"}
+                                   [:span {:class "truncate max-w-[75px]"}
+                                    (or (case @rx-difficulty
+                                          1 "Easy"
+                                          2 "Level 2"
+                                          3 "Medium"
+                                          4 "Level 4"
+                                          5 "Hard"
+                                          nil)
+                                        "Difficulty")]
+                                   [:span {:class "flex-shrink-0 ml-1 inline-flex"}
+                                    [:> lucide-icons/ChevronDown {:size 14}]]]]
+                        :open? difficulty-open?
+                        :width :match-trigger
+                        :min-width "120px"
+                        :on-close #(apply-filters set-id)}
 
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :difficulty nil))
-                                      (reset! difficulty-open? false))
-                         :selected? (nil? @rx-difficulty)}
-              "Any Difficulty"]
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :difficulty 1))
-                                      (reset! difficulty-open? false))
-                         :selected? (= @rx-difficulty 1)}
-              "Level 1 (Easy)"]
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :difficulty 2))
-                                      (reset! difficulty-open? false))
-                         :selected? (= @rx-difficulty 2)}
-              "Level 2"]
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :difficulty 3))
-                                      (reset! difficulty-open? false))
-                         :selected? (= @rx-difficulty 3)}
-              "Level 3 (Medium)"]
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :difficulty 4))
-                                      (reset! difficulty-open? false))
-                         :selected? (= @rx-difficulty 4)}
-              "Level 4"]
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :difficulty 5))
-                                      (reset! difficulty-open? false))
-                         :selected? (= @rx-difficulty 5)}
-              "Level 5 (Hard)"]]])
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :difficulty nil))
+                                       (reset! difficulty-open? false))
+                          :selected? (nil? @rx-difficulty)}
+               "Any Difficulty"]
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :difficulty 1))
+                                       (reset! difficulty-open? false))
+                          :selected? (= @rx-difficulty 1)}
+               "Level 1 (Easy)"]
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :difficulty 2))
+                                       (reset! difficulty-open? false))
+                          :selected? (= @rx-difficulty 2)}
+               "Level 2"]
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :difficulty 3))
+                                       (reset! difficulty-open? false))
+                          :selected? (= @rx-difficulty 3)}
+               "Level 3 (Medium)"]
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :difficulty 4))
+                                       (reset! difficulty-open? false))
+                          :selected? (= @rx-difficulty 4)}
+               "Level 4"]
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :difficulty 5))
+                                       (reset! difficulty-open? false))
+                          :selected? (= @rx-difficulty 5)}
+               "Level 5 (Hard)"]]])
 
           ;; Status dropdown
           (r/with-let [answered-open? (r/atom false)]
             [:div {:class "flex-shrink-0 mb-2 sm:mb-0"}
              [dropdown {:trigger [button {:variant (if (not (nil? @rx-answered)) :primary :outlined)
-                                         :size :sm
-                                         :start-icon lucide-icons/CheckCircle
-                                         :class "whitespace-nowrap w-[120px]"}
-                                 [:div {:class "flex items-center justify-between w-full"}
-                                  [:span {:class "truncate max-w-[75px]"}
-                                   (case @rx-answered
-                                     true "Answered"
-                                     false "Unanswered"
-                                     "Any Status")]
-                                  [:span {:class "flex-shrink-0 ml-1 inline-flex"}
-                                   [:> lucide-icons/ChevronDown {:size 14}]]]]
-                       :open? answered-open?
-                       :width :match-trigger
-                       :min-width "120px"
-                       :on-close #(apply-filters set-id)}
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :answered nil))
-                                      (reset! answered-open? false))
-                         :selected? (nil? @rx-answered)}
-              "Any Status"]
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :answered true))
-                                      (reset! answered-open? false))
-                         :selected? (true? @rx-answered)}
-              "Answered"]
-             [menu-item {:on-click #(do
-                                      (state/set-current-set-filters (assoc @rx-filters :answered false))
-                                      (reset! answered-open? false))
-                         :selected? (false? @rx-answered)}
-              "Unanswered"]]])]
+                                          :size :sm
+                                          :start-icon lucide-icons/CheckCircle
+                                          :class "whitespace-nowrap w-[120px]"}
+                                  [:div {:class "flex items-center justify-between w-full"}
+                                   [:span {:class "truncate max-w-[75px]"}
+                                    (case @rx-answered
+                                      true "Answered"
+                                      false "Unanswered"
+                                      "Any Status")]
+                                   [:span {:class "flex-shrink-0 ml-1 inline-flex"}
+                                    [:> lucide-icons/ChevronDown {:size 14}]]]]
+                        :open? answered-open?
+                        :width :match-trigger
+                        :min-width "120px"
+                        :on-close #(apply-filters set-id)}
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :answered nil))
+                                       (reset! answered-open? false))
+                          :selected? (nil? @rx-answered)}
+               "Any Status"]
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :answered true))
+                                       (reset! answered-open? false))
+                          :selected? (true? @rx-answered)}
+               "Answered"]
+              [menu-item {:on-click #(do
+                                       (state/set-current-set-filters (assoc @rx-filters :answered false))
+                                       (reset! answered-open? false))
+                          :selected? (false? @rx-answered)}
+               "Unanswered"]]])]
 
          ;; Right side - Bookmarked toggle + Reset
          [:div {:class "flex flex-wrap items-center gap-2"}
@@ -306,7 +306,7 @@
       "Clear filters"])])
 
 (defn questions-component []
-  (fn [match] ; match is passed from parent (set-page)
+  (fn [match]
     (let [set-id (get-in match [:parameters :path :set-id])
           current-set-full-state @(state/get-current-set-state)
           questions (:questions current-set-full-state)
@@ -431,7 +431,6 @@
 
     :component-will-unmount
     (fn []
-      ;; Clear out the current set data when leaving the page
       (state/set-current-set nil [])
       (state/set-current-set-error nil)
       (state/set-current-set-questions-error nil)
@@ -439,7 +438,7 @@
       (state/set-current-set-questions-loading false))
 
     :reagent-render
-    (fn [match] ; match is the route match data
+    (fn [match]
       (let [current-set-state @(state/get-current-set-state)
             details (:details current-set-state)
             set-loading? (:loading? current-set-state)

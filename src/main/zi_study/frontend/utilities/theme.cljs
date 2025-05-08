@@ -57,8 +57,7 @@
 
     (.addEventListener system-theme-media-query "change" handle-system-theme-change)
     (reset! cleanup-system-theme-listener-fn
-            #(.removeEventListener system-theme-media-query "change" handle-system-theme-change))
-    (js/console.log "System theme change listener initialized.")))
+            #(.removeEventListener system-theme-media-query "change" handle-system-theme-change))))
 ;; --- End System Theme Change Listener ---
 
 (defn initialize-theme

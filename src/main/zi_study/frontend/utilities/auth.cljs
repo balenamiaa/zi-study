@@ -72,7 +72,17 @@
                :error "No token found"})))
 
 (defn logout
-  "Logout the current user"
+  "Logout the current user. Calls backend to clear session cookie and removes local token."
   [callback]
   (auth-core/remove-token)
-  (callback {:success true}))
+  (state/reset-auth-state!)
+  
+  (http/fetch-auth "/api/auth/logout"
+                   {:method "POST"}
+                   (fn [result]
+                     (if (:success result)
+                       (do
+                         (callback {:success true}))
+                       (do
+                         (println "Logout: Server call to clear session failed, but locally logged out.")
+                         (callback {:success true :warning "Server session might still be active."}))))))

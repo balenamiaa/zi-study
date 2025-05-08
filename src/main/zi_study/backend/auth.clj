@@ -127,14 +127,24 @@
           (resp/status 400)) ; Set Bad Request status
       (if-let [user (get-user-by-email email)]
         (if (verify-password password (:password_hash user))
-          (let [token (create-token user)]
-            (resp/response {:token token
-                            ; Return user details without hash
-                            :user (dissoc user :password_hash)}))
+          (let [token (create-token user)
+                response-body {:token token
+                               :user (dissoc user :password_hash)}
+                cookie-attrs {:http-only true
+                              :secure false ; Set to true in production if using HTTPS
+                              :same-site :lax
+                              :path "/"
+                              :max-age (/ token-expiry-millis 1000)}] ; Max-Age is in seconds
+            (-> (resp/response response-body)
+                (resp/set-cookie "auth-session-active" "true" cookie-attrs)))
           (-> (resp/response {:error "Invalid credentials."})
               (resp/status 401))) ; Unauthorized
         (-> (resp/response {:error "Invalid credentials."})
             (resp/status 401)))))) ; Unauthorized
+
+(defn logout-handler [_request]
+  (-> (resp/response {:message "Logged out successfully"})
+      (resp/set-cookie "auth-session-active" "" {:max-age 0 :path "/" :http-only true})))
 
 ;; --- Authentication Middleware & Handler --- 
 

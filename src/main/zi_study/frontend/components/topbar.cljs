@@ -207,7 +207,7 @@
         (let [auth-state @(state/get-auth-state)
               authenticated? (:authenticated? auth-state)
               current-user (:current-user auth-state)
-              auth-loading? (:loading? auth-state)]
+              auth-loading? (:loading-current-user? auth-state)]
           [:div
            ;; Mobile menu overlay
            [mobile-menu show-mobile-menu current-route]

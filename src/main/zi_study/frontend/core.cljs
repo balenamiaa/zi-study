@@ -3,6 +3,7 @@
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
             [reitit.coercion.spec :as rss]
+            [zi-study.frontend.utilities.cookies :as cookies]
             [zi-study.frontend.pages.home :refer [home-page]]
             [zi-study.frontend.pages.components :refer [components-page]]
             [zi-study.frontend.pages.not-found :refer [not-found-page]]
@@ -50,6 +51,32 @@
      :parameters {:path {:set-id int?}}}]])
 
 
+(defn fetch-current-user-details
+  "Fetches current user details if a token exists."
+  []
+  (let [token (auth-core/get-token)]
+    (when token
+      (state/set-auth-loading-current-user true)
+      (auth/get-current-user
+       (fn [result]
+         (if (:success result)
+           (state/set-fully-authenticated token (:user result))
+           (do
+             (auth-core/remove-token)
+             (state/set-unauthenticated))))))))
+
+(defn initial-auth-check
+  "Performs the initial, faster authentication check using local token and cookie."
+  []
+  (let [token (auth-core/get-token)
+        session-cookie (cookies/get-cookie "auth-session-active")]
+    (if (and token session-cookie)
+      (do
+        (state/set-provisionally-authenticated token)
+        (fetch-current-user-details)) ; Now fetch full details
+      (state/set-unauthenticated))))
+
+
 (defn app []
   (let [current-match (state/get-current-route)
         current-route (get-in current-match [:data :name])]
@@ -60,17 +87,9 @@
                     [view current-match])
                   [not-found-page])}]))
 
-(defn check-auth-status []
-  (state/set-auth-loading true)
-  (auth/get-current-user
-   (fn [result]
-     (if (:success result)
-       (state/set-authenticated true (auth-core/get-token) (:user result))
-       (state/set-authenticated false nil nil)))))
-
 (defn init []
   (theme/initialize-theme)
-
+  (initial-auth-check)
   (rfe/start!
    (rf/router routes {:data {:coercion rss/coercion}})
    (fn [m] (state/set-current-route m))
@@ -78,7 +97,7 @@
 
   (rdom/render (rdom/create-root (js/document.getElementById "app")) [app])
 
-  (check-auth-status))
+  (fetch-current-user-details))
 
 (defn reload []
   (println "Reloading frontend...")
