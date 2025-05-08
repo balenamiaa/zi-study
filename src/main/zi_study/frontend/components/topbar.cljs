@@ -66,7 +66,7 @@
    ;; Menu items
    [:nav {:class "flex flex-col items-center justify-center h-full text-xl space-y-6"}
     ;; User info at the top (if authenticated)
-    (let [auth-state (state/get-auth-state)
+    (let [auth-state @(state/get-auth-state)
           authenticated? (:authenticated? auth-state)
           current-user (:current-user auth-state)]
       (when (and authenticated? current-user)
@@ -97,7 +97,7 @@
 
     ;; Render the same auth buttons that appear in the topbar
     [:div {:class "absolute bottom-8 left-0 right-0 flex justify-center space-x-4 mt-10"}
-     (let [auth-state (state/get-auth-state)
+     (let [auth-state @(state/get-auth-state)
            authenticated? (:authenticated? auth-state)]
        (if authenticated?
          [button {:variant :outlined
@@ -204,7 +204,7 @@
 
       :reagent-render
       (fn [{:keys [current-route]}]
-        (let [auth-state (state/get-auth-state)
+        (let [auth-state @(state/get-auth-state)
               authenticated? (:authenticated? auth-state)
               current-user (:current-user auth-state)
               auth-loading? (:loading? auth-state)]

@@ -4,7 +4,6 @@
             [reitit.frontend.easy :as rfe]
             [reitit.coercion.spec :as rss]
             [zi-study.frontend.pages.home :refer [home-page]]
-            [zi-study.frontend.pages.items :refer [demo-item-page]]
             [zi-study.frontend.pages.components :refer [components-page]]
             [zi-study.frontend.pages.not-found :refer [not-found-page]]
             [zi-study.frontend.pages.login :refer [login-page]]
@@ -15,13 +14,14 @@
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.auth :as auth]
             [zi-study.frontend.utilities.auth-core :as auth-core]
+            [zi-study.frontend.utilities.auth-guard :as auth-guard]
             [zi-study.frontend.utilities.theme :as theme]))
 
 
 
 (def routes
   [["/"
-    {:name ::homez
+    {:name ::home
      :view home-page}]
 
    ["/components"
@@ -36,19 +36,17 @@
     {:name ::register
      :view register-page}]
 
-   ["/item/:id"
-    {:name ::item
-     :view demo-item-page
-     :parameters {:path {:id int?}
-                  :query map?}}]
-
    ["/question-sets"
     {:name ::question-sets
-     :view question-sets-page}]
+     :view (auth-guard/with-auth {:content question-sets-page
+                                  :redirect-to ::login
+                                  :message "Please log in to view the question sets"})}]
 
    ["/question-sets/:set-id"
     {:name ::set-page
-     :view set-page
+     :view (auth-guard/with-auth {:content set-page
+                                  :redirect-to ::login
+                                  :message "Please log in to view the question set"})
      :parameters {:path {:set-id int?}}}]])
 
 

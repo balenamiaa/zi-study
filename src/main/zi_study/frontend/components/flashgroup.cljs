@@ -25,7 +25,7 @@
       (#{:top-center} position) "slide-in-top"
       (#{:bottom-center} position) "slide-in-bottom"
       :else "slide-in-right")
-    
+
     ;; Exit animations
     :else
     (cond
@@ -62,23 +62,23 @@
   (let [messages (get-flash-messages)]
     (r/create-class
      {:display-name "FlashGroup"
-      
+
       :reagent-render
       (fn []
         (when (seq @messages)
           [:div
            ;; Group messages by position
            (for [[position pos-messages] (->> @messages
-                                             (group-by #(or (:position %) default-position)))]
+                                              (group-by #(or (:position %) default-position)))]
              ^{:key (name position)}
              [:div.fixed.z-50.pointer-events-none.flash-container
               {:class (cx (get-position-classes position)
                           {"bottom-position" (#{:bottom-left :bottom-center :bottom-right} position)})}
-              
+
               ;; Render messages for this position
               (for [msg pos-messages]
                 ^{:key (:id msg)}
                 [:div.pointer-events-auto
-                 [flash-message (assoc msg 
+                 [flash-message (assoc msg
                                        :position position
                                        :on-hide remove-flash-message)]])])]))})))

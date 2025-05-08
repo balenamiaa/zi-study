@@ -41,7 +41,7 @@
 
 (defn- handle-system-theme-change [_event]
   ;; Only re-apply if the current app setting is :system
-  (when (= (:theme (state/get-ui-state)) :system)
+  (when (= (:theme @(state/get-ui-state)) :system)
     (js/console.log "System theme changed, re-applying effective theme for :system choice.")
     (apply-theme (get-effective-theme :system))))
 
@@ -93,13 +93,5 @@
   ;; If the theme is set to :system, ensure our listener is active and correct theme is applied.
   ;; If set to :light or :dark, the listener for system changes isn't strictly needed to drive updates,
   ;; but it doesn't harm to keep it active. The handle-system-theme-change checks current app state.
-  (js/console.log (str "Theme set to: " chosen-theme-kw
-                       ", Effective theme: " (get-effective-theme chosen-theme-kw))))
+  )
 
-;; toggle-theme is now obsolete with the new 3-way switcher.
-;; (defn toggle-theme
-;;   "Toggle between light and dark themes"
-;;   []
-;;   (let [current-theme (:theme (state/get-ui-state))
-;;         new-theme (if (= current-theme :light) :dark :light)]
-;;     (set-theme new-theme))) 

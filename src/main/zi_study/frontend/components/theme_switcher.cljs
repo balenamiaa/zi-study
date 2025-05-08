@@ -9,7 +9,7 @@
   "A theme switcher component that allows selecting between system, light, and dark themes.
   The UI is a pill-shaped control with a sliding indicator for the active theme."
   []
-  (let [current-theme-atom (r/reaction (:theme (state/get-ui-state)))
+  (let [current-theme-atom (r/reaction (:theme @(state/get-ui-state)))
         themes [{:value :system :icon lucide/Monitor :title "Auto (System Preference)"}
                 {:value :light  :icon lucide/Sun :title "Light Theme"}
                 {:value :dark   :icon lucide/Moon :title "Dark Theme"}]]
@@ -38,25 +38,26 @@
                 :style {:transform thumb-transform}}])
 
        ;; Buttons for each theme option
-       (for [{:keys [value icon title]} themes]
-         ^{:key (keyword (str "theme-btn-" (name value)))}
-         [:button
-          {:title title
-           :class (cx "relative z-10 flex h-8 w-8 items-center justify-center rounded-full"
-                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
-                      "focus-visible:ring-offset-[var(--color-light-bg)] dark:focus-visible:ring-offset-[var(--color-dark-bg)]"
-                      "transition-colors duration-100")
-           :on-click #(theme/set-theme value)
-           :aria-label title
-           :role "radio"
-           :aria-checked (= @current-theme-atom value)}
-          [:> icon {:size 18 ; Slightly smaller icon for better padding within the 32px button
-                    :class (cx "transition-colors duration-100"
-                               (if (= @current-theme-atom value)
-                                 ;; Active icon color (contrasts with thumb)
-                                 "text-[var(--color-primary)] dark:text-[var(--color-primary-300)]"
-                                 ;; Inactive icon color
-                                 "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]")
-                               ;; Hover color for inactive icons (only apply if not active)
-                               (when (not= @current-theme-atom value)
-                                 "hover:text-[var(--color-light-text-primary)] dark:hover:text-[var(--color-dark-text-primary)]"))}]])])))
+       (doall
+        (for [{:keys [value icon title]} themes]
+          ^{:key (keyword (str "theme-btn-" (name value)))}
+          [:button
+           {:title title
+            :class (cx "relative z-10 flex h-8 w-8 items-center justify-center rounded-full"
+                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
+                       "focus-visible:ring-offset-[var(--color-light-bg)] dark:focus-visible:ring-offset-[var(--color-dark-bg)]"
+                       "transition-colors duration-100")
+            :on-click #(theme/set-theme value)
+            :aria-label title
+            :role "radio"
+            :aria-checked (= @current-theme-atom value)}
+           [:> icon {:size 18 ; Slightly smaller icon for better padding within the 32px button
+                     :class (cx "transition-colors duration-100"
+                                (if (= @current-theme-atom value)
+                                  ;; Active icon color (contrasts with thumb)
+                                  "text-[var(--color-primary)] dark:text-[var(--color-primary-300)]"
+                                  ;; Inactive icon color
+                                  "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]")
+                                ;; Hover color for inactive icons (only apply if not active)
+                                (when (not= @current-theme-atom value)
+                                  "hover:text-[var(--color-light-text-primary)] dark:hover:text-[var(--color-dark-text-primary)]"))}]]))])))

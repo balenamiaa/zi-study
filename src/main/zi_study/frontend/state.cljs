@@ -8,8 +8,6 @@
                   :authenticated? false
                   :current-user nil}
            :ui {:theme :system
-                :sidebar-open? false
-                ;; Add flash messages to state
                 :flash {:messages []
                         :counter 0}} ;; Counter for unique IDs
            :router {:current-match nil}
@@ -61,10 +59,10 @@
 
 ;; Selectors
 (defn get-auth-state []
-  (:auth @app-state))
+  (r/reaction (:auth @app-state)))
 
 (defn get-ui-state []
-  (:ui @app-state))
+  (r/reaction (:ui @app-state)))
 
 (defn get-current-route []
   (get-in @app-state [:router :current-match]))
@@ -134,9 +132,6 @@
 ;; UI state updaters
 (defn set-theme [theme]
   (swap! app-state assoc-in [:ui :theme] theme))
-
-(defn toggle-sidebar []
-  (swap! app-state update-in [:ui :sidebar-open?] not))
 
 ;; --- Question Bank Updaters ---
 
