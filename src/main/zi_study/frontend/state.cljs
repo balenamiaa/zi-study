@@ -1,5 +1,94 @@
 (ns zi-study.frontend.state
-  (:require [reagent.core :as r]))
+  (:require
+   [malli.core :as m]
+   [malli.error :as me]
+   [reagent.core :as r]))
+
+;; State schema definitions
+(def auth-schema
+  [:map
+   [:loading-current-user? :boolean]
+   [:token {:optional true} [:maybe :string]]
+   [:authenticated? :boolean]
+   [:current-user {:optional true} [:maybe :map]]])
+
+(def ui-schema
+  [:map
+   [:theme [:enum :system :light :dark]]
+   [:flash [:map
+            [:messages [:vector :map]]
+            [:counter :int]]]])
+
+(def router-schema
+  [:map
+   [:current-match {:optional true} [:maybe :map]]])
+
+(def sets-filters-schema
+  [:map
+   [:tags [:set :string]]
+   [:search :string]
+   [:sort_by :string]
+   [:sort_order :string]
+   [:show_bookmarked_sets :boolean]])
+
+(def sets-schema
+  [:map
+   [:list [:vector :map]]
+   [:loading? :boolean]
+   [:error {:optional true} [:maybe :string]]
+   [:pagination [:map
+                 [:page :int]
+                 [:limit :int]
+                 [:total_pages :int]
+                 [:total_items :int]]]
+   [:filters sets-filters-schema]])
+
+(def current-set-filters-schema
+  [:map
+   [:difficulty {:optional true} [:maybe :int]]
+   [:answered {:optional true} [:maybe :boolean]]
+   [:correct {:optional true} [:maybe :boolean]]
+   [:bookmarked {:optional true} [:maybe :boolean]]
+   [:search :string]])
+
+(def current-set-schema
+  [:map
+   [:details {:optional true} [:maybe :map]]
+   [:questions [:vector :map]]
+   [:questions-loading? :boolean]
+   [:questions-error {:optional true} [:maybe :string]]
+   [:loading? :boolean]
+   [:error {:optional true} [:maybe :string]]
+   [:filters current-set-filters-schema]])
+
+(def tags-schema
+  [:map
+   [:list [:vector :string]]
+   [:loading? :boolean]
+   [:error {:optional true} [:maybe :string]]])
+
+(def bookmarks-schema
+  [:map
+   [:list [:vector :map]]
+   [:loading? :boolean]
+   [:error {:optional true} [:maybe :string]]])
+
+(def question-bank-schema
+  [:map
+   [:sets sets-schema]
+   [:current-set current-set-schema]
+   [:tags tags-schema]
+   [:bookmarks bookmarks-schema]
+   [:answer-submission [:map-of :any :map]]
+   [:bookmark-toggle [:map-of :any :map]]
+   [:self-eval [:map-of :any :map]]])
+
+(def app-state-schema
+  [:map
+   [:auth auth-schema]
+   [:ui ui-schema]
+   [:router router-schema]
+   [:question-bank question-bank-schema]])
 
 ;; Core application state
 (defonce app-state
@@ -9,7 +98,7 @@
                   :current-user nil}
            :ui {:theme :system
                 :flash {:messages []
-                        :counter 0}} ;; Counter for unique IDs
+                        :counter 0}}
            :router {:current-match nil}
 
            :question-bank
@@ -20,39 +109,31 @@
                                 :limit 12
                                 :total_items 0
                                 :total_pages 0}
-                   :filters {:tags #{} ; Set of selected tag names
+                   :filters {:tags #{}
                              :search ""
                              :sort_by "created_at"
                              :sort_order "desc"
-                             :show_bookmarked_sets false ; Toggle to show only sets with bookmarks
-                             }}
-            :current-set {:details nil ; Details of the specific set being viewed
+                             :show_bookmarked_sets false}}
+            :current-set {:details nil
                           :questions []
                           :questions-loading? true
                           :questions-error nil
                           :loading? true
                           :error nil
                           :filters {:difficulty nil
-                                    :answered nil ; true, false, nil (any)
-                                    :correct nil ; true, false, nil (any)
-                                    :bookmarked nil ; true, false, nil (any)
+                                    :answered nil
+                                    :correct nil
+                                    :bookmarked nil
                                     :search ""}}
             :tags {:list []
                    :loading? true
                    :error nil}
-            :bookmarks {:list [] ; Grouped by set { :set-id ..., :set-title ..., :questions [...] }
+            :bookmarks {:list []
                         :loading? false
                         :error nil}
-            :answer-submission {; Track submission state per question
-                                ;; :question-id-1 {:loading? true, :error "..."}
-                                ;; :question-id-2 {:loading? false, :error nil}
-                                }
-            :bookmark-toggle {; Track toggle state per question
-                              ;; :question-id-1 {:loading? true}
-                              }
-            :self-eval {; Track self-eval state per question
-                        ;; :question-id-1 {:loading? true}
-                        }}}))
+            :answer-submission {}
+            :bookmark-toggle {}
+            :self-eval {}}}))
 
 ;; Track the last applied filters to avoid redundant API calls
 (defonce last-applied-filters (r/atom nil))
@@ -66,10 +147,6 @@
 
 (defn get-current-route []
   (r/reaction (get-in @app-state [:router :current-match])))
-
-;; --- Question Bank Selectors ---
-(defn get-qb-state []
-  (r/reaction (:question-bank @app-state)))
 
 (defn get-sets-list-state []
   (r/reaction (get-in @app-state [:question-bank :sets])))
@@ -101,8 +178,9 @@
 (defn get-self-eval-state [question-id]
   (r/reaction (get-in @app-state [:question-bank :self-eval question-id])))
 
-(defn get-last-applied-filters []
+(defn get-last-applied-filters
   "Returns an atom containing the last set of filters that were actually applied"
+  []
   last-applied-filters)
 
 ;; Auth state updaters
@@ -275,12 +353,19 @@
 (defn add-flash-message
   "Add a flash message to the UI
   
-   Options:
-   - message: (required) message text or hiccup to display
-   - color: :primary, :success, :warning, :error, :info (default :info)
-   - variant: :filled, :outlined, :soft (default :soft)
-   - auto-hide: milliseconds before auto-hiding (default 5000, nil for no auto-hide)
-   - position: :top-left, :top-center, :top-right, :bottom-left, :bottom-center, :bottom-right (default :top-right)"
+   Options scheme:
+   [:map
+    [:message {:doc \"message text or hiccup to display\"} [:or :string :vector]]
+    [:color {:doc \"message color\", :optional true, :default :info} 
+            [:enum :primary :success :warning :error :info]]
+    [:variant {:doc \"message style\", :optional true, :default :soft} 
+              [:enum :filled :outlined :soft]]
+    [:auto-hide {:doc \"milliseconds before auto-hiding, nil for no auto-hide\", 
+                 :optional true, :default 5000} 
+                [:maybe :int]]
+    [:position {:doc \"message position\", :optional true, :default :top-right}
+               [:enum :top-left :top-center :top-right 
+                      :bottom-left :bottom-center :bottom-right]]]"
   [{:keys [message color variant auto-hide position]
     :or {color :info
          variant :soft
@@ -290,6 +375,7 @@
   (let [id (swap! app-state update-in [:ui :flash :counter] inc)]
     (swap! app-state update-in [:ui :flash :messages]
            conj (assoc opts
+                       :message message
                        :id id
                        :color color
                        :variant variant
@@ -328,3 +414,40 @@
   "Show an info flash message"
   [message & {:as opts}]
   (add-flash-message (merge {:message message :color :info} opts)))
+
+;; =========== Malli Schema Validation Utilities ===========
+
+(defn validate-state-update
+  "Validates a state update against a schema segment. 
+   Returns [true nil] if valid, [false error-message] if invalid."
+  [schema data & {:keys [humanize]
+                  :or {humanize true}}]
+  (let [valid? (m/validate schema data)]
+    (if valid?
+      [true nil]
+      (let [explain-data (m/explain schema data)
+            error-msg (if humanize
+                        (str "Invalid state data: "
+                             (pr-str (me/humanize explain-data)))
+                        explain-data)]
+        [false error-msg]))))
+
+(defn safe-update-state!
+  "Updates app-state only if the update is valid according to the schema.
+   Otherwise logs an error. Returns true if update was successful, false otherwise."
+  [path schema new-value]
+  (let [[valid? error] (validate-state-update schema new-value)]
+    (if valid?
+      (do
+        (swap! app-state assoc-in path new-value)
+        true)
+      (do
+        (js/console.error "State update validation failed for path" path ":" error)
+        false))))
+
+;; In development mode, we could add Schema validation to every state change:
+;; (add-watch app-state :schema-validator
+;;   (fn [_ _ _ new-state]
+;;     (when-not (m/validate app-state-schema new-state)
+;;       (let [explain-data (m/explain app-state-schema new-state)]
+;;         (js/console.error "App state schema validation failed:" (m/humanize explain-data))))))

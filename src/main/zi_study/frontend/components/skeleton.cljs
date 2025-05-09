@@ -1,6 +1,5 @@
 (ns zi-study.frontend.components.skeleton
-  (:require [reagent.core :as r]
-            [zi-study.frontend.utilities :refer [cx]]))
+  (:require [zi-study.frontend.utilities :refer [cx]]))
 
 (defn skeleton
   "A skeleton loading component with multiple variants.
@@ -184,7 +183,7 @@
     (for [r (range rows)]
       ^{:key r}
       [:div {:class (cx "flex gap-4 p-2 rounded-md"
-                         (when (even? r) "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)]"))}
+                        (when (even? r) "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)]"))}
        (for [c (range cols)]
          ^{:key c}
          [skeleton {:variant :text

@@ -1,8 +1,6 @@
 (ns zi-study.frontend.components.button
-  (:require
-   [reagent.core :as r]
-   ["lucide-react" :as lucide-icons]
-   [zi-study.frontend.utilities :refer [add-ripple-effect cx]]))
+  (:require ["lucide-react" :as lucide-icons]
+            [zi-study.frontend.utilities :refer [add-ripple-effect cx]]))
 
 (defn button
   "A beautiful, customizable button component.
@@ -53,11 +51,11 @@
                            "opacity-50 cursor-not-allowed pointer-events-none"
                            "")
 
-        all-classes (cx base-classes 
-                        variant-classes 
-                        size-classes 
-                        width-classes 
-                        disabled-classes 
+        all-classes (cx base-classes
+                        variant-classes
+                        size-classes
+                        width-classes
+                        disabled-classes
                         class)
 
         handle-click (fn [e]
@@ -81,7 +79,7 @@
      ;; The actual content, always present for layout, but opacity changed when loading.
      ;; Content is not focusable or interactive if loading via disabled_classes on parent.
      [:span {:class (cx "inline-flex gap-1 items-center justify-center w-full"
-                         (if loading "opacity-0" "opacity-100"))}
+                        (if loading "opacity-0" "opacity-100"))}
       (when start-icon
         [:div {:class "btn-icon flex-shrink-0"}
          [:> start-icon]])

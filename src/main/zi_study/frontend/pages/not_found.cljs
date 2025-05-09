@@ -3,8 +3,7 @@
    [reagent.core :as r]
    ["lucide-react" :as lucide-icons]
    [reitit.frontend.easy :as rfe]
-   [zi-study.frontend.components.button :refer [button]]
-   [zi-study.frontend.state :refer [app-state]]))
+   [zi-study.frontend.components.button :refer [button]]))
 
 (defn not-found-page []
   (r/create-class

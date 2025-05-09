@@ -1,7 +1,5 @@
 (ns zi-study.frontend.components.badge
-  (:require
-   [reagent.core :as r]
-   [zi-study.frontend.utilities :refer [cx]]))
+  (:require [zi-study.frontend.utilities :refer [cx]]))
 
 (defn badge
   "A badge component for showing counts, notifications, or status indicators.

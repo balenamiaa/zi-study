@@ -76,13 +76,12 @@
   [callback]
   (auth-core/remove-token)
   (state/reset-auth-state!)
-  
+
   (http/fetch-auth "/api/auth/logout"
                    {:method "POST"}
                    (fn [result]
                      (if (:success result)
-                       (do
-                         (callback {:success true}))
+                       (callback {:success true})
                        (do
                          (println "Logout: Server call to clear session failed, but locally logged out.")
                          (callback {:success true :warning "Server session might still be active."}))))))

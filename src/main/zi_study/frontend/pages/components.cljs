@@ -9,7 +9,7 @@
    [zi-study.frontend.components.badge :refer [badge avatar]]
    [zi-study.frontend.components.alert :refer [alert toast]]
    [zi-study.frontend.components.toggle :refer [toggle checkbox radio]]
-   [zi-study.frontend.components.skeleton :refer [skeleton skeleton-text skeleton-card skeleton-avatar-with-text skeleton-table]]
+   [zi-study.frontend.components.skeleton :refer [skeleton skeleton-text skeleton-avatar-with-text skeleton-table]]
    [zi-study.frontend.components.dropdown :refer [dropdown menu-item menu-divider menu-label]]))
 
 (defn section-title [title]
