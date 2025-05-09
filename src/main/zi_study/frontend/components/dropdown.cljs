@@ -3,7 +3,8 @@
    [reagent.core :as r]
    ["react-dom" :as react-dom]
    ["lucide-react" :as lucide-icons]
-   [zi-study.frontend.utilities :refer [cx]]))
+   [zi-study.frontend.utilities :refer [cx]]
+   [zi-study.frontend.components.tooltip :refer [tooltip]]))
 
 (defn dropdown
   "A dropdown menu component with consistent width handling.

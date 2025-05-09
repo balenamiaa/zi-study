@@ -227,14 +227,14 @@
                              :width "calc(100% - 2rem)"
                              :transition "colors 300ms ease, opacity 200ms ease, transform 200ms ease"}}
 
-            [:div {:class "mx-auto px-4 w-full"}
+            [:div {:class "mx-auto px-2 sm:px-4 w-full"}
              [:div {:class "flex items-center justify-between"}
 
               ;; Left section: Logo and desktop navigation
-              [:div {:class "flex items-center"}
+              [:div {:class "flex items-center flex-shrink-0"}
                ;; Logo
                [:a {:href (rfe/href :zi-study.frontend.core/home)
-                    :class (cx "mr-4 transition-transform duration-300 scale-95")}
+                    :class (cx "mr-2 sm:mr-4 transition-transform duration-300 scale-90 sm:scale-95")}
                 [logo]]
 
                ;; Desktop navigation - more compact design
@@ -250,7 +250,7 @@
                      label]))]]
 
               ;; Right section: Actions
-              [:div {:class "flex items-center space-x-1"}
+              [:div {:class "flex items-center space-x-0.5 sm:space-x-1"}
 
                ;; Search button - visible on all screens
                [action-button
@@ -267,8 +267,8 @@
                (cond
                  auth-loading?
                  ;; Show loading indicator
-                 [:div {:class "w-8 h-8 flex items-center justify-center"}
-                  [:div {:class "animate-spin rounded-full h-5 w-5 border-b-2 border-t-2 border-[var(--color-primary)]"}]]
+                 [:div {:class "w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center"}
+                  [:div {:class "animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-t-2 border-[var(--color-primary)]"}]]
 
                  authenticated?
                  ;; User is logged in - show user menu
@@ -294,13 +294,13 @@
                            :on-click #(rfe/push-state :zi-study.frontend.core/register)}
                    "Register"]])
 
-               ;; Mobile menu toggle
+               ;; Mobile menu toggle - Fixed the overflow issue
                [button {:variant :text
-                        :class "ml-1 md:hidden"
-                        :size :sm
+                        :class "ml-0.5 md:hidden flex-shrink-0"
+                        :size :xs
                         :on-click #(reset! show-mobile-menu true)
                         :aria-label "Open menu"
                         :aria-expanded @show-mobile-menu}
                 [:> lucide-icons/Menu
-                 {:size 20
+                 {:size 18
                   :className "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]]]]]]]))})))

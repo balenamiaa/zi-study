@@ -6,6 +6,7 @@
             [zi-study.frontend.components.dropdown :refer [dropdown menu-item]]
             [zi-study.frontend.components.button :refer [button]]
             [zi-study.frontend.components.badge :refer [badge]]
+            [zi-study.frontend.components.tooltip :refer [tooltip]]
             [zi-study.frontend.utilities :refer [cx]]
             ["lucide-react" :as lucide-icons]))
 
@@ -25,8 +26,8 @@
    [:div {:class "flex flex-col md:flex-row md:items-center gap-3 items-center"}
     ;; Premise text with letter labeling (A, B, C, etc.)
     [:div {:class "flex items-start md:w-1/2"}
-     [badge {:size :md 
-             :class (cx "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]" 
+     [badge {:size :md
+             :class (cx "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
                         "h-[38px] py-2 px-4 text-left flex items-center justify-center font-bold"
                         "bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]")}
       premise]]
@@ -42,7 +43,7 @@
                                (if (and is-submitted? (not is-correct?))
                                  :error
                                  :outlined))
-                    :class (cx "w-full justify-between text-left"
+                    :class (cx "justify-between text-left"
                                "border-2 shadow-sm hover:shadow transition-all")
                     :disabled disabled?
                     :end-icon (cond
@@ -56,9 +57,9 @@
                       (get options selected-option-idx)
                       "Select an option...")]]
                   :open? open?
-                  :width "w-full"
+                  :width :match-trigger
                   :transition :scale
-                  :class (cx "max-h-60 shadow-lg" 
+                  :class (cx "max-h-60 shadow-lg"
                              "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)]")}
 
         (for [[option-idx option-text] (map-indexed vector options)]
@@ -69,7 +70,11 @@
                       :class (cx (when (= option-idx actual-correct-option-idx) "font-medium")
                                  "hover:bg-[var(--color-primary-50)] dark:hover:bg-[rgba(233,30,99,0.15)]")
                       :end-icon (when (and is-submitted? (= option-idx actual-correct-option-idx)) lucide-icons/Check)}
-           option-text])])]]
+           [tooltip {:content option-text
+                     :position :top
+                     :variant :light
+                     :delay 100}
+            [:span {:class "truncate"} option-text]]])])]]
 
    ;; Show correct answer indicator when submitted and incorrect
    (when (and is-submitted?
@@ -190,10 +195,10 @@
                [:div {:class "flex justify-between text-sm mb-1"}
                 [:span {:class "font-medium"} "Your Score"]
                 [:span {:class (cx "font-medium"
-                                  (cond
-                                    (>= percentage-correct 80) "text-[var(--color-success)]"
-                                    (>= percentage-correct 50) "text-[var(--color-warning)]"
-                                    :else "text-[var(--color-error)]"))} 
+                                   (cond
+                                     (>= percentage-correct 80) "text-[var(--color-success)]"
+                                     (>= percentage-correct 50) "text-[var(--color-warning)]"
+                                     :else "text-[var(--color-error)]"))}
                  (str correct-count "/" total-count " (" (Math/round percentage-correct) "%)")]]
                [:div {:class "h-2 w-full bg-[var(--color-light-bg-subtle)] dark:bg-[var(--color-dark-bg-subtle)] rounded-full overflow-hidden"}
                 [:div {:class (cx "h-full transition-all duration-1000 ease-out"

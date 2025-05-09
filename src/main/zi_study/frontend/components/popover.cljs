@@ -120,45 +120,7 @@
               [content #(toggle false)]
               content)]]))})))
 
-(defn tooltip
-  "A simplified tooltip component built on top of popover.
-   
-   Options:
-   - text: tooltip text content
-   - placement: :top, :right, :bottom, :left (default :top)
-   - delay: delay in ms before showing (default 300)
-   - class: additional CSS classes
-   - trigger: element that triggers the tooltip"
-  [{:keys [delay] :or {delay 300}}]
-  (let [show? (r/atom false)
-        timer (r/atom nil)
 
-        handle-mouse-enter (fn []
-                             (when @timer
-                               (js/clearTimeout @timer)
-                               (reset! timer nil))
-                             (reset! timer (js/setTimeout #(reset! show? true) delay)))
-
-        handle-mouse-leave (fn []
-                             (when @timer
-                               (js/clearTimeout @timer)
-                               (reset! timer nil))
-                             (reset! show? false))]
-
-    (fn [{:keys [text placement class trigger]
-          :or {placement :top}}]
-      [:div.inline-block
-       {:on-mouse-enter handle-mouse-enter
-        :on-mouse-leave handle-mouse-leave
-        :on-focus handle-mouse-enter
-        :on-blur handle-mouse-leave}
-
-       [popover {:trigger trigger
-                 :is-open @show?
-                 :placement placement
-                 :arrow true
-                 :class (str "py-1 px-2 text-xs " class)
-                 :content [:div text]}]])))
 
 (defn menu-item
   "A menu item for use in context menus and dropdown menus.

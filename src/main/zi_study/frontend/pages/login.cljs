@@ -7,7 +7,8 @@
             [zi-study.frontend.components.alert :refer [alert]]
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.auth :as auth]
-            ["lucide-react" :as lucide-icons]))
+            ["lucide-react" :as lucide-icons]
+            [clojure.string :as str]))
 
 (defn email-valid? [email]
   (re-matches #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" email))
@@ -38,8 +39,8 @@
                                          (rfe/push-state :zi-study.frontend.core/home))
                                        (reset! error (:error result))))))
 
-        valid-form? #(and (seq? @email)
-                          (seq? @password)
+        valid-form? #(and (-> @email str/blank? not)
+                          (-> @password str/blank? not)
                           (email-valid? @email))]
 
     (fn []

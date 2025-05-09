@@ -44,11 +44,11 @@
         ;; Simplified position-class: JS will handle precise pixel positioning.
         ;; We only keep classes that don't interfere with left/top calculations.
         position-class (case position
-                         :top "mb-2"    ; Margin for spacing from trigger
+                         :top "mb-8"    ; Increased margin for better spacing from trigger
                          :right "ml-2"   ; Margin for spacing from trigger
                          :bottom "mt-2"  ; Margin for spacing from trigger
                          :left "mr-2"    ; Margin for spacing from trigger
-                         "mb-2")     ; Default margin for spacing
+                         "mb-8")     ; Default margin for spacing
 
         arrow-class (case position
                       :top "bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-t-current border-l-transparent border-r-transparent border-b-transparent"
@@ -85,7 +85,7 @@
                                      ;; getBoundingClientRect returns viewport coordinates, so we add scroll
                                      ;; to convert to absolute document coordinates
                                      position-map {:top {:left (+ left scroll-x (/ trigger-width 2) (- (/ tooltip-width 2)))
-                                                         :top (+ top scroll-y (- tooltip-height 8))}
+                                                         :top (- (+ top scroll-y) tooltip-height 8)} ;; Position above the element with 8px gap
                                                    :right {:left (+ right scroll-x 8)
                                                            :top (+ top scroll-y (/ trigger-height 2) (- (/ tooltip-height 2)))}
                                                    :bottom {:left (+ left scroll-x (/ trigger-width 2) (- (/ tooltip-width 2)))

@@ -14,10 +14,10 @@
 
            :question-bank
            {:sets {:list []
-                   :loading? false
+                   :loading? true
                    :error nil
                    :pagination {:page 1
-                                :limit 10
+                                :limit 12
                                 :total_items 0
                                 :total_pages 0}
                    :filters {:tags #{} ; Set of selected tag names
@@ -28,9 +28,9 @@
                              }}
             :current-set {:details nil ; Details of the specific set being viewed
                           :questions []
-                          :questions-loading? false
+                          :questions-loading? true
                           :questions-error nil
-                          :loading? false
+                          :loading? true
                           :error nil
                           :filters {:difficulty nil
                                     :answered nil ; true, false, nil (any)
@@ -38,7 +38,7 @@
                                     :bookmarked nil ; true, false, nil (any)
                                     :search ""}}
             :tags {:list []
-                   :loading? false
+                   :loading? true
                    :error nil}
             :bookmarks {:list [] ; Grouped by set { :set-id ..., :set-title ..., :questions [...] }
                         :loading? false
@@ -65,7 +65,7 @@
   (r/reaction (:ui @app-state)))
 
 (defn get-current-route []
-  (get-in @app-state [:router :current-match]))
+  (r/reaction (get-in @app-state [:router :current-match])))
 
 ;; --- Question Bank Selectors ---
 (defn get-qb-state []
