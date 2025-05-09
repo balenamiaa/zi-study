@@ -3,7 +3,8 @@
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.http :as http]
             [zi-study.frontend.components.button :refer [button]]
-            ["lucide-react" :as lucide-icons]))
+            ["lucide-react" :as lucide-icons]
+            [clojure.string :as str]))
 
 
 ;; Helper to get and dereference the answer submission state reaction
@@ -41,6 +42,26 @@
                        :else "bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"))}
    number])
 
+(defn slanted-question-badge [number answered? correct?]
+  (let [base-color (cond
+                     (and answered? correct?) "bg-[var(--color-success-100)] text-[var(--color-success)] dark:bg-[rgba(var(--color-success-rgb),0.2)]"
+                     answered? "bg-[var(--color-error-100)] text-[var(--color-error)] dark:bg-[rgba(var(--color-error-rgb),0.2)]"
+                     :else "bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]")
+        accent-color (cond
+                       (and answered? correct?) "bg-[var(--color-success-50)] dark:bg-[rgba(var(--color-success-rgb),0.1)]"
+                       answered? "bg-[var(--color-error-50)] dark:bg-[rgba(var(--color-error-rgb),0.1)]"
+                       :else "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)]")]
+    [:div {:class "flex items-center relative h-8 mr-3"}
+     ;; Circle with number
+     [:div {:class (str "w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-medium text-sm z-10 " base-color)}
+      number]
+     
+     ;; Extended background with slanted edge
+     [:div {:class (str "absolute left-4 h-8 w-12 " accent-color)}]
+     ;; Slanted edge shape using clip-path
+     [:div {:class (str "absolute left-16 h-8 w-4 " accent-color)
+            :style {:clip-path "polygon(0 0, 0% 100%, 100% 100%)"}}]]))
+
 (defn retention-hint [{:keys [text]}]
   (when text
     [:div {:class "mt-3 px-4 py-3 rounded-md bg-[var(--color-secondary-50)] dark:bg-[rgba(var(--color-secondary-rgb),0.1)] flex items-start"}
@@ -65,14 +86,23 @@
 (defn question-header
   "Common header component for questions"
   [{:keys [index question-id text retention-aid submitted? is-correct? bookmarked clear-fn]}]
-  (let [clearing (r/atom false)]
+  (let [clearing (r/atom false)
+        has-text? (not (str/blank? text))]
     [:div {:class "p-4 sm:p-5"}
      ;; Top row with question number, text, and bookmark button
-     [:div {:class "flex items-start justify-between gap-2 sm:gap-4"}
-      [:div {:class "flex items-start flex-grow min-w-0"} ; min-w-0 prevents flex children from overflowing
-       [question-number-badge index submitted? is-correct?]
-       [:div {:class "min-w-0 flex-grow"} ; min-w-0 allows text to truncate properly
-        [:div {:class "font-medium text-base sm:text-lg mb-1 break-words"} text]]]
+     [:div {:class (str "flex items-start justify-between gap-2 sm:gap-4 "
+                        (when-not has-text? "pb-1"))}
+      ;; If there's no text, create a more compact and visual badge
+      (if has-text?
+        ;; With text - standard layout
+        [:div {:class "flex items-start flex-grow min-w-0"} ; min-w-0 prevents flex children from overflowing
+         [question-number-badge index submitted? is-correct?]
+         [:div {:class "min-w-0 flex-grow"} ; min-w-0 allows text to truncate properly
+          [:div {:class "font-medium text-base sm:text-lg mb-1 break-words"} text]]]
+        
+        ;; Without text - stylish badge with extended shape
+        [:div {:class "flex items-center h-8"} ; Set height to match badge
+         [slanted-question-badge index submitted? is-correct?]])
       
       ;; Bookmark button - always visible
       [:div {:class "flex-shrink-0 ml-2"}

@@ -1,17 +1,15 @@
- ;; src/main/zi_study/backend/importer.clj
- (ns zi_study.backend.importer
-   (:require [clojure.edn :as edn]
-             [clojure.data.json :as json]
-             [clojure.java.io :as io]
-             [clojure.string :as str]
-             [next.jdbc :as jdbc]
-             [next.jdbc.sql :as sql]
-             [next.jdbc.result-set :as rs]
-             [zi-study.backend.db :refer [db-pool]] ; Get the HikariDataSource atom
-             [malli.core :as m]
-             [malli.error :as me]))
+(ns zi-study.backend.importer
+  (:require [clojure.edn :as edn]
+            [clojure.data.json :as json]
+            [clojure.java.io :as io]
+            [next.jdbc :as jdbc]
+            [next.jdbc.sql :as sql]
+            [next.jdbc.result-set :as rs]
+            [zi-study.backend.db :refer [db-pool]] ; Get the HikariDataSource atom
+            [malli.core :as m]
+            [malli.error :as me]))
 
-;; --- Malli Schemas for Validation ---
+
 
 (def NonBlankString [:string {:min 1}])
 (def OptionalString [:maybe :string])
@@ -218,10 +216,10 @@
 
 (defn import-question-set-data!
   "Imports question set data from an EDN or JSON string or file path.
-    Validates the data structure, resolves temporary IDs, and inserts into the database.
-    Performs the import within a single transaction; rolls back on any error.
-    `input` can be a file path (string) or the raw data string.
-    `format` must be :edn or :json."
+      Validates the data structure, resolves temporary IDs, and inserts into the database.
+      Performs the import within a single transaction; rolls back on any error.
+      `input` can be a file path (string) or the raw data string.
+      `format` must be :edn or :json."
   [input format]
   (jdbc/with-transaction [tx @db-pool] ; Use the connection pool from db.clj
     (try

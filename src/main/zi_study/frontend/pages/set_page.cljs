@@ -17,6 +17,7 @@
             [zi-study.frontend.components.questions.true-false-question :refer [true-false-question]]
             [zi-study.frontend.components.questions.mcq-multi-question :refer [mcq-multi-question]]
             [zi-study.frontend.components.questions.emq-question :refer [emq-question]]
+            [zi-study.frontend.components.questions.cloze-question :refer [cloze-question]]
             [clojure.string :as str]
             ["lucide-react" :as lucide-icons]))
 
@@ -276,6 +277,7 @@
                                   (apply-filters set-id))}]]]]]])))
 
 (defn question-component [question index]
+  (prn question)
   [:div {:id (str "question-" (:question-id question))
          :class "scroll-mt-4 transition-all duration-300 "}
    (case (:question-type question)
@@ -284,6 +286,7 @@
      "true-false" [true-false-question (assoc question :index index)]
      "mcq-multi" [mcq-multi-question (assoc question :index index)]
      "emq" [emq-question (assoc question :index index)]
+     "cloze" [cloze-question (assoc question :index index)]
      [:div {:class "mb-6 p-4 border border-dashed rounded-md border-[var(--color-warning)] bg-[var(--color-warning-50)] dark:bg-[rgba(var(--color-warning-rgb),0.1)]"}
       [:div {:class "flex items-center"}
        [:> lucide-icons/AlertCircle {:size 20 :className "text-[var(--color-warning)] mr-2"}]

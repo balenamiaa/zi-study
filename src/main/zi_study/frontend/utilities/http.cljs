@@ -150,7 +150,7 @@
                   (state/set-current-set-error (:error result))
                   (callback {:success false :error (:error result)}))))))
 
-(defn get-set-questions [set-id filters callback] \
+(defn get-set-questions [set-id filters callback]
   (state/set-current-set-questions-loading true)
   (let [query-string (build-query-params filters)
         url (str "/api/question-sets/" set-id "/questions" (when query-string (str "?" query-string)))]

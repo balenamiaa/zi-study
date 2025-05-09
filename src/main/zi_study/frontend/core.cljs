@@ -4,7 +4,6 @@
             [reitit.frontend.easy :as rfe]
             [reitit.frontend.controllers :as rfc]
             [reitit.coercion.spec :as rss]
-            [zi-study.frontend.utilities.cookies :as cookies]
             [zi-study.frontend.pages.home :refer [home-page]]
             [zi-study.frontend.pages.components :refer [components-page]]
             [zi-study.frontend.pages.not-found :refer [not-found-page]]

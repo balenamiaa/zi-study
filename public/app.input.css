@@ -960,3 +960,14 @@
 .shadow-5 {
     box-shadow: var(--shadow-5);
 }
+
+/* Cloze Question Styles */
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.cloze-blank-animated {
+    animation: pop 0.3s ease-in-out;
+}
