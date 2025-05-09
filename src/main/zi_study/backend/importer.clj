@@ -141,16 +141,39 @@
                      :explanation (me/humanize (m/explain schema data))}))))
 
 (defn- get-or-create-tag [tx tag-name]
-  (if-let [existing-tag-id (:tag_id (sql/find-by-keys tx :tags {:tag_name tag-name} {:columns [:tag_id]}))]
-    existing-tag-id ; Return existing ID if found
-    ;; Otherwise, insert and then get the last ID for SQLite
-    (do
-      (sql/insert! tx :tags {:tag_name tag-name})
-      (:last_insert_rowid
-       (jdbc/execute-one! tx ["SELECT last_insert_rowid() AS last_insert_rowid"]
-                          {:builder-fn rs/as-unqualified-lower-maps})))))
+  (let [clean-tag-name (-> tag-name str .trim)]
+    ;; First try: Find using an exact match
+    (if-let [existing-tag-id (:tag_id (sql/find-by-keys tx :tags {:tag_name clean-tag-name} {:columns [:tag_id]}))]
+      existing-tag-id ; Return existing ID if found
+      ;; Not found with exact match, try case-insensitive match with SQL LIKE or LOWER
+      (if-let [existing-tag-id (:tag_id (jdbc/execute-one! tx 
+                                                          ["SELECT tag_id FROM tags WHERE LOWER(tag_name) = LOWER(?)" 
+                                                           clean-tag-name]
+                                                          {:builder-fn rs/as-unqualified-lower-maps}))]
+        existing-tag-id
+        ;; If still not found, create it
+        (try
+          (sql/insert! tx :tags {:tag_name clean-tag-name})
+          (:last_insert_rowid
+           (jdbc/execute-one! tx ["SELECT last_insert_rowid() AS last_insert_rowid"]
+                              {:builder-fn rs/as-unqualified-lower-maps}))
+          (catch Exception e
+            ;; If insert fails due to constraint violation, try to find it again one last time
+            ;; (handles race condition where tag might have been created between our check and insert)
+            (let [error-msg (ex-message e)]
+              (if (and (instance? org.sqlite.SQLiteException e)
+                       (.contains error-msg "UNIQUE constraint failed: tags.tag_name"))
+                (if-let [existing-tag-id (:tag_id (jdbc/execute-one! tx 
+                                                                    ["SELECT tag_id FROM tags WHERE LOWER(tag_name) = LOWER(?)" 
+                                                                     clean-tag-name]
+                                                                    {:builder-fn rs/as-unqualified-lower-maps}))]
+                  existing-tag-id
+                  (throw (ex-info (str "Failed to get or create tag: " clean-tag-name) 
+                                  {:error :tag-creation-failed, :tag-name clean-tag-name} e)))
+                ;; If it's another type of error, rethrow
+                (throw e)))))))))
 
-(defn- process-mcq-data [question temp-id-map]
+(defn- process-mcq-data [question]
   (let [options (:options question)
         correct-temp-id (get question :correct_option_temp_id) ; Single MCQ
         correct-temp-ids (set (get question :correct_option_temp_ids)) ; Multi MCQ
@@ -165,22 +188,22 @@
                                                                       idx)))
                                                     (into []))))))
 
-(defn- process-written-data [question temp-id-map]
+(defn- process-written-data [question]
   {:text (:question_text question)
    :correct_answer (:correct_answer_text question)
    :explanation (:explanation question)})
 
-(defn- process-true-false-data [question temp-id-map]
+(defn- process-true-false-data [question]
   {:text (:question_text question)
    :is_correct_true (:is_correct_answer_true question)
    :explanation (:explanation question)})
 
-(defn- process-cloze-data [question temp-id-map]
+(defn- process-cloze-data [question]
   {:cloze_text (:cloze_text question) ; e.g., "Hello {{c1::World}}."
    :answers (:answers question)       ; e.g., ["World"]
    :explanation (:explanation question)})
 
-(defn- process-emq-data [question temp-id-map]
+(defn- process-emq-data [question]
   (let [premises (:premises question)
         options (:options question)
         matches (:matches question)
@@ -197,7 +220,7 @@
 
 (defn- process-question
   "Transforms the validated question map into the format needed for DB insertion (esp. question_data)."
-  [question temp-id-map]
+  [question]
   (let [q-type (keyword (:type question))
         processor (case q-type
                     :mcq-single process-mcq-data
@@ -209,7 +232,7 @@
     {:set_id nil ; Will be set later
      :question_type (name q-type)
      :difficulty (:difficulty question)
-     :question_data (pr-str (processor question temp-id-map)) ; Store processed data as EDN string
+     :question_data (pr-str (processor question)) ; Store processed data as EDN string
      :retention_aid (:retention_aid question)}))
 
 ;; --- Main Import Function ---
@@ -247,25 +270,23 @@
               (println (str "  Associated tags: " (:tags set-data []))))
 
             ;; 3. Process and Insert Questions
-            (let [temp-id-map (atom {})] ; To store temp_id -> db_id mappings if needed (not strictly needed here as we generate new IDs)
-              (doseq [[idx question] (map-indexed vector (:questions set-data))]
-                (try
-                  (let [processed-q (process-question question @temp-id-map)
-                        q-insert-data (assoc processed-q
-                                             :set_id set-id
-                                             :order_in_set idx) ; Use index as order
-                        ;; Use lower-case keys for result map
-                        {:keys [question_id]} (sql/insert! tx :questions q-insert-data {:builder-fn rs/as-unqualified-lower-maps})]
-                    (println (str "    Inserted question " idx " (temp: " (:temp_id question) ") -> ID: " question_id))
-                    (swap! temp-id-map assoc (:temp_id question) question_id)) ; Store mapping if needed later
-                  (catch Exception e
-                    (throw (ex-info (str "Failed to process/insert question at index " idx " in set '" (:title set-data) "'")
-                                    {:error :question-processing-failed
-                                     :set-title (:title set-data)
-                                     :question-index idx
-                                     :question-temp-id (:temp_id question)
-                                     :original-exception e}
-                                    e))))))
+            (doseq [[idx question] (map-indexed vector (:questions set-data))]
+              (try
+                (let [processed-q (process-question question)
+                      q-insert-data (assoc processed-q
+                                           :set_id set-id
+                                           :order_in_set idx) ; Use index as order
+                      ;; Use lower-case keys for result map
+                      {:keys [question_id]} (sql/insert! tx :questions q-insert-data {:builder-fn rs/as-unqualified-lower-maps})]
+                  (println (str "    Inserted question " idx " (temp: " (:temp_id question) ") -> ID: " question_id)))
+                (catch Exception e
+                  (throw (ex-info (str "Failed to process/insert question at index " idx " in set '" (:title set-data) "'")
+                                  {:error :question-processing-failed
+                                   :set-title (:title set-data)
+                                   :question-index idx
+                                   :question-temp-id (:temp_id question)
+                                   :original-exception e}
+                                  e)))))
             (swap! results conj {:set_id set-id :title (:title set-data)})))
 
         {:success true :imported-sets @results})
@@ -284,7 +305,7 @@
 ;; --- Example Usage (in REPL) ---
 (comment
   (require '[zi-study.backend.db :as db])
-  (db/init-db!) ; Ensure DB is initialized and migrations (including new ones) ran
+  (db/init-db!)
 
   (def edn-example-str
     [{:title "Neuroscience Basics Revised"
@@ -349,6 +370,7 @@
   ;; (import-question-set-data! "path/to/your/import_data.edn" :edn)
   ;; (import-question-set-data! "path/to/your/import_data.json" :json)
 
+  (import-question-set-data! "questionz/lower_gi_bleeding.edn" :edn)
 
   ;; Verify insertion (using next.jdbc directly for quick check)
   (jdbc/execute! @db/db-pool ["SELECT * FROM question_sets;"])

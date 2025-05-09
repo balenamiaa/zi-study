@@ -13,13 +13,13 @@
   (cond
     (map? value)
     (reduce-kv (fn [m k v]
-                (let [new-k (if (keyword? k) k (keyword k))]
-                  (assoc m new-k (ensure-keyword-keys v))))
-              {} value)
-    
+                 (let [new-k (if (keyword? k) k (keyword k))]
+                   (assoc m new-k (ensure-keyword-keys v))))
+               {} value)
+
     (or (seq? value) (vector? value))
     (mapv ensure-keyword-keys value)
-    
+
     :else value))
 
 (defn blank-input
@@ -47,34 +47,34 @@
                              incorrect? "bg-red-50 dark:bg-red-900/10"
                              :else "")
                            " " @animation-class)}
-         
+
          ;; Use tooltip for incorrect answers when submitted
          (if (and submitted? incorrect? actual-answer)
            [tooltip {:content [:div {:class "p-1"}
-                              [:div {:class "text-center mb-1 font-medium text-xs"}
-                               "Correct Answer"]
-                              [:div {:class "bg-[rgba(255,255,255,0.1)] rounded-md px-2 py-1 text-center font-medium text-xs"}
-                               actual-answer]]
-                    :position :bottom
-                    :delay 100
-                    :variant :dark
-                    :max-width "120px"
-                    :class "text-white"}
+                               [:div {:class "text-center mb-1 font-medium text-xs"}
+                                "Correct Answer"]
+                               [:div {:class "bg-[rgba(255,255,255,0.1)] rounded-md px-2 py-1 text-center font-medium text-xs"}
+                                actual-answer]]
+                     :position :bottom
+                     :delay 100
+                     :variant :dark
+                     :max-width "120px"
+                     :class "text-white"}
             [:input {:type "text"
-                    :value value
-                    :disabled (or pending? disabled?)
-                    :placeholder placeholder
-                    :on-focus #(.select (.-target %))
-                    :ref #(reset! input-ref %)
-                    :on-change #(when on-change
-                                  (on-change index (.. % -target -value)))
-                    :class (str "w-20 fit-content py-0.5 text-center border-b-2 bg-transparent outline-none transition-all duration-300 text-xs sm:text-sm "
-                                (cond
-                                  pending? "border-[var(--color-primary)] dark:border-[var(--color-primary-300)]"
-                                  correct? "border-[var(--color-success)] dark:border-[var(--color-success-300)]"
-                                  incorrect? "border-[var(--color-error)] dark:border-[var(--color-error-300)]"
-                                  :else "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] focus:border-[var(--color-primary)] dark:focus:border-[var(--color-primary-300)]"))}]]
-           
+                     :value value
+                     :disabled (or pending? disabled?)
+                     :placeholder placeholder
+                     :on-focus #(.select (.-target %))
+                     :ref #(reset! input-ref %)
+                     :on-change #(when on-change
+                                   (on-change index (.. % -target -value)))
+                     :class (str "w-20 fit-content py-0.5 text-center border-b-2 bg-transparent outline-none transition-all duration-300 text-xs sm:text-sm "
+                                 (cond
+                                   pending? "border-[var(--color-primary)] dark:border-[var(--color-primary-300)]"
+                                   correct? "border-[var(--color-success)] dark:border-[var(--color-success-300)]"
+                                   incorrect? "border-[var(--color-error)] dark:border-[var(--color-error-300)]"
+                                   :else "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] focus:border-[var(--color-primary)] dark:focus:border-[var(--color-primary-300)]"))}]]
+
            ;; Regular input without tooltip
            [:input {:type "text"
                     :value value
@@ -135,28 +135,28 @@
                        (= correct-count 0) "text-[var(--color-error)]"
                        :else "text-[var(--color-primary)]")]
     [:div {:class "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-lg p-2 mb-3 shadow-sm"}
-      [:div {:class "flex items-center justify-between mb-1.5"}
-       [:div {:class "flex items-center gap-1.5"}
-        [:> (cond
-              (= correct-count blank-count) lucide-icons/CheckCircle
-              (= correct-count 0) lucide-icons/XCircle
-              :else lucide-icons/CircleDot)
-         {:size 16
-          :className status-color}]
-        [:span {:class (str "font-medium text-sm " status-color)}
-         (str correct-count "/" blank-count " correct")]]
-       
-       [:span {:class "text-xs font-medium bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] px-1.5 py-0.5 rounded-full"}
-        (str (Math/round percentage) "%")]]
-      
-      ;; Enhanced progress bar
-      [:div {:class "h-2 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-full overflow-hidden"}
-       [:div {:class (str "h-full transition-all duration-700 ease-out rounded-full "
-                          (cond
-                            (= correct-count blank-count) "bg-[var(--color-success)]"
-                            (= correct-count 0) "bg-[var(--color-error)]"
-                            :else "bg-gradient-to-r from-[var(--color-primary-400)] to-[var(--color-primary)]"))
-              :style {:width (str percentage "%")}}]]]))
+     [:div {:class "flex items-center justify-between mb-1.5"}
+      [:div {:class "flex items-center gap-1.5"}
+       [:> (cond
+             (= correct-count blank-count) lucide-icons/CheckCircle
+             (= correct-count 0) lucide-icons/XCircle
+             :else lucide-icons/CircleDot)
+        {:size 16
+         :className status-color}]
+       [:span {:class (str "font-medium text-sm " status-color)}
+        (str correct-count "/" blank-count " correct")]]
+
+      [:span {:class "text-xs font-medium bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] px-1.5 py-0.5 rounded-full"}
+       (str (Math/round percentage) "%")]]
+
+     ;; Enhanced progress bar
+     [:div {:class "h-2 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-full overflow-hidden"}
+      [:div {:class (str "h-full transition-all duration-700 ease-out rounded-full "
+                         (cond
+                           (= correct-count blank-count) "bg-[var(--color-success)]"
+                           (= correct-count 0) "bg-[var(--color-error)]"
+                           :else "bg-gradient-to-r from-[var(--color-primary-400)] to-[var(--color-primary)]"))
+             :style {:width (str percentage "%")}}]]]))
 
 (defn cloze-question []
   (let [answers (r/atom {}) ; Map of blank-id -> user input
@@ -282,14 +282,14 @@
                                                 (filter map?)
                                                 (map :blank))]
                                 (zipmap blanks correct-answers)))
-              
+
               ;; Create a map to track blank number by index
               blank-indices (reduce (fn [acc segment]
-                                     (if (map? segment)
-                                       (assoc acc (:blank segment) (inc (count acc)))
-                                       acc))
-                                   {}
-                                   current-segments)]
+                                      (if (map? segment)
+                                        (assoc acc (:blank segment) (inc (count acc)))
+                                        acc))
+                                    {}
+                                    current-segments)]
 
           [card {:class "mb-6" :variant :outlined}
            ;; Question Header - don't show text as we'll display it in the main content

@@ -61,63 +61,75 @@
      [:> lucide-icons/CheckSquare {:size 20 :className "ml-auto text-[var(--color-success)] opacity-70" :title "This was a correct option"}])])
 
 (defn mcq-multi-question []
-  (let [selected-indices-atom (r/atom #{}) ; Stores a set of selected option indices
+  (let [selected-indices-atom (r/atom []) ; Store as vector instead of set
         show-explanation? (r/atom false)
         submitting-via-local-flag? (r/atom false)]
     (r/create-class
      {:component-did-mount
       (fn [this]
         (let [[props] (r/argv this)
-              initial-submitted-answer-set (get-in (:user-answer props) [:answer-data :answer] #{})]
-          (reset! selected-indices-atom (if (set? initial-submitted-answer-set) initial-submitted-answer-set #{}))))
+              initial-submitted-answer (get-in (:user-answer props) [:answer-data :answer] [])]
+          (reset! selected-indices-atom (cond
+                                          (vector? initial-submitted-answer) initial-submitted-answer
+                                          (set? initial-submitted-answer) (vec initial-submitted-answer)
+                                          :else []))))
 
       :component-did-update
       (fn [this [_ old-props]]
         (let [[new-props] (r/argv this)
-              old-submitted-answer-set (get-in (:user-answer old-props) [:answer-data :answer] ::not-found)
-              new-submitted-answer-set (get-in (:user-answer new-props) [:answer-data :answer] ::not-found)]
-          (when (not= old-submitted-answer-set new-submitted-answer-set)
+              old-submitted-answer (get-in (:user-answer old-props) [:answer-data :answer] ::not-found)
+              new-submitted-answer (get-in (:user-answer new-props) [:answer-data :answer] ::not-found)]
+          (when (not= old-submitted-answer new-submitted-answer)
             (when-not @submitting-via-local-flag?
-              (reset! selected-indices-atom (if (and (not= new-submitted-answer-set ::not-found) (set? new-submitted-answer-set))
-                                              new-submitted-answer-set
-                                              #{}))))))
+              (reset! selected-indices-atom (cond
+                                              (and (not= new-submitted-answer ::not-found) (vector? new-submitted-answer))
+                                              new-submitted-answer
+                                              
+                                              (and (not= new-submitted-answer ::not-found) (set? new-submitted-answer))
+                                              (vec new-submitted-answer)
+                                              
+                                              :else []))))))
       :reagent-render
       (fn [props]
         (let [{:keys [question-id question-data user-answer retention-aid bookmarked index]} props
               submission-state-from-global (q-common/get-deref-answer-submission-state question-id)
 
               is-globally-answered? (boolean user-answer)
-              globally-submitted-indices-set (get-in user-answer [:answer-data :answer] #{})
+              globally-submitted-indices (get-in user-answer [:answer-data :answer] [])
+              globally-submitted-indices-set (if (set? globally-submitted-indices)
+                                              globally-submitted-indices
+                                              (set globally-submitted-indices))
               is-globally-correct? (when is-globally-answered? (= 1 (:is-correct user-answer)))
 
               is-submission-pending-globally? (or (:loading? submission-state-from-global) @submitting-via-local-flag?)
 
               text (:text question-data)
               options (:options question-data)
-              actual-correct-indices-set (set (:correct_indices question-data)) ; Ensure it's a set
+              actual-correct-indices-set (set (:correct_indices question-data))
               explanation (:explanation question-data)
 
-              current-selection-set @selected-indices-atom
+              current-selection @selected-indices-atom
+              current-selection-set (set current-selection)
 
               handle-option-toggle (fn [toggled-idx]
                                      (when-not (or is-globally-answered? is-submission-pending-globally?)
                                        (swap! selected-indices-atom
-                                              (fn [current-set]
-                                                (if (contains? current-set toggled-idx)
-                                                  (disj current-set toggled-idx)
-                                                  (conj current-set toggled-idx))))))
+                                              (fn [current-vec]
+                                                (if (some #(= % toggled-idx) current-vec)
+                                                  (vec (remove #(= % toggled-idx) current-vec))
+                                                  (conj current-vec toggled-idx))))))
 
               handle-submit (fn []
-                              (when (and (not is-submission-pending-globally?) (seq current-selection-set))
+                              (when (and (not is-submission-pending-globally?) (seq current-selection))
                                 (reset! submitting-via-local-flag? true)
-                                (http/submit-answer question-id "mcq-multi" {:answer current-selection-set}
+                                (http/submit-answer question-id "mcq-multi" {:answer current-selection}
                                                     (fn [_result]
                                                       (reset! submitting-via-local-flag? false)
                                                       ;; user-answer in props will update via state change
                                                       ))))
               clear-fn (fn [callback]
                          (http/delete-answer question-id callback)
-                         (reset! selected-indices-atom #{}))]
+                         (reset! selected-indices-atom []))]
 
           [card {:class "mb-8" :variant :outlined}
            [q-common/question-header {:index (inc index)
@@ -153,7 +165,7 @@
             (when (not is-globally-answered?)
               [:div {:class "mt-6 flex justify-end"}
                [button {:variant :primary
-                        :disabled (or is-submission-pending-globally? (empty? current-selection-set))
+                        :disabled (or is-submission-pending-globally? (empty? current-selection))
                         :loading is-submission-pending-globally?
                         :on-click handle-submit}
                 "Submit Answer"]])

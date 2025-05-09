@@ -280,6 +280,7 @@
   (prn question)
   [:div {:id (str "question-" (:question-id question))
          :class "scroll-mt-4 transition-all duration-300 "}
+   (prn question)
    (case (:question-type question)
      "written" [written-question (assoc question :index index)]
      "mcq-single" [mcq-single-question (assoc question :index index)]

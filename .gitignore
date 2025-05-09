@@ -28,3 +28,6 @@ pom.xml.asc
 
 db/
 public/uploads/
+
+questionz/
+gen_prompt

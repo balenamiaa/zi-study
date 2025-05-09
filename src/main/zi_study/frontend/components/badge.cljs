@@ -13,13 +13,15 @@
    - max: number - max value to show before displaying '+' (e.g. '5+')
    - dot: true/false (default: false) - shows a simple dot instead of content
    - position: :top-right, :top-left, :bottom-right, :bottom-left - position when used as an overlay
+   - auto-height: true/false (default: false) - allows height to adjust to content
    - class: additional CSS classes"
-  [{:keys [variant color size rounded count max dot position class]
+  [{:keys [variant color size rounded count max dot position auto-height class]
     :or   {variant :filled
            color   :primary
            size    :sm
            rounded false
-           dot     false}}
+           dot     false
+           auto-height false}}
    & children]
 
   (let [base-classes "inline-flex items-center justify-center align-middle transition-all duration-200 ease-in-out leading-none"
@@ -47,12 +49,21 @@
             :sm "w-2 h-2"
             :md "w-2.5 h-2.5"
             "w-2 h-2")
-          (case size
-            :xs "text-[0.65rem] px-1 min-w-[18px] h-[18px] flex items-center"
-            :sm "text-xs px-1.5 min-w-[20px] h-[20px] flex items-center"
-            :md "text-sm px-2 min-w-[24px] h-[24px] flex items-center"
-            :lg "text-base px-3 min-w-[28px] h-[28px] flex items-center"
-            "text-xs px-1.5 min-w-[20px] h-[20px] flex items-center"))
+          (if auto-height
+            ;; Auto height classes - height adjusts to content
+            (case size
+              :xs "text-[0.65rem] px-1 min-w-[18px] py-1 flex items-center"
+              :sm "text-xs px-1.5 min-w-[20px] py-1 flex items-center"
+              :md "text-sm px-2 min-w-[24px] py-1.5 flex items-center"
+              :lg "text-base px-3 min-w-[28px] py-2 flex items-center"
+              "text-xs px-1.5 min-w-[20px] py-1 flex items-center")
+            ;; Fixed height classes
+            (case size
+              :xs "text-[0.65rem] px-1 min-w-[18px] h-[18px] flex items-center"
+              :sm "text-xs px-1.5 min-w-[20px] h-[20px] flex items-center"
+              :md "text-sm px-2 min-w-[24px] h-[24px] flex items-center"
+              :lg "text-base px-3 min-w-[28px] h-[28px] flex items-center"
+              "text-xs px-1.5 min-w-[20px] h-[20px] flex items-center")))
 
         rounded-classes (if (or rounded dot) "rounded-full" "rounded")
 

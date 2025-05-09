@@ -26,10 +26,14 @@
    [:div {:class "flex flex-col md:flex-row md:items-center gap-3 items-center"}
     ;; Premise text with letter labeling (A, B, C, etc.)
     [:div {:class "flex items-start md:w-1/2"}
-     [badge {:size :md
-             :class (cx "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
-                        "h-[38px] py-2 px-4 text-left flex items-center justify-center font-bold"
-                        "bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]")}
+     [:div {:class (cx "rounded text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
+                       "py-2 px-4 text-left flex items-start justify-start font-bold w-full"
+                       "bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]"
+                       "min-h-9 max-h-24 h-auto overflow-y-auto"
+                       "scrollbar-thin scrollbar-track-[var(--color-light-bg)] dark:scrollbar-track-[var(--color-dark-bg)]"
+                       "scrollbar-thumb-[var(--color-light-divider)] dark:scrollbar-thumb-[var(--color-dark-divider)]"
+                       "hover:scrollbar-thumb-[var(--color-primary-300)] dark:hover:scrollbar-thumb-[var(--color-primary-500)]"
+                       "scrollbar-thumb-rounded")}
       premise]]
 
     ;; Dropdown selector for options
