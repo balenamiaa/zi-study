@@ -4,7 +4,8 @@
             [zi-study.frontend.utilities.http :as http]
             [zi-study.frontend.components.button :refer [button]]
             ["lucide-react" :as lucide-icons]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            ["marked" :as marked]))
 
 
 ;; Helper to get and dereference the answer submission state reaction
@@ -55,7 +56,7 @@
      ;; Circle with number
      [:div {:class (str "w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-medium text-sm z-10 " base-color)}
       number]
-     
+
      ;; Extended background with slanted edge
      [:div {:class (str "absolute left-4 h-8 w-12 " accent-color)}]
      ;; Slanted edge shape using clip-path
@@ -68,20 +69,83 @@
      [:> lucide-icons/Lightbulb {:size 18 :className "text-[var(--color-secondary)] mt-0.5 mr-2 flex-shrink-0"}]
      [:span {:class "text-sm text-[var(--color-secondary-800)] dark:text-[var(--color-secondary-200)] flex-grow"} text]]))
 
-(defn explanation-section [{:keys [explanation show-explanation? on-toggle]}]
+(def marked-options
+  (clj->js
+   {:gfm true
+    :breaks true
+    :sanitize false
+    :smartLists true
+    :smartypants true
+    :xhtml true}))
+
+(defn explanation-section [{:keys [explanation rx-show-explanation? on-toggle question-id]}]
   (when explanation
-    [:div {:class "mt-5 pt-4 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-     [:div {:class "flex justify-center mb-2"}
-      [button {:variant :outlined
-               :size :sm
-               :class "w-full max-w-xs"
-               :start-icon (if show-explanation? lucide-icons/EyeOff lucide-icons/Eye)
-               :on-click on-toggle}
-       (if show-explanation? "Hide Explanation" "Show Explanation")]]
-     (when show-explanation?
-       [:div {:class "mt-3 p-4 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"}
-        [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-         explanation]])]))
+    (let [container-id (str "explanation-" (or question-id (random-uuid)))
+          scroll-listener (r/atom nil)
+          debounce-timer (r/atom nil)
+          is-scrolling (r/atom false)]
+
+      (r/create-class
+       {:component-did-mount
+        (fn []
+          (let [check-visibility (fn []
+                                   (when @rx-show-explanation?
+                                     (let [el (js/document.getElementById container-id)]
+                                       (when el
+                                         (let [rect (.getBoundingClientRect el)
+                                               window-height (or (.-innerHeight js/window) (.. js/document -documentElement -clientHeight))
+                                               is-visible? (not (or (< (.-bottom rect) 0)
+                                                                    (> (.-top rect) window-height)))]
+                                           (when-not is-visible?
+                                             (on-toggle)))))))
+
+                debounced-scroll-handler (fn []
+                                           (reset! is-scrolling true)
+
+                                           (when @debounce-timer
+                                             (js/clearTimeout @debounce-timer))
+
+                                           (reset! debounce-timer
+                                                   (js/setTimeout
+                                                    (fn []
+                                                      (reset! is-scrolling false)
+                                                      (when @rx-show-explanation?
+                                                        (check-visibility)))
+                                                    300))) ; 300ms debounce
+
+                scroll-handler (fn [] (.requestAnimationFrame js/window debounced-scroll-handler))]
+
+            (reset! scroll-listener scroll-handler)
+            (.addEventListener js/window "scroll" scroll-handler #js {:passive true})))
+
+        :component-will-unmount
+        (fn []
+          ;; Clean up timers and listeners
+          (when @debounce-timer
+            (js/clearTimeout @debounce-timer))
+
+          (when @scroll-listener
+            (.removeEventListener js/window "scroll" @scroll-listener)
+            (reset! scroll-listener nil)))
+
+        :reagent-render
+        (fn [{:keys [explanation rx-show-explanation? on-toggle]}]
+          (let [show-explanation? @rx-show-explanation?]
+            [:div {:class "mt-5 pt-4 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
+             [:div {:class "flex justify-center mb-2"}
+              [button {:variant :outlined
+                       :size :sm
+                       :class "w-full max-w-xs"
+                       :start-icon (if show-explanation? lucide-icons/EyeOff lucide-icons/Eye)
+                       :on-click on-toggle}
+               (if show-explanation? "Hide Explanation" "Show Explanation")]]
+
+             ;; Only render explanation content when visible
+             (when show-explanation?
+               [:div {:id container-id
+                      :class "mt-3 p-4 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"}
+                [:div {:class "prose prose-sm dark:prose-invert prose-p:text-[var(--color-light-text-secondary)] dark:prose-p:text-[var(--color-dark-text-secondary)] prose-a:text-[var(--color-primary)] prose-headings:text-[var(--color-light-text)] dark:prose-headings:text-[var(--color-dark-text)] prose-headings:font-medium prose-img:rounded-md prose-pre:bg-[var(--color-light-bg)] dark:prose-pre:bg-[var(--color-dark-bg)] prose-pre:text-sm prose-code:text-[var(--color-primary-700)] dark:prose-code:text-[var(--color-primary-300)] prose-code:bg-[var(--color-primary-50)] dark:prose-code:bg-[rgba(var(--color-primary-rgb),0.1)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-strong:text-[var(--color-light-text)] dark:prose-strong:text-[var(--color-dark-text)] prose-li:marker:text-[var(--color-light-text-secondary)] dark:prose-li:marker:text-[var(--color-dark-text-secondary)] max-w-none"}
+                 [:div {:dangerouslySetInnerHTML (r/unsafe-html (marked/parse (str explanation) marked-options))}]]])]))}))))
 
 (defn question-header
   "Common header component for questions"
@@ -99,20 +163,20 @@
          [question-number-badge index submitted? is-correct?]
          [:div {:class "min-w-0 flex-grow"} ; min-w-0 allows text to truncate properly
           [:div {:class "font-medium text-base sm:text-lg mb-1 break-words"} text]]]
-        
+
         ;; Without text - stylish badge with extended shape
         [:div {:class "flex items-center h-8"} ; Set height to match badge
          [slanted-question-badge index submitted? is-correct?]])
-      
+
       ;; Bookmark button - always visible
       [:div {:class "flex-shrink-0 ml-2"}
        [bookmark-button {:question-id question-id
                          :bookmarked bookmarked}]]]
-     
+
      ;; Middle row - retention aid (full width on mobile)
      (when (and submitted? retention-aid)
        [retention-hint {:text retention-aid}])
-     
+
      ;; Bottom row - clear button (only when submitted)
      (when submitted?
        [:div {:class "flex justify-end mt-2"}

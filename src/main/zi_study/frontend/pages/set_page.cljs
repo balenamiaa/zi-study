@@ -277,10 +277,8 @@
                                   (apply-filters set-id))}]]]]]])))
 
 (defn question-component [question index]
-  (prn question)
   [:div {:id (str "question-" (:question-id question))
          :class "scroll-mt-4 transition-all duration-300 "}
-   (prn question)
    (case (:question-type question)
      "written" [written-question (assoc question :index index)]
      "mcq-single" [mcq-single-question (assoc question :index index)]
@@ -349,7 +347,7 @@
 
 
 (defn set-progress-header [{:keys [title description tags]}]
-  (fn [] ; Removed unnecessary inner fn
+  (fn []
     (let [questions @(state/get-current-set-questions) ; This will react to changes
           total-questions (count questions)
           answered-count (count (filter #(boolean (:user-answer %)) questions))

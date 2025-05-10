@@ -246,5 +246,6 @@
            (when (and is-submitted? explanation)
              [q-common/explanation-section
               {:explanation explanation
-               :show-explanation? @show-explanation?
-               :on-toggle #(swap! show-explanation? not)}])]))})))
+               :rx-show-explanation? show-explanation?
+               :on-toggle #(swap! show-explanation? not)
+               :question-id question-id}])]))})))

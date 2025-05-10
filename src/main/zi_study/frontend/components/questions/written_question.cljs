@@ -65,7 +65,8 @@
                (when explanation
                  [q-common/explanation-section {:explanation explanation
                                                 :show-explanation? @show-explanation?
-                                                :on-toggle #(swap! show-explanation? not)}])
+                                                :on-toggle #(swap! show-explanation? not)
+                                                :question-id question-id}])
 
                [:div {:class "flex justify-center gap-4 mt-6"}
                 [button {:variant :outlined
@@ -111,8 +112,9 @@
 
                   (when explanation
                     [q-common/explanation-section {:explanation explanation
-                                                   :show-explanation? @show-explanation?
-                                                   :on-toggle #(swap! show-explanation? not)}])])
+                                                   :rx-show-explanation? show-explanation?
+                                                   :on-toggle #(swap! show-explanation? not)
+                                                   :question-id question-id}])])
 
                (when (not submitted?)
                  [:div {:class "mt-4"}

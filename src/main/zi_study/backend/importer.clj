@@ -146,10 +146,10 @@
     (if-let [existing-tag-id (:tag_id (sql/find-by-keys tx :tags {:tag_name clean-tag-name} {:columns [:tag_id]}))]
       existing-tag-id ; Return existing ID if found
       ;; Not found with exact match, try case-insensitive match with SQL LIKE or LOWER
-      (if-let [existing-tag-id (:tag_id (jdbc/execute-one! tx 
-                                                          ["SELECT tag_id FROM tags WHERE LOWER(tag_name) = LOWER(?)" 
-                                                           clean-tag-name]
-                                                          {:builder-fn rs/as-unqualified-lower-maps}))]
+      (if-let [existing-tag-id (:tag_id (jdbc/execute-one! tx
+                                                           ["SELECT tag_id FROM tags WHERE LOWER(tag_name) = LOWER(?)"
+                                                            clean-tag-name]
+                                                           {:builder-fn rs/as-unqualified-lower-maps}))]
         existing-tag-id
         ;; If still not found, create it
         (try
@@ -163,12 +163,12 @@
             (let [error-msg (ex-message e)]
               (if (and (instance? org.sqlite.SQLiteException e)
                        (.contains error-msg "UNIQUE constraint failed: tags.tag_name"))
-                (if-let [existing-tag-id (:tag_id (jdbc/execute-one! tx 
-                                                                    ["SELECT tag_id FROM tags WHERE LOWER(tag_name) = LOWER(?)" 
-                                                                     clean-tag-name]
-                                                                    {:builder-fn rs/as-unqualified-lower-maps}))]
+                (if-let [existing-tag-id (:tag_id (jdbc/execute-one! tx
+                                                                     ["SELECT tag_id FROM tags WHERE LOWER(tag_name) = LOWER(?)"
+                                                                      clean-tag-name]
+                                                                     {:builder-fn rs/as-unqualified-lower-maps}))]
                   existing-tag-id
-                  (throw (ex-info (str "Failed to get or create tag: " clean-tag-name) 
+                  (throw (ex-info (str "Failed to get or create tag: " clean-tag-name)
                                   {:error :tag-creation-failed, :tag-name clean-tag-name} e)))
                 ;; If it's another type of error, rethrow
                 (throw e)))))))))
@@ -370,7 +370,7 @@
   ;; (import-question-set-data! "path/to/your/import_data.edn" :edn)
   ;; (import-question-set-data! "path/to/your/import_data.json" :json)
 
-  (import-question-set-data! "questionz/lower_gi_bleeding.edn" :edn)
+  (import-question-set-data! "questionz/ruq_biliary.edn" :edn)
 
   ;; Verify insertion (using next.jdbc directly for quick check)
   (jdbc/execute! @db/db-pool ["SELECT * FROM question_sets;"])
