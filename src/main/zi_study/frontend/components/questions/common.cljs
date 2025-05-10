@@ -78,55 +78,43 @@
     :smartypants true
     :xhtml true}))
 
-(defn explanation-section [{:keys [explanation rx-show-explanation? on-toggle question-id]}]
-  (when explanation
-    (let [container-id (str "explanation-" (or question-id (random-uuid)))
-          scroll-listener (r/atom nil)
-          debounce-timer (r/atom nil)
-          is-scrolling (r/atom false)]
+(defn explanation-section [{:keys [explanation rx-show-explanation? on-toggle]}]
+  (let [container-ref (r/atom nil)
+        observer-atom (r/atom nil)
+        container-id-str (str "explanation-" (or explanation (random-uuid)))]
+
+    (letfn [(manage-observer [{:keys [rx-show-explanation? on-toggle]}]
+              (let [show-explanation? @rx-show-explanation?
+                    current-container @container-ref]
+                (if (and show-explanation? current-container (nil? @observer-atom))
+                  (let [obs (js/IntersectionObserver.
+                             (fn [entries _observer]
+                               (doseq [entry entries]
+                                 (when (and (not (.-isIntersecting entry)) @rx-show-explanation?)
+                                   (on-toggle))))
+                             #js{:root nil :threshold [0.0]})]
+                    (.observe obs current-container)
+                    (reset! observer-atom obs))
+                  (when (and (or (not show-explanation?) (nil? current-container)) (some? @observer-atom))
+                    (.disconnect @observer-atom)
+                    (reset! observer-atom nil)))))]
 
       (r/create-class
-       {:component-did-mount
-        (fn []
-          (let [check-visibility (fn []
-                                   (when @rx-show-explanation?
-                                     (let [el (js/document.getElementById container-id)]
-                                       (when el
-                                         (let [rect (.getBoundingClientRect el)
-                                               window-height (or (.-innerHeight js/window) (.. js/document -documentElement -clientHeight))
-                                               is-visible? (not (or (< (.-bottom rect) 0)
-                                                                    (> (.-top rect) window-height)))]
-                                           (when-not is-visible?
-                                             (on-toggle)))))))
+       {:display-name "explanation-section"
 
-                debounced-scroll-handler (fn []
-                                           (reset! is-scrolling true)
+        :component-did-mount
+        (fn [this]
+          (manage-observer (r/props this)))
 
-                                           (when @debounce-timer
-                                             (js/clearTimeout @debounce-timer))
-
-                                           (reset! debounce-timer
-                                                   (js/setTimeout
-                                                    (fn []
-                                                      (reset! is-scrolling false)
-                                                      (when @rx-show-explanation?
-                                                        (check-visibility)))
-                                                    300))) ; 300ms debounce
-
-                scroll-handler (fn [] (.requestAnimationFrame js/window debounced-scroll-handler))]
-
-            (reset! scroll-listener scroll-handler)
-            (.addEventListener js/window "scroll" scroll-handler #js {:passive true})))
+        :component-did-update
+        (fn [this _old-argv]
+          (manage-observer (r/props this)))
 
         :component-will-unmount
         (fn []
-          ;; Clean up timers and listeners
-          (when @debounce-timer
-            (js/clearTimeout @debounce-timer))
-
-          (when @scroll-listener
-            (.removeEventListener js/window "scroll" @scroll-listener)
-            (reset! scroll-listener nil)))
+          (when-let [obs @observer-atom]
+            (.disconnect obs)
+            (reset! observer-atom nil)))
 
         :reagent-render
         (fn [{:keys [explanation rx-show-explanation? on-toggle]}]
@@ -140,9 +128,9 @@
                        :on-click on-toggle}
                (if show-explanation? "Hide Explanation" "Show Explanation")]]
 
-             ;; Only render explanation content when visible
              (when show-explanation?
-               [:div {:id container-id
+               [:div {:id container-id-str
+                      :ref (fn [el] (reset! container-ref el))
                       :class "mt-3 p-4 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"}
                 [:div {:class "prose prose-sm dark:prose-invert prose-p:text-[var(--color-light-text-secondary)] dark:prose-p:text-[var(--color-dark-text-secondary)] prose-a:text-[var(--color-primary)] prose-headings:text-[var(--color-light-text)] dark:prose-headings:text-[var(--color-dark-text)] prose-headings:font-medium prose-img:rounded-md prose-pre:bg-[var(--color-light-bg)] dark:prose-pre:bg-[var(--color-dark-bg)] prose-pre:text-sm prose-code:text-[var(--color-primary-700)] dark:prose-code:text-[var(--color-primary-300)] prose-code:bg-[var(--color-primary-50)] dark:prose-code:bg-[rgba(var(--color-primary-rgb),0.1)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-strong:text-[var(--color-light-text)] dark:prose-strong:text-[var(--color-dark-text)] prose-li:marker:text-[var(--color-light-text-secondary)] dark:prose-li:marker:text-[var(--color-dark-text-secondary)] max-w-none"}
                  [:div {:dangerouslySetInnerHTML (r/unsafe-html (marked/parse (str explanation) marked-options))}]]])]))}))))
