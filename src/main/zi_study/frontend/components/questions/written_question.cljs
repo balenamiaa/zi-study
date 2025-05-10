@@ -64,7 +64,7 @@
 
                (when explanation
                  [q-common/explanation-section {:explanation explanation
-                                                :show-explanation? @show-explanation?
+                                                :rx-show-explanation? show-explanation?
                                                 :on-toggle #(swap! show-explanation? not)
                                                 :question-id question-id}])
 

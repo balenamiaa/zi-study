@@ -213,7 +213,7 @@
                                 (hh/order-by :q.order_in_set :q.question_id)) ; Ensure consistent order
 
                 questions-raw (execute! final-query)
-
+                _ (prn questions-raw)
                 questions (mapv (fn [q]
                                   (let [q (-> q
                                               (parse-edn-field :question-data)
@@ -250,8 +250,15 @@
         :cloze (let [correct-answers (:answers q-data)]
                  (and (= (count correct-answers) (count user-answer))
                       (every? true? (map = (map str/trim correct-answers) (map str/trim user-answer)))))
-        :emq (let [correct-matches (set (map vec (:matches q-data)))
-                   user-matches (set (map vec user-answer))]
+        :emq (let [correct-matches-raw (:matches q-data)
+                   ;; Normalize correct matches from either map or vector format
+                   correct-matches (set (cond 
+                                          (map? correct-matches-raw) (map vec (seq correct-matches-raw))
+                                          :else (map vec correct-matches-raw)))
+                   ;; Normalize user answer from either map or vector format
+                   user-matches (set (cond
+                                       (map? user-answer) (map vec (seq user-answer))
+                                       :else (map vec user-answer)))]
                (= correct-matches user-matches))
         false))
     (catch Exception e

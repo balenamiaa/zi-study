@@ -125,6 +125,11 @@
 
 ;; --- Helper Functions ---
 
+(defn- to-str-temp-id [temp-id]
+  (if (keyword? temp-id)
+    (name temp-id)
+    (str temp-id)))
+
 (defn- parse-input [input-str format]
   (try
     (case format
@@ -207,14 +212,15 @@
   (let [premises (:premises question)
         options (:options question)
         matches (:matches question)
-        premise-temp-to-index (into {} (map-indexed (fn [idx p] [(get p :temp_id) idx]) premises))
-        option-temp-to-index (into {} (map-indexed (fn [idx o] [(get o :temp_id) idx]) options))]
+        premise-temp-to-index (into {} (map-indexed (fn [idx p] [(to-str-temp-id (get p :temp_id)) idx]) premises))
+        option-temp-to-index (into {} (map-indexed (fn [idx o] [(to-str-temp-id (get o :temp_id)) idx]) options))]
     {:instructions (:instructions question)
      :premises (mapv :text premises)
      :options (mapv :text options)
      :matches (->> matches
                    (mapv (fn [[p-temp o-temp]]
-                           [(get premise-temp-to-index p-temp) (get option-temp-to-index o-temp)]))
+                           [(get premise-temp-to-index (to-str-temp-id p-temp))
+                            (get option-temp-to-index (to-str-temp-id o-temp))]))
                    (filterv (fn [[p-idx o-idx]] (and (some? p-idx) (some? o-idx))))) ; Ensure both IDs were found
      :explanation (:explanation question)}))
 
@@ -364,13 +370,14 @@
                   ["p2" "oA"]
                   ["p3" "oC"]]}]}])
 
-  ;; Import from EDN string
   (import-question-set-data! (pr-str edn-example-str) :edn)
+  ;; Import from EDN string
+  (import-question-set-data! "questionz/jaundice.edn" :edn)
   ;; Assuming you have a file 'import_data.edn' or 'import_data.json'
   ;; (import-question-set-data! "path/to/your/import_data.edn" :edn)
   ;; (import-question-set-data! "path/to/your/import_data.json" :json)
 
-  (import-question-set-data! "questionz/ruq_biliary.edn" :edn)
+  (sql/query @zi-study.backend.db/db-pool ["DELETE FROM question_sets WHERE set_id = 12"])
 
   ;; Verify insertion (using next.jdbc directly for quick check)
   (jdbc/execute! @db/db-pool ["SELECT * FROM question_sets;"])

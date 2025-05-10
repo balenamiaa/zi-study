@@ -76,18 +76,16 @@
        [:div {:class "absolute inset-0 flex items-center justify-center z-10"} ; Added z-10 to ensure spinner is on top
         [:> lucide-icons/Loader {:class "animate-spin h-6 w-6"}]])
 
-     ;; The actual content, always present for layout, but opacity changed when loading.
-     ;; Content is not focusable or interactive if loading via disabled_classes on parent.
-     [:span {:class (cx "inline-flex gap-1 items-center justify-center w-full"
+     [:span {:class (cx "inline-flex items-center w-full"
                         (if loading "opacity-0" "opacity-100"))}
       (when start-icon
-        [:div {:class "btn-icon flex-shrink-0"}
+        [:div {:class "btn-icon flex-shrink-0 mr-2"}
          [:> start-icon]])
 
-      [:span {:class "min-w-0"} (into [:span] children)]
+      [:span {:class "truncate flex-1 min-w-0"} (into [:span] children)]
 
       (when end-icon
-        [:div {:class "btn-icon flex-shrink-0"}
+        [:div {:class "btn-icon flex-shrink-0 ml-2"}
          [:> end-icon]])]]))
 
 (defn button-group

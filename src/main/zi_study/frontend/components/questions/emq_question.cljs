@@ -47,7 +47,7 @@
                                (if (and is-submitted? (not is-correct?))
                                  :error
                                  :outlined))
-                    :class (cx "justify-between text-left"
+                    :class (cx "justify-between text-left max-w-full"
                                "border-2 shadow-sm hover:shadow transition-all")
                     :disabled disabled?
                     :end-icon (cond
@@ -63,6 +63,7 @@
                   :open? open?
                   :width :match-trigger
                   :transition :scale
+                  :trigger-class "w-full"
                   :class (cx "max-h-60 shadow-lg"
                              "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)]")}
 
@@ -104,20 +105,28 @@
     (r/create-class
      {:component-did-mount
       (fn [this]
-        (let [[props] (r/argv this)
+        (let [props (r/props this)
               ;; Initialize with any existing submitted answers
-              existing-answers (get-in props [:user-answer :answer-data :answers] {})]
-          (reset! selections-atom existing-answers)))
+              existing-answers (get-in props [:user-answer :answer-data :answers] {})
+              ;; Ensure answers are converted to a map format consistently
+              normalized-answers (if (sequential? existing-answers)
+                                   (into {} existing-answers)
+                                   existing-answers)]
+          (reset! selections-atom normalized-answers)))
 
       :component-did-update
       (fn [this [_ old-props]]
-        (let [[new-props] (r/argv this)
+        (let [new-props (r/props this)
               ;; Check if answers in props have changed
               old-answers (get-in old-props [:user-answer :answer-data :answers] {})
-              new-answers (get-in new-props [:user-answer :answer-data :answers] {})]
+              new-answers (get-in new-props [:user-answer :answer-data :answers] {})
+              ;; Ensure new answers are converted to a map format consistently
+              normalized-answers (if (sequential? new-answers)
+                                   (into {} new-answers)
+                                   new-answers)]
           (when (and (not= old-answers new-answers)
                      (not @submitting?))
-            (reset! selections-atom new-answers))))
+            (reset! selections-atom normalized-answers))))
 
       :reagent-render
       (fn [props]
@@ -131,11 +140,21 @@
               explanation (get question-data :explanation)
 
               ;; Create a map of correct matches {premise-idx -> option-idx}
-              correct-matches (into {} matches)
+              ;; Handle both formats: vector of vectors [[0 0] [1 2]] or map format {0 0, 1 2}
+              correct-matches (if (map? matches)
+                                ;; If already a map, just ensure keys are integers
+                                (into {} (map (fn [[k v]] [(if (keyword? k) (parse-long (name k)) k) v]) matches))
+                                ;; If vector of vectors, convert to map
+                                (into {} matches))
 
               ;; Derive state from props
               is-submitted? (boolean user-answer)
-              submitted-answers (get-in user-answer [:answer-data :answers] {})
+              ;; Handle both formats for submitted answers
+              submitted-answers (let [answers (get-in user-answer [:answer-data :answers])]
+                                  (if (map? answers)
+                                    answers
+                                    (when (sequential? answers)
+                                      (into {} answers))))
               submission-state (q-common/get-deref-answer-submission-state question-id)
               pending? (or (:loading? submission-state) @submitting?)
 
@@ -152,7 +171,7 @@
                                (http/submit-answer
                                 question-id
                                 "emq"
-                                {:answers @selections-atom}
+                                {:answers (vec (map vec @selections-atom))}
                                 (fn [_]
                                   (reset! submitting? false))))
 

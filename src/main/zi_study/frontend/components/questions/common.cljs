@@ -78,62 +78,31 @@
     :smartypants true
     :xhtml true}))
 
-(defn explanation-section [{:keys [explanation rx-show-explanation? on-toggle]}]
+(defn explanation-section [{:keys [explanation]}]
   (let [container-ref (r/atom nil)
-        observer-atom (r/atom nil)
         container-id-str (str "explanation-" (or explanation (random-uuid)))]
 
-    (letfn [(manage-observer [{:keys [rx-show-explanation? on-toggle]}]
-              (let [show-explanation? @rx-show-explanation?
-                    current-container @container-ref]
-                (if (and show-explanation? current-container (nil? @observer-atom))
-                  (let [obs (js/IntersectionObserver.
-                             (fn [entries _observer]
-                               (doseq [entry entries]
-                                 (when (and (not (.-isIntersecting entry)) @rx-show-explanation?)
-                                   (on-toggle))))
-                             #js{:root nil :threshold [0.0]})]
-                    (.observe obs current-container)
-                    (reset! observer-atom obs))
-                  (when (and (or (not show-explanation?) (nil? current-container)) (some? @observer-atom))
-                    (.disconnect @observer-atom)
-                    (reset! observer-atom nil)))))]
+    (r/create-class
+     {:display-name "explanation-section"
 
-      (r/create-class
-       {:display-name "explanation-section"
+      :reagent-render
+      (fn [{:keys [explanation rx-show-explanation? on-toggle]}]
+        (let [show-explanation? @rx-show-explanation?]
+          [:div {:class "mt-5 pt-4 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
+           [:div {:class "flex justify-center mb-2"}
+            [button {:variant :outlined
+                     :size :sm
+                     :class "w-full max-w-xs"
+                     :start-icon (if show-explanation? lucide-icons/EyeOff lucide-icons/Eye)
+                     :on-click on-toggle}
+             (if show-explanation? "Hide Explanation" "Show Explanation")]]
 
-        :component-did-mount
-        (fn [this]
-          (manage-observer (r/props this)))
-
-        :component-did-update
-        (fn [this _old-argv]
-          (manage-observer (r/props this)))
-
-        :component-will-unmount
-        (fn []
-          (when-let [obs @observer-atom]
-            (.disconnect obs)
-            (reset! observer-atom nil)))
-
-        :reagent-render
-        (fn [{:keys [explanation rx-show-explanation? on-toggle]}]
-          (let [show-explanation? @rx-show-explanation?]
-            [:div {:class "mt-5 pt-4 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-             [:div {:class "flex justify-center mb-2"}
-              [button {:variant :outlined
-                       :size :sm
-                       :class "w-full max-w-xs"
-                       :start-icon (if show-explanation? lucide-icons/EyeOff lucide-icons/Eye)
-                       :on-click on-toggle}
-               (if show-explanation? "Hide Explanation" "Show Explanation")]]
-
-             (when show-explanation?
-               [:div {:id container-id-str
-                      :ref (fn [el] (reset! container-ref el))
-                      :class "mt-3 p-4 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"}
-                [:div {:class "prose prose-sm dark:prose-invert prose-p:text-[var(--color-light-text-secondary)] dark:prose-p:text-[var(--color-dark-text-secondary)] prose-a:text-[var(--color-primary)] prose-headings:text-[var(--color-light-text)] dark:prose-headings:text-[var(--color-dark-text)] prose-headings:font-medium prose-img:rounded-md prose-pre:bg-[var(--color-light-bg)] dark:prose-pre:bg-[var(--color-dark-bg)] prose-pre:text-sm prose-code:text-[var(--color-primary-700)] dark:prose-code:text-[var(--color-primary-300)] prose-code:bg-[var(--color-primary-50)] dark:prose-code:bg-[rgba(var(--color-primary-rgb),0.1)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-strong:text-[var(--color-light-text)] dark:prose-strong:text-[var(--color-dark-text)] prose-li:marker:text-[var(--color-light-text-secondary)] dark:prose-li:marker:text-[var(--color-dark-text-secondary)] max-w-none"}
-                 [:div {:dangerouslySetInnerHTML (r/unsafe-html (marked/parse (str explanation) marked-options))}]]])]))}))))
+           (when show-explanation?
+             [:div {:id container-id-str
+                    :ref (fn [el] (reset! container-ref el))
+                    :class "mt-3 p-4 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"}
+              [:div {:class "prose prose-sm dark:prose-invert prose-p:text-[var(--color-light-text-secondary)] dark:prose-p:text-[var(--color-dark-text-secondary)] prose-a:text-[var(--color-primary)] prose-headings:text-[var(--color-light-text)] dark:prose-headings:text-[var(--color-dark-text)] prose-headings:font-medium prose-img:rounded-md prose-pre:bg-[var(--color-light-bg)] dark:prose-pre:bg-[var(--color-dark-bg)] prose-pre:text-sm prose-code:text-[var(--color-primary-700)] dark:prose-code:text-[var(--color-primary-300)] prose-code:bg-[var(--color-primary-50)] dark:prose-code:bg-[rgba(var(--color-primary-rgb),0.1)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-strong:text-[var(--color-light-text)] dark:prose-strong:text-[var(--color-dark-text)] prose-li:marker:text-[var(--color-light-text-secondary)] dark:prose-li:marker:text-[var(--color-dark-text-secondary)] max-w-none"}
+               [:div {:dangerouslySetInnerHTML (r/unsafe-html (marked/parse (str explanation) marked-options))}]]])]))})))
 
 (defn question-header
   "Common header component for questions"

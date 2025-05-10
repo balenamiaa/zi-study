@@ -40,7 +40,7 @@
                          (js/clearTimeout @timer))
                        (reset! timer nil)
                        (reset! show? false))
-        
+
         ;; Simplified position-class: JS will handle precise pixel positioning.
         ;; We only keep classes that don't interfere with left/top calculations.
         position-class (case position
@@ -72,7 +72,7 @@
                                      scroll-y (.-scrollY js/window)
                                      tooltip-width (.-offsetWidth tooltip-el)
                                      tooltip-height (.-offsetHeight tooltip-el)
-                                     
+
                                      ;; Rect values are relative to viewport
                                      left (.-left rect)
                                      right (.-right rect)
@@ -80,7 +80,7 @@
                                      bottom (.-bottom rect)
                                      trigger-width (.-width rect)
                                      trigger-height (.-height rect)
-                                     
+
                                      ;; Calculate positions with correct scroll offsets
                                      ;; getBoundingClientRect returns viewport coordinates, so we add scroll
                                      ;; to convert to absolute document coordinates
@@ -92,19 +92,19 @@
                                                             :top (+ bottom scroll-y 8)}
                                                    :left {:left (+ left scroll-x (- tooltip-width 8))
                                                           :top (+ top scroll-y (/ trigger-height 2) (- (/ tooltip-height 2)))}}
-                                     
+
                                      ;; Get the position for the current direction
                                      coords (get position-map position)
-                                     
+
                                      ;; Boundary checking to keep tooltip in viewport
                                      window-width (.-innerWidth js/window)
                                      window-height (.-innerHeight js/window)
                                      adjusted-left (-> (:left coords)
-                                                      (max (+ scroll-x 8))
-                                                      (min (+ scroll-x window-width (- tooltip-width 8))))
+                                                       (max (+ scroll-x 8))
+                                                       (min (+ scroll-x window-width (- tooltip-width 8))))
                                      adjusted-top (-> (:top coords)
-                                                     (max (+ scroll-y 8))
-                                                     (min (+ scroll-y window-height (- tooltip-height 8))))]
+                                                      (max (+ scroll-y 8))
+                                                      (min (+ scroll-y window-height (- tooltip-height 8))))]
 
                                  (set! (.. tooltip-el -style -position) "absolute")
                                  (set! (.. tooltip-el -style -zIndex) "9999")
@@ -166,14 +166,14 @@
                                  @portal-container))]
 
           [:div {:ref #(reset! trigger-ref %)
-                 :class (cx "inline-flex" trigger-class)
+                 :class (cx "inline-flex w-full" trigger-class)
                  :on-mouse-enter show-tooltip
                  :on-mouse-leave hide-tooltip
                  :on-focus show-tooltip
                  :on-blur hide-tooltip}
 
            ;; Trigger element(s)
-           (into [:div] children)
+           (into [:<>] children)
 
            ;; Tooltip portal
            tooltip-content]))})))
