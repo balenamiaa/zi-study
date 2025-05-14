@@ -37,7 +37,7 @@
       premise]]
 
     ;; Dropdown selector for options
-    [:div {:class "flex-grow md:w-1/2"}
+    [:div {:class "flex-grow w-full md:w-1/2"}
      ;; Custom dropdown control
      (r/with-let [open? (r/atom false)]
        [dropdown {:trigger
@@ -47,7 +47,7 @@
                                (if (and is-submitted? (not is-correct?))
                                  :error
                                  :outlined))
-                    :class (cx "justify-between text-left max-w-full"
+                    :class (cx "justify-between text-left max-w-full mx-auto"
                                "border-2 shadow-sm hover:shadow transition-all")
                     :disabled disabled?
                     :end-icon (cond
@@ -63,7 +63,7 @@
                   :open? open?
                   :width :match-trigger
                   :transition :scale
-                  :trigger-class "w-full"
+                  :trigger-class "flex w-full justify-center"
                   :class (cx "max-h-60 shadow-lg"
                              "bg-[var(--color-light-card)] dark:bg-[var(--color-dark-card)]")}
 

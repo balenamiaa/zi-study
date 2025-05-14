@@ -352,7 +352,7 @@
           total-questions (count questions)
           answered-count (count (filter #(boolean (:user-answer %)) questions))
           correct-count (count (filter #(= 1 (get-in % [:user-answer :is-correct])) questions))
-          progress-percent (if (pos? total-questions) (Math/round (* 100 (/ correct-count total-questions))) 0)]
+          progress-percent (if (pos? total-questions) (Math/round (* 100 (/ answered-count total-questions))) 0)]
       [:div {:class "mb-8 rounded-xl overflow-hidden shadow-sm border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] bg-white dark:bg-[var(--color-dark-bg-paper)]"}
        [:div {:class "p-6"}
         [:h1 {:class "text-2xl font-bold mb-2"} title]
@@ -390,7 +390,7 @@
            [:circle {:cx 50 :cy 50 :r 45 :fill "transparent"
                      :stroke "var(--color-primary)" :stroke-width 8
                      :stroke-dasharray 283
-                     :stroke-dashoffset (- 283 (* 283 (/ correct-count (if (pos? total-questions) total-questions 1))))}]]
+                     :stroke-dashoffset (- 283 (* 283 (/ answered-count (if (pos? total-questions) total-questions 1))))}]]
           [:div {:class "absolute"}
            [:div {:class "text-2xl font-bold"} (str progress-percent "%")]]]]]])))
 

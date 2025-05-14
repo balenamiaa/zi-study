@@ -99,8 +99,8 @@
                                      [:qs.description :description]
                                      [:qs.created_at :created_at]
                                      [[:raw "COUNT(DISTINCT q.question_id)"] :total_questions]
-                                     [[:coalesce [:sum [:case [:<> :ua.answer_id nil] 1 :else 0]] 0] :answered_count]
-                                     [[:coalesce [:sum [:case [:= :ua.is_correct 1] 1 :else 0]] 0] :correct_count])
+                                     [[:coalesce [:count [:distinct [:case [:<> :ua.answer_id nil] :q.question_id]]] 0] :answered_count]
+                                     [[:coalesce [:count [:distinct [:case [:= :ua.is_correct 1] :q.question_id]]] 0] :correct_count])
                           (hh/from [:question_sets :qs])
                           (hh/left-join [:questions :q] [:= :qs.set_id :q.set_id])
                           (hh/left-join [:user_answers :ua] [:and [:= :q.question_id :ua.question_id] [:= :ua.user_id user-id]])

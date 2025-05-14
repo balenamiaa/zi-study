@@ -15,6 +15,70 @@
 (defn format-date [date-str]
   (-> date-str js/Date. .toLocaleDateString))
 
+(defn format-percentage [value]
+  (str (int (* value 100)) "%"))
+
+;; --- Radial Progress Chart Component ---
+(defn radial-progress-chart [{:keys [total answered correct size]
+                              :or {size 80}}]
+  (let [radius (/ size 2)
+        stroke-width 4
+        circle-radius (- radius (/ stroke-width 2.75))
+        circumference (* circle-radius 2 Math/PI)
+
+        answered-ratio (if (and (some? total) (pos? total) (some? answered) (>= answered 0))
+                         (min 1.0 (/ answered total))
+                         0.0)
+        correct-ratio  (if (and (some? total) (pos? total) (some? correct) (>= correct 0))
+                         (min 1.0 (/ correct total))
+                         0.0)
+
+        final-correct-arc-ratio correct-ratio
+
+        answered-arc-length (* circumference answered-ratio)
+        correct-arc-length (* circumference final-correct-arc-ratio)
+
+        center radius
+        text-size (/ size 5)
+
+        percent-correct-of-answered (if (and (some? answered) (pos? answered) (some? correct))
+                                      (min 1.0 (max 0.0 (/ correct answered)))
+                                      0.0)]
+    [:div {:class "relative" :style {:width size :height size}}
+     [:svg {:width size :height size :viewBox (str "0 0 " size " " size)}
+      ;; Background circle
+      [:circle {:cx center :cy center :r circle-radius
+                :stroke "var(--color-light-divider)" :stroke-width stroke-width
+                :fill "none" :class "dark:stroke-[var(--color-dark-divider)]"}]
+
+      ;; Answered progress (e.g., Purple) - Base layer for answered questions
+      [:circle {:cx center :cy center :r circle-radius
+                :stroke "var(--color-primary-300)" :stroke-width stroke-width
+                :fill "none"
+                :stroke-dasharray (str answered-arc-length " " circumference)
+                :stroke-dashoffset 0 :transform (str "rotate(-90 " center " " center ")")
+                :class "transition-all duration-500 ease-out"}]
+
+      ;; Correct progress (e.g., Pink/Green) - Overlay showing correct portion of total
+      [:circle {:cx center :cy center :r circle-radius
+                :stroke "var(--color-secondary)" :stroke-width stroke-width
+                :fill "none"
+                :stroke-dasharray (str correct-arc-length " " circumference)
+                :stroke-dashoffset 0 :transform (str "rotate(-90 " center " " center ")")
+                :class "transition-all duration-500 ease-out"}]]
+
+     [:div {:class "absolute inset-0 flex flex-col items-center justify-center"}
+      [:div {:class "text-base font-bold text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)]"
+             :style {:font-size text-size}}
+       (str (or answered 0) "/" (or total 0))]
+      [:div {:class "text-xs text-[var(--color-secondary)] font-bold flex items-center justify-center gap-0.5"}
+       (cond
+         (not (and (some? total) (pos? total))) [:span "No questions"]
+         (not (and (some? answered) (pos? answered))) [:span "Not started"]
+         :else [:<> 
+                [:span (format-percentage percent-correct-of-answered)]
+                [:> lucide-icons/Check {:size 10 :strokeWidth 3}]])]]]))
+
 ;; --- Tag Filter Component ---
 (defn tag-filter [{:keys [tags selected-tags on-tag-click]}]
   [:div {:class "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-xl p-4 shadow-sm"}
@@ -24,7 +88,7 @@
     [:h4 {:class "text-lg font-medium bg-gradient-to-r from-[var(--color-primary-700)] to-[var(--color-primary-500)] bg-clip-text text-transparent dark:from-[var(--color-primary-300)] dark:to-[var(--color-primary-200)]"}
      "Filter by Tags"]]
 
-   [:div {:class "flex flex-wrap gap-2 justify-center"}
+   [:div {:class "flex flex-wrap gap-2 justify-center max-h-[180px] overflow-y-auto pr-1 pb-1 scrollbar-thin scrollbar-thumb-[var(--color-light-divider)] dark:scrollbar-thumb-[var(--color-dark-divider)] scrollbar-track-transparent"}
     (map-indexed
      (fn [idx tag]
        ^{:key idx}
@@ -54,8 +118,13 @@
      :class "w-full"}]])
 
 ;; --- Question Set Card Component ---
-(defn question-set-card [{:keys [set-id title description created-at total-questions tags]}]
-  (let [selected-tags (:tags @(state/get-sets-filters))]
+(defn question-set-card [{:keys [set-id title description created-at total-questions tags progress]}]
+  (let [selected-tags (:tags @(state/get-sets-filters))
+        answered (get-in progress [:answered] 0)
+        correct (get-in progress [:correct] 0)
+        answered-percent (get-in progress [:answered_percent] 0)
+        correct-percent (get-in progress [:correct_percent] 0)
+        correct-display-percent (if (pos? answered) (/ correct answered) 0)]
     [card {:hover-effect true
            :class "h-full animate-fade-in-up transition-all duration-300 transform hover:scale-[1.02]"
            :on-click #(rfe/push-state :zi-study.frontend.core/set-page {:set-id set-id})}
@@ -66,10 +135,13 @@
          title]
         [:p {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] line-clamp-2"}
          description]]
-       [:div {:class "flex-shrink-0 bg-[var(--color-primary-50)] dark:bg-[rgba(var(--color-primary-rgb),0.1)] rounded-lg p-3"}
-        [:div {:class "text-center"}
-         [:div {:class "text-xl font-bold text-[var(--color-primary)]"} total-questions]
-         [:div {:class "text-xs text-[var(--color-primary-600)] dark:text-[var(--color-primary-300)]"} "Questions"]]]]
+
+       ;; Progress chart instead of just numbers
+       [radial-progress-chart
+        {:total total-questions
+         :answered answered
+         :correct correct
+         :size 80}]]
 
       [:div {:class "space-y-4"}
        [:div {:class "flex flex-wrap gap-1"}
@@ -111,39 +183,80 @@
 
 ;; --- Pagination Component ---
 (defn pagination [{:keys [page total-pages total-items limit on-page-change]}]
-  [:div {:class "flex flex-col sm:flex-row justify-center items-center gap-4 mt-8"}
-   [:div {:class "flex justify-center items-center gap-2"}
-    [button
-     {:variant :outlined
-      :size :sm
-      :disabled (= page 1)
-      :on-click #(on-page-change (dec page))
-      :start-icon lucide-icons/ChevronLeft}
-     "Previous"]
+  [:div {:class "flex flex-col sm:flex-row justify-center items-center gap-6 mt-10"
+         :key (str "pagination-" page)} ;; Add key to prevent re-rendering issues
 
-    [:div {:class "flex gap-1"}
+   ;; Pages navigation
+   [:div {:class "flex justify-center items-center"}
+    [:div {:class "inline-flex items-center rounded-md shadow-sm border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] overflow-hidden"}
+     ;; Previous button
+     [:button
+      {:class (str "p-2.5 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border-r border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] "
+                   "hover:bg-[var(--color-light-bg)] dark:hover:bg-[var(--color-dark-bg)] transition-colors flex items-center justify-center "
+                   (when (= page 1) "opacity-50 cursor-not-allowed"))
+       :disabled (= page 1)
+       :on-click #(on-page-change (dec page))}
+      [:> lucide-icons/ChevronLeft {:size 18 :className "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]]
+
+     ;; First page button (if needed)
+     (when (and (> total-pages 5) (> page 3))
+       [:button
+        {:class "h-10 w-10 flex items-center justify-center bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] hover:bg-[var(--color-light-bg)] dark:hover:bg-[var(--color-dark-bg)] transition-colors border-r border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
+         :on-click #(on-page-change 1)}
+        "1"])
+
+     ;; Ellipsis (if needed) after first page
+     (when (and (> total-pages 5) (> page 3))
+       [:span {:class "h-10 flex items-center justify-center px-2 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border-r border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
+        "..."])
+
+     ;; Page buttons
      (for [p (cond
                (<= total-pages 5) (range 1 (inc total-pages))
                (< page 3) (range 1 6)
                (> page (- total-pages 2)) (range (- total-pages 4) (inc total-pages))
                :else (range (- page 2) (+ page 3)))]
        ^{:key p}
-       [button
-        {:variant (if (= p page) :primary :text)
-         :size :sm
-         :on-click #(on-page-change p)}
-        (str p)])]
+       [:button
+        {:class (str "h-10 w-10 flex items-center justify-center border-r border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] "
+                     (if (= p page)
+                       "bg-[var(--color-primary)] text-white font-medium"
+                       "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] hover:bg-[var(--color-light-bg)] dark:hover:bg-[var(--color-dark-bg)] text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)]")
+                     " transition-colors")
+         :disabled (= p page)
+         :on-click #(when (not= p page) (on-page-change p))}
+        p])
 
-    [button
-     {:variant :outlined
-      :size :sm
-      :disabled (= page total-pages)
-      :on-click #(on-page-change (inc page))
-      :end-icon lucide-icons/ChevronRight}
-     "Next"]]
+     ;; Ellipsis (if needed) before last page
+     (when (and (> total-pages 5) (< page (- total-pages 2)))
+       [:span {:class "h-10 flex items-center justify-center px-2 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border-r border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
+        "..."])
 
-   [:div {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-    (str "Showing " (if (zero? total-items) 0 (inc (* (dec page) limit))) "-" (min (* page limit) total-items) " of " total-items)]])
+     ;; Last page button (if needed)
+     (when (and (> total-pages 5) (< page (- total-pages 2)))
+       [:button
+        {:class "h-10 w-10 flex items-center justify-center bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] hover:bg-[var(--color-light-bg)] dark:hover:bg-[var(--color-dark-bg)] transition-colors border-r border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
+         :on-click #(on-page-change total-pages)}
+        total-pages])
+
+     ;; Next button
+     [:button
+      {:class (str "p-2.5 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] hover:bg-[var(--color-light-bg)] dark:hover:bg-[var(--color-dark-bg)] transition-colors "
+                   "flex items-center justify-center "
+                   (when (= page total-pages) "opacity-50 cursor-not-allowed"))
+       :disabled (= page total-pages)
+       :on-click #(on-page-change (inc page))}
+      [:> lucide-icons/ChevronRight {:size 18 :className "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]]]]
+
+   ;; Display showing range / total
+   [:div {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] py-2 px-4 rounded-full shadow-sm border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
+    (let [start-item (if (or (zero? total-items) (= 1 page))
+                       1
+                       (inc (* (dec page) limit)))
+          end-item (min (* page limit) total-items)]
+      (if (zero? total-items)
+        "No items to display"
+        (str "Showing " start-item "–" end-item " of " total-items " sets")))]])
 
 ;; --- Main Page Component ---
 (defn question-sets-page []
@@ -164,9 +277,13 @@
             tags-loading? (:loading? tags-state)
             error (:error sets-state)
             question-sets (:list sets-state)
-            pagination (:pagination sets-state)
+            sets-pagination (:pagination sets-state)
             filters (:filters sets-state)
             selected-tags (:tags filters)]
+
+        ;; Add debug log to inspect the structure of a set
+        (when (seq question-sets)
+          (js/console.log "First set example:" (clj->js (first question-sets))))
 
         [:div {:class "container mx-auto px-4 py-8 max-w-7xl"}
          [:div {:class "mb-8"}
@@ -205,7 +322,7 @@
                :on-click #(do
                             (state/set-sets-filter-tags #{})
                             (state/set-sets-filter-search "")
-                            (http/get-sets {:tags #{} :search ""} (assoc pagination :page 1) (fn [_] nil)))}
+                            (http/get-sets {:tags #{} :search ""} (assoc sets-pagination :page 1) (fn [_] nil)))}
               "Reset All"]]]
 
            (cond
@@ -223,7 +340,7 @@
                                                 (conj selected-tags %))]
                                  (state/set-sets-filter-tags new-tags)
                                  (http/get-sets (assoc filters :tags new-tags)
-                                                (assoc pagination :page 1)
+                                                (assoc sets-pagination :page 1)
                                                 (fn [_] nil)))}]]
              :else
              [:div {:class "mt-4 p-4 text-center text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
@@ -243,7 +360,7 @@
          (when sets-loading?
            [:div
             [:div {:class "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-6"}
-             (for [_ (range (get-in pagination [:limit] 3))] ; Show a few skeleton cards based on limit or a default
+             (for [_ (range (get-in sets-pagination [:limit] 3))] ; Show a few skeleton cards based on limit or a default
                ^{:key (gensym "skeleton-set-")}
                [question-set-card-skeleton])]])
          ;; Content when not loading
@@ -253,7 +370,7 @@
              {:on-reset #(do
                            (state/set-sets-filter-tags #{})
                            (state/set-sets-filter-search "")
-                           (http/get-sets {:tags #{} :search ""} (assoc pagination :page 1) (fn [_] nil)))}]])
+                           (http/get-sets {:tags #{} :search ""} (assoc sets-pagination :page 1) (fn [_] nil)))}]])
          ;; Question sets grid
          (when (seq question-sets)
            [:div
@@ -262,12 +379,12 @@
                ^{:key (:set-id set)}
                [question-set-card set])]
 
-            (when (and (:total_pages pagination) (> (:total_pages pagination) 1))
-              [pagination
-               {:page (:page pagination)
-                :total-pages (:total_pages pagination)
-                :total-items (:total_items pagination)
-                :limit (:limit pagination)
-                :on-page-change #(do
-                                   (state/set-sets-page %)
-                                   (http/get-sets filters (assoc pagination :page %) (fn [_] nil)))}])])]))}))
+            ;; Always show pagination when there are question sets
+            [pagination
+             {:page (:page sets-pagination)
+              :total-pages (max 1 (:total_pages sets-pagination))
+              :total-items (:total_items sets-pagination)
+              :limit (:limit sets-pagination)
+              :on-page-change #(do
+                                 (state/set-sets-page %)
+                                 (http/get-sets filters (assoc sets-pagination :page %) (fn [_] nil)))}]])]))}))

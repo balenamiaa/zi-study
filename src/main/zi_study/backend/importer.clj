@@ -372,7 +372,7 @@
 
   (import-question-set-data! (pr-str edn-example-str) :edn)
   ;; Import from EDN string
-  (import-question-set-data! "questionz/jaundice.edn" :edn)
+  (import-question-set-data! "questionz/gyne_finals_00.edn" :edn)
   ;; Assuming you have a file 'import_data.edn' or 'import_data.json'
   ;; (import-question-set-data! "path/to/your/import_data.edn" :edn)
   ;; (import-question-set-data! "path/to/your/import_data.json" :json)

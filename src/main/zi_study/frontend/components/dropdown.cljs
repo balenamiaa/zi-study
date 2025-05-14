@@ -221,12 +221,12 @@
                          "Apply"]])])
                    @portal-container)))]
 
-          [:div {:class (cx "inline-block" trigger-class)}
-           [:div {:ref #(reset! trigger-ref %)
-                  :on-click #(do
-                               ((toggle-dropdown-handler open? on-close) %)
-                               (when on-open (on-open)))}
-            trigger]
+          [:div {:class (cx "inline-block" trigger-class)
+                 :ref #(reset! trigger-ref %)
+                 :on-click #(do
+                              ((toggle-dropdown-handler open? on-close) %)
+                              (when on-open (on-open)))}
+           trigger
            portal-element]))})))
 
 (defn menu-item
