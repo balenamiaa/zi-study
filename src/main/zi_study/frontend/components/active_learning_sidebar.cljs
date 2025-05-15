@@ -1,4 +1,4 @@
-(ns zi-study.frontend.components.sidebar
+(ns zi-study.frontend.components.active-learning-sidebar
   (:require [reagent.core :as r]
             [zi-study.frontend.utilities :refer [cx]]
             ["lucide-react" :as lucide-icons]))
@@ -30,8 +30,8 @@
     :title (if @collapsed? "Expand Sidebar" "Collapse Sidebar")
     :class (cx
             (if @collapsed?
-              ;; When collapsed - make the toggle button more prominent, but hide on mobile
-              "fixed left-0 top-1/2 -translate-y-1/2 z-50 h-12 w-12 rounded-r-lg flex items-center justify-center hidden md:flex"
+              ;; When collapsed - make the toggle button more prominent
+              "fixed left-0 top-1/2 -translate-y-1/2 z-50 h-12 w-12 rounded-r-lg flex items-center justify-center"
               ;; When expanded - attach to sidebar
               "absolute top-1/2 -right-3 transform -translate-y-1/2 z-50 h-10 w-6 rounded-r-md flex items-center justify-center")
             "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)]"
@@ -42,7 +42,7 @@
     {:size (if @collapsed? 20 18)
      :class "text-[var(--color-primary)] dark:text-[var(--color-primary-300)]"}]])
 
-(defn sidebar [{:keys [current-page links mobile-open? toggle-mobile-sidebar on-desktop-toggle]}]
+(defn active-learning-sidebar [{:keys [current-page links mobile-open? toggle-mobile-sidebar on-desktop-toggle]}]
   (r/with-let [collapsed? (r/atom true) ;; Persistent state atom for desktop collapse
                toggle-collapsed (fn []
                                   (swap! collapsed? not)
@@ -84,7 +84,7 @@
       [:div {:class (cx "pt-16 px-4 pb-4 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
                         "flex items-center justify-between")}
        [:h2 {:class "text-lg font-semibold text-[var(--color-primary)] dark:text-[var(--color-primary-300)] truncate"}
-        "Learning Tools"]]
+        "Active Learning Tools"]]
 
       ;; Navigation Links
       [:nav {:class "flex-grow p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-light-divider)] dark:scrollbar-thumb-[var(--color-dark-divider)]"}

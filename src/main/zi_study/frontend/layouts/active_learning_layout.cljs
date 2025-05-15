@@ -1,6 +1,6 @@
 (ns zi-study.frontend.layouts.active-learning-layout
   (:require [reagent.core :as r]
-            [zi-study.frontend.components.sidebar :refer [sidebar]]
+            [zi-study.frontend.components.active-learning-sidebar :refer [active-learning-sidebar]]
             [zi-study.frontend.components.topbar :refer [topbar]]
             [zi-study.frontend.components.flashgroup :refer [flashgroup]]
             [reitit.frontend.easy :as rfe]
@@ -29,11 +29,11 @@
      [flashgroup {:default-position :top-right}]
 
      [:div {:class "flex flex-1 mt-[calc(theme(spacing.2)+60px)]"}
-      [sidebar {:current-page active-learning-page
-                :links sidebar-links
-                :mobile-open? mobile-sidebar-open?
-                :toggle-mobile-sidebar toggle-mobile-sidebar
-                :on-desktop-toggle handle-desktop-sidebar-toggle}]
+      [active-learning-sidebar {:current-page active-learning-page
+                                :links sidebar-links
+                                :mobile-open? mobile-sidebar-open?
+                                :toggle-mobile-sidebar toggle-mobile-sidebar
+                                :on-desktop-toggle handle-desktop-sidebar-toggle}]
 
       [:main {:class "flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto scrollable-content transition-all duration-300 ease-in-out"}
        children]]]))
