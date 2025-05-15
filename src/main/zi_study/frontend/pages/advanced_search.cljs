@@ -8,7 +8,7 @@
             [zi-study.frontend.components.alert :refer [alert]]
             [zi-study.frontend.components.card :refer [card]]
             [zi-study.frontend.components.skeleton :as skeleton]
-            [zi-study.frontend.pages.question-sets :refer [pagination]] ;; Re-use pagination
+            [zi-study.frontend.components.pagination :refer [pagination]]
             ;; Import question components
             [zi-study.frontend.components.questions.written-question :refer [written-question]]
             [zi-study.frontend.components.questions.mcq-single-question :refer [mcq-single-question]]
@@ -22,38 +22,33 @@
 (defn- question-card-skeleton [] ; Simplified skeleton for search results
   [card {:class "mb-6"}
    [:div {:class "p-5"}
-    [skeleton/skeleton {:variant :text :width "30%" :height "1.25rem" :class "mb-3"}] ; Set title placeholder
-    [skeleton/skeleton {:variant :rectangular :width "100%" :height "6rem" :class "mb-3"}] ; Question content placeholder
-    [skeleton/skeleton {:variant :rectangular :width "8rem" :height "2.25rem"}]]]) ; View in set button placeholder
+    [:div {:class "mb-3 pb-3 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] flex items-center gap-2"}
+     [:div {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+      "From set:"]
+     [skeleton/skeleton {:variant :text :width "50%" :height "1.25rem"}]] ; Set title placeholder
+    [skeleton/skeleton {:variant :rectangular :width "100%" :height "6rem"}]]])
 
 (defn- searched-question-card [{:keys [question index]}]
-  (let [{:keys [question-id set-id set-title question-type]} question]
+  (let [{:keys [question-id set-id question-set-title question-type]} question]
     [card {:class "mb-6 animate-fade-in-up"}
      [:div {:class "p-5"}
-      [:div {:class "mb-3 pb-3 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-       [:p {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] mb-1"}
+      [:div {:class "mb-3 pb-3 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] flex items-center gap-2"}
+       [:span {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
         "From set:"]
-       [:h3 {:class "text-md font-semibold text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)]"}
-        set-title]]
+       [:a {:href (rfe/href :zi-study.frontend.core/set-page {:set-id set-id} {:focus_question_id question-id})
+            :class "group flex items-center text-md font-semibold text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)] hover:text-[var(--color-primary-500)] dark:hover:text-[var(--color-primary-200)] transition-colors duration-200"}
+        [:span question-set-title]
+        [:> lucide-icons/ArrowUpRight {:size 18 :className "ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"}]]]
+      
       ;; Render the actual question using existing components
       (case question-type
-        "written" [written-question (assoc question :index index :standalone true)]
-        "mcq-single" [mcq-single-question (assoc question :index index :standalone true)]
-        "true-false" [true-false-question (assoc question :index index :standalone true)]
-        "mcq-multi" [mcq-multi-question (assoc question :index index :standalone true)]
-        "emq" [emq-question (assoc question :index index :standalone true)]
-        "cloze" [cloze-question (assoc question :index index :standalone true)]
-        [:div {:class "text-red-500"} (str "Unsupported question type: " question-type)])
-
-      [:div {:class "mt-4 pt-4 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] flex justify-end"}
-       [button {:variant :soft
-                :color :primary
-                :size :sm
-                :start-icon lucide-icons/ExternalLink
-                :on-click #(rfe/push-state :zi-study.frontend.core/set-page
-                                           {:set-id set-id}
-                                           {:focus_question_id question-id})}
-        "View in Set"]]]]))
+        "written" [written-question question]
+        "mcq-single" [mcq-single-question question]
+        "true-false" [true-false-question question]
+        "mcq-multi" [mcq-multi-question question]
+        "emq" [emq-question question]
+        "cloze" [cloze-question question]
+        [:div {:class "text-red-500"} (str "Unsupported question type: " question-type)])]]))
 
 (defn- empty-search-results []
   [:div {:class "text-center py-12 border border-dashed rounded-xl border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)]"}
@@ -69,9 +64,9 @@
      {:component-did-mount
       (fn [_this]
         (let [filters @(state/get-advanced-search-filters-state)
-              pagination @(state/get-advanced-search-results-pagination-state)]
+              pagination-details @(state/get-advanced-search-results-pagination-state)]
           (when-not (str/blank? (:keywords filters))
-            (http/advanced-search-questions filters pagination (fn [_] nil)))))
+            (http/advanced-search-questions filters pagination-details (fn [_] nil)))))
 
       :reagent-render
       (fn []
@@ -136,7 +131,8 @@
                         questions-list))
                 (when (> (:total_pages pagination-info) 1)
                   [pagination
-                   {:page (:page pagination-info)
+                   {:item-name "question"
+                    :page (:page pagination-info)
                     :total-pages (:total_pages pagination-info)
                     :total-items (:total_items pagination-info)
                     :limit (:limit pagination-info)

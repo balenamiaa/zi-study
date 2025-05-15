@@ -400,6 +400,10 @@
    {:component-did-mount
     (fn [_this]
       (let [set-id (get-in match [:parameters :path :set-id])
+            focus-question-id (when-let [query-params (.-search js/window.location)]
+                                (when-not (str/blank? query-params)
+                                  (let [params (js/URLSearchParams. query-params)]
+                                    (.get params "focus_question_id"))))
             initial-filters @(state/get-current-set-filters)]
         ;; Clear previous set data and errors before fetching new set
         (state/set-current-set nil [])
@@ -415,7 +419,13 @@
                                     (http/get-set-questions set-id initial-filters
                                                             (fn [{success-questions :success questions-data :data error-questions :error}]
                                                               (if success-questions
-                                                                (state/set-current-set set-details (:questions questions-data))
+                                                                (do
+                                                                  (state/set-current-set set-details (:questions questions-data))
+                                                                  (when focus-question-id
+                                                                    (js/setTimeout
+                                                                     #(when-let [el (.getElementById js/document (str "question-" focus-question-id))]
+                                                                        (.scrollIntoView el #js {:behavior "smooth" :block "center"}))
+                                                                     500)))
                                                                 (do
                                                                   (println "Error fetching questions:" error-questions)
                                                                   (state/set-current-set set-details []) ;; Set details, empty questions
@@ -444,7 +454,20 @@
       (let [current-set-state @(state/get-current-set-state)
             details (:details current-set-state)
             set-loading? (:loading? current-set-state)
-            set-error (:error current-set-state)]
+            set-error (:error current-set-state)
+            focus-question-id (r/atom nil)] ; For potential re-focus if questions reload
+
+        ;; Check for focus_question_id on initial render or match update
+        (let [query-params (.-search js/window.location)]
+          (when-not (str/blank? query-params)
+            (let [params (js/URLSearchParams. query-params)]
+              (when-let [fqid (.get params "focus_question_id")]
+                (reset! focus-question-id fqid)
+                ;; Clear the param from URL after reading to prevent re-triggering on unrelated re-renders
+                ;; Consider if this is desired UX, or if it should persist for reloads.
+                ;; For now, let's assume we try to focus once.
+                ;; (js/history.replaceState nil "" (str (.-pathname js/window.location) "")) 
+                ))))
 
         [:div {:class "max-w-3xl mx-auto px-4 py-8"}
          [:div {:class "mb-6"}

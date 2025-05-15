@@ -522,3 +522,7 @@
 
 (defn set-advanced-search-page [page-num]
   (swap! app-state assoc-in [:advanced-search :results :pagination :page] page-num))
+
+(defn update-advanced-search-question [question-id updated-question-data]
+  (swap! app-state update-in [:advanced-search :results :list]
+         (fn [questions] (mapv (fn [q] (if (= (:question-id q) question-id) (merge q updated-question-data) q)) questions))))

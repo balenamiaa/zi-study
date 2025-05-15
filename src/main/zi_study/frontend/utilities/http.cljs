@@ -175,8 +175,16 @@
              (fn [result]
                (if (:success result)
                  (let [data (:data result)
-                       current-question (first (filter #(= (:question-id %) question-id) @(state/get-current-set-questions)))
-                       question-data (:question-data current-question)
+                       ;; Try to find question in current set first
+                       current-question (first (filter #(= (:question-id %) question-id)
+                                                       @(state/get-current-set-questions)))
+                       ;; If not found, check in advanced search results
+                       advanced-search-question (when-not current-question
+                                                  (first (filter #(= (:question-id %) question-id)
+                                                                 (get-in @state/app-state [:advanced-search :results :list]))))
+                       ;; Use whichever question we found
+                       source-question (or current-question advanced-search-question)
+                       question-data (:question-data source-question)
                        final-is-correct (cond
                                           (= question-type "written") nil
 
@@ -185,12 +193,20 @@
 
                                           :else
                                           (let [is-correct-from-backend (:correct data)]
-                                            (if (nil? is-correct-from-backend) nil (if is-correct-from-backend 1 0))))]
-                   (state/update-current-question question-id
-                                                  {:user-answer {:answer-data answer-data
-                                                                 :is-correct final-is-correct
-                                                                 :submitted-at (js/Date.)}
-                                                   :bookmarked (:bookmarked current-question)})
+                                            (if (nil? is-correct-from-backend) nil (if is-correct-from-backend 1 0))))
+                       updated-question-data {:user-answer {:answer-data answer-data
+                                                            :is-correct final-is-correct
+                                                            :submitted-at (js/Date.)}
+                                              :bookmarked (:bookmarked source-question)}]
+
+                   ;; Update in current set if that's where we found it
+                   (when current-question
+                     (state/update-current-question question-id updated-question-data))
+
+                   ;; Update in advanced search if that's where we found it
+                   (when advanced-search-question
+                     (state/update-advanced-search-question question-id updated-question-data))
+
                    (state/set-answer-submitting question-id false nil)
                    (callback {:success true :data data}))
                  (do
@@ -204,11 +220,30 @@
              (fn [result]
                (if (:success result)
                  (do
-                   (let [current-questions @(state/get-current-set-questions)
-                         question-to-update (first (filter #(= (:question-id %) question-id) current-questions))
-                         updated-user-answer (assoc (:user-answer question-to-update) :is-correct (if is-correct 1 0))]
-                     (state/update-current-question question-id
-                                                    {:user-answer updated-user-answer}))
+                   (let [;; Try to find in current questions
+                         current-questions @(state/get-current-set-questions)
+                         current-question (first (filter #(= (:question-id %) question-id) current-questions))
+
+                         ;; If not found, check in advanced search
+                         advanced-search-questions (get-in @state/app-state [:advanced-search :results :list])
+                         advanced-search-question (when-not current-question
+                                                    (first (filter #(= (:question-id %) question-id)
+                                                                   advanced-search-questions)))
+
+                         ;; Use whichever question we found
+                         source-question (or current-question advanced-search-question)
+                         updated-user-answer (assoc (:user-answer source-question) :is-correct (if is-correct 1 0))]
+
+                     ;; Update in current set if found there
+                     (when current-question
+                       (state/update-current-question question-id
+                                                      {:user-answer updated-user-answer}))
+
+                     ;; Update in advanced search if found there
+                     (when advanced-search-question
+                       (state/update-advanced-search-question question-id
+                                                              {:user-answer updated-user-answer})))
+
                    (state/set-self-evaluating question-id false)
                    (callback {:success true}))
                  (do
@@ -223,12 +258,23 @@
                (fn [result]
                  (if (:success result)
                    (do
-                     ;; First immediately update the local state for instant feedback
-                     (state/update-current-question question-id
-                                                    {:user-answer nil})
-                     (state/set-answer-submitting question-id false nil)
+                     ;; Check in current set
+                     (let [current-question (first (filter #(= (:question-id %) question-id)
+                                                           @(state/get-current-set-questions)))
+                           ;; Check in advanced search
+                           advanced-search-question (when-not current-question
+                                                      (first (filter #(= (:question-id %) question-id)
+                                                                     (get-in @state/app-state [:advanced-search :results :list]))))]
 
-                     ;; Then inform the caller
+                       ;; Update in current set if found there
+                       (when current-question
+                         (state/update-current-question question-id {:user-answer nil}))
+
+                       ;; Update in advanced search if found there
+                       (when advanced-search-question
+                         (state/update-advanced-search-question question-id {:user-answer nil})))
+
+                     (state/set-answer-submitting question-id false nil)
                      (callback {:success true
                                 :deleted_count (get-in result [:data :deleted_count])}))
                    (do
@@ -268,9 +314,24 @@
              {:bookmarked bookmarked}
              (fn [result]
                (if (:success result)
-                 (let [new-bookmarked-state (:bookmarked (:data result))]
+                 (let [new-bookmarked-state (:bookmarked (:data result))
+                       ;; Check in current set
+                       current-question (first (filter #(= (:question-id %) question-id)
+                                                       @(state/get-current-set-questions)))
+                       ;; Check in advanced search
+                       advanced-search-question (when-not current-question
+                                                  (first (filter #(= (:question-id %) question-id)
+                                                                 (get-in @state/app-state [:advanced-search :results :list]))))]
+
+                   ;; Update in current set if found there
+                   (when current-question
+                     (state/update-current-question question-id {:bookmarked new-bookmarked-state}))
+
+                   ;; Update in advanced search if found there
+                   (when advanced-search-question
+                     (state/update-advanced-search-question question-id {:bookmarked new-bookmarked-state}))
+
                    (state/set-bookmark-toggling question-id false)
-                   (state/update-current-question question-id {:bookmarked new-bookmarked-state})
                    (callback {:success true :bookmarked new-bookmarked-state}))
                  (do
                    (state/set-bookmark-toggling question-id false)

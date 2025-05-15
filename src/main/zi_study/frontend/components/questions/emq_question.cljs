@@ -45,8 +45,6 @@
                     :disabled disabled?
                     :end-icon (cond
                                 pending? lucide-icons/Loader2
-                                (and is-submitted? is-correct?) lucide-icons/Check
-                                (and is-submitted? (not is-correct?)) lucide-icons/X
                                 :else lucide-icons/ChevronDown)}
                    [:span {:class (cx "truncate"
                                       (when (nil? selected-option-idx) "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"))}
@@ -78,13 +76,14 @@
    (when (and is-submitted?
               (not is-correct?)
               (some? actual-correct-option-idx))
-     [:div {:class (cx "mt-2 text-sm flex items-center rounded-md p-2"
+     [:div {:class (cx "mt-2 text-sm p-2 rounded-md"
                        "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)]"
                        "text-[var(--color-success-700)] dark:text-[var(--color-success-300)]"
                        "border border-[var(--color-success-200)] dark:border-[var(--color-success-700)]")}
-      [:> lucide-icons/AlertCircle {:size 16 :className "mr-2 flex-shrink-0"}]
-      [:span "Correct answer: "]
-      [:span {:class "font-medium ml-1"} (get options actual-correct-option-idx)]])])
+      [:div {:class "flex items-center"}
+       [:> lucide-icons/AlertCircle {:size 16, :class "flex-shrink-0"}]
+       [:span {:class "ml-2 font-medium"}
+        (get options actual-correct-option-idx)]]])])
 
 (defn emq-question
   "Extended Matching Questions component

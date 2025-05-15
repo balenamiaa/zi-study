@@ -515,40 +515,32 @@
           (bad-request "Search keywords are required." nil)
           (let [fts-match-query (str keywords "*") ;; Use prefix matching for FTS
 
-                ;; First, get matching question_ids from FTS table with pagination
-                matching_q_ids_map (-> (hh/select :q_fts.question_id)
-                                       (hh/from [:questions_fts :q_fts])
-                                       (hh/where [:match :q_fts.searchable_text fts-match-query])
-                                       ;; Potentially add other filters here if passed (e.g., by joining with questions on q_fts.question_id)
-                                       (hh/order-by [:rank]) ;; FTS rank, if available and desired
-                                       (hh/limit limit)
-                                       (hh/offset offset))
-                matching_q_ids_results (execute! matching_q_ids_map)
-                question-ids (mapv :question-id matching_q_ids_results)
-
-                ;; Get total count for pagination
-                count-query-map (-> (hh/select [[:count :*] :total])
+                ;; Get total count for pagination from FTS table
+                count_query_map (-> (hh/select [[:count :*] :total])
                                     (hh/from [:questions_fts :q_fts])
-                                    (hh/where [:match :q_fts.searchable_text fts-match-query]))
-                total-items (:total (execute-one! count-query-map) 0)
+                                    (hh/where [:raw "searchable_text MATCH " [:lift fts-match-query]]))
+                _ (println "FTS Count Query:" (h/format count_query_map))
+                total-items (:total (execute-one! count_query_map) 0)
                 total-pages (if (pos? total-items) (int (Math/ceil (/ (double total-items) limit))) 0)
 
-                questions (if (seq question-ids)
-                            (let [query-base {:select [:q.* :qs.title :set_title
-                                                       [:ua.answer_data :user_answer_data]
-                                                       [:ua.is_correct :user_is_correct]
-                                                       [:ua.submitted_at :user_submitted_at]
-                                                       [:ub.bookmarked_at :user_bookmarked_at]]
-                                              :from [[:questions :q]]
-                                              :join [[:question_sets :qs] [:= :q.set_id :qs.set_id]]
-                                              :left-join [[:user_answers :ua] [:and [:= :q.question_id :ua.question_id] [:= :ua.user_id user-id]]
-                                                          [:user_bookmarks :ub] [:and [:= :q.question_id :ub.question_id] [:= :ub.user_id user-id]]]
-                                              :where [:in :q.question_id question-ids]}
-                                  ;; To maintain the order from FTS results, we might need to fetch and then sort in Clojure,
-                                  ;; or rely on the DB if :in preserves order (not guaranteed for all DBs)
-                                  ;; For simplicity now, we'll fetch and then re-order if needed, or accept DB default for :in
-                                  final-query (-> query-base (hh/order-by :q.set_id :q.order_in_set :q.question_id))
-                                  questions-raw (execute! final-query)
+                questions (if (and (pos? total-items) (> total-pages (dec page)))
+                            (let [questions_query_map (-> (hh/select :q.* 
+                                                                   [:qs.title :question_set_title] ; Ensure set title is selected
+                                                                   [:ua.answer_data :user_answer_data]
+                                                                   [:ua.is_correct :user_is_correct]
+                                                                   [:ua.submitted_at :user_submitted_at]
+                                                                   [:ub.bookmarked_at :user_bookmarked_at])
+                                                          (hh/from [:questions_fts :q_fts])
+                                                          (hh/join [:questions :q] [:= :q.question_id :q_fts.question_id]
+                                                                   [:question_sets :qs] [:= :q.set_id :qs.set_id])
+                                                          (hh/left-join [:user_answers :ua] [:and [:= :q.question_id :ua.question_id] [:= :ua.user_id user-id]]
+                                                                        [:user_bookmarks :ub] [:and [:= :q.question_id :ub.question_id] [:= :ub.user_id user-id]])
+                                                          (hh/where [:raw "searchable_text MATCH " [:lift fts-match-query]])
+                                                          ;; Relying on FTS default ordering by relevance
+                                                          (hh/limit limit)
+                                                          (hh/offset offset))
+                                  _ (println "FTS Combined Query:" (h/format questions_query_map))
+                                  questions-raw (execute! questions_query_map)
                                   parsed-questions (mapv (fn [q]
                                                            (let [parsed-q (-> q
                                                                               (parse-edn-field :question-data)
@@ -560,11 +552,8 @@
                                                                                         :is-correct (:user-is-correct parsed-q)
                                                                                         :submitted-at (:user-submitted-at parsed-q)}))
                                                                  (dissoc :user-answer-data :user-is-correct :user-submitted-at :user-bookmarked-at))))
-                                                         questions-raw)
-                                  id-to-question (zipmap (map :question-id parsed-questions) parsed-questions)]
-
-                              ;; Re-order based on original FTS match order if necessary
-                              (mapv id-to-question question-ids))
+                                                         questions-raw)]
+                              parsed-questions)
                             [])]
 
             (resp/response {:questions questions
@@ -590,4 +579,10 @@
                               (:question-type q)
                               (:question-data q)
                               (:retention-aid q)))
-      (println "Updated FTS index for" (count questions) "questions"))))
+      (println "Updated FTS index for" (count questions) "questions")))
+
+
+  (try
+    (let [results (jdbc/execute! @db-pool ["SELECT question_id FROM questions_fts WHERE searchable_text MATCH ?" "erect"])]
+      (println "Raw FTS query results:" results))
+    (catch Exception e (println "Raw FTS query failed:" (ex-message e) (.printStackTrace e)))))
