@@ -4,7 +4,6 @@
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.http :as http]
             [zi-study.frontend.components.input :refer [text-input]]
-            [zi-study.frontend.components.button :refer [button]]
             [zi-study.frontend.components.alert :refer [alert]]
             [zi-study.frontend.components.card :refer [card]]
             [zi-study.frontend.components.skeleton :as skeleton]
@@ -28,7 +27,7 @@
      [skeleton/skeleton {:variant :text :width "50%" :height "1.25rem"}]] ; Set title placeholder
     [skeleton/skeleton {:variant :rectangular :width "100%" :height "6rem"}]]])
 
-(defn- searched-question-card [{:keys [question index]}]
+(defn- searched-question-card [{:keys [question]}]
   (let [{:keys [question-id set-id question-set-title question-type]} question]
     [card {:class "mb-6 animate-fade-in-up"}
      [:div {:class "p-5"}
@@ -39,7 +38,7 @@
             :class "group flex items-center text-md font-semibold text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)] hover:text-[var(--color-primary-500)] dark:hover:text-[var(--color-primary-200)] transition-colors duration-200"}
         [:span question-set-title]
         [:> lucide-icons/ArrowUpRight {:size 18 :className "ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"}]]]
-      
+
       ;; Render the actual question using existing components
       (case question-type
         "written" [written-question question]

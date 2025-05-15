@@ -311,7 +311,7 @@
   (fn [match]
     (let [set-id (get-in match [:parameters :path :set-id])
           current-set-full-state @(state/get-current-set-state)
-          questions (:questions current-set-full-state)
+          questions @(state/get-current-set-questions)
           questions-loading? (:questions-loading? current-set-full-state)
           questions-error (:questions-error current-set-full-state)]
       [:div
@@ -420,7 +420,11 @@
                                                             (fn [{success-questions :success questions-data :data error-questions :error}]
                                                               (if success-questions
                                                                 (do
-                                                                  (state/set-current-set set-details (:questions questions-data))
+                                                                  ;; We now just set the details directly since questions go through the registry
+                                                                  (swap! state/app-state assoc-in [:question-bank :current-set :details] set-details)
+                                                                  ;; Explicitly turn off loading states
+                                                                  (state/set-current-set-loading false)
+                                                                  (state/set-current-set-questions-loading false)
                                                                   (when focus-question-id
                                                                     (js/setTimeout
                                                                      #(when-let [el (.getElementById js/document (str "question-" focus-question-id))]
@@ -428,13 +432,12 @@
                                                                      500)))
                                                                 (do
                                                                   (println "Error fetching questions:" error-questions)
-                                                                  (state/set-current-set set-details []) ;; Set details, empty questions
+                                                                  ;; The question IDs list will be empty due to using set-current-set-question-ids
+                                                                  (swap! state/app-state assoc-in [:question-bank :current-set :details] set-details)
                                                                   (state/set-current-set-questions-error (str "Failed to load questions: " error-questions))
-                                                                  ;; state/set-current-set will turn off loading? and questions-loading?
-                                                                  ;; but explicitly turn off questions-loading if set-current-set wasn't fully successful for questions
+                                                                  ;; Explicitly turn off loading state
                                                                   (state/set-current-set-questions-loading false)
-                                                                  (state/set-current-set-loading false) ; Ensure overall is also off if we only partially loaded
-                                                                  )))))
+                                                                  (state/set-current-set-loading false))))))
                                   (do
                                     (println "Error fetching set details:" error-details)
                                     (state/set-current-set-error (str "Failed to load set details: " error-details))
@@ -443,7 +446,9 @@
 
     :component-will-unmount
     (fn []
-      (state/set-current-set nil [])
+      ;; Clear current set data but leave questions in the registry
+      (swap! state/app-state assoc-in [:question-bank :current-set :details] nil)
+      (swap! state/app-state assoc-in [:question-bank :current-set :questions] [])
       (state/set-current-set-error nil)
       (state/set-current-set-questions-error nil)
       (state/set-current-set-loading false)

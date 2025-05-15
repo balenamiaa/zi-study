@@ -161,7 +161,7 @@
               (fn [result]
                 (if (:success result)
                   (do
-                    (state/set-current-set-questions-loading false)
+                    (state/set-current-set-question-ids (:questions (:data result)))
                     (callback {:success true :data (:data result)}))
                   (do
                     (state/set-current-set-questions-loading false)
@@ -175,16 +175,9 @@
              (fn [result]
                (if (:success result)
                  (let [data (:data result)
-                       ;; Try to find question in current set first
-                       current-question (first (filter #(= (:question-id %) question-id)
-                                                       @(state/get-current-set-questions)))
-                       ;; If not found, check in advanced search results
-                       advanced-search-question (when-not current-question
-                                                  (first (filter #(= (:question-id %) question-id)
-                                                                 (get-in @state/app-state [:advanced-search :results :list]))))
-                       ;; Use whichever question we found
-                       source-question (or current-question advanced-search-question)
-                       question-data (:question-data source-question)
+                       ;; Get the question directly from the registry
+                       question (get-in @state/app-state [:questions-registry question-id])
+                       question-data (:question-data question)
                        final-is-correct (cond
                                           (= question-type "written") nil
 
@@ -197,16 +190,10 @@
                        updated-question-data {:user-answer {:answer-data answer-data
                                                             :is-correct final-is-correct
                                                             :submitted-at (js/Date.)}
-                                              :bookmarked (:bookmarked source-question)}]
+                                              :bookmarked (:bookmarked question)}]
 
-                   ;; Update in current set if that's where we found it
-                   (when current-question
-                     (state/update-current-question question-id updated-question-data))
-
-                   ;; Update in advanced search if that's where we found it
-                   (when advanced-search-question
-                     (state/update-advanced-search-question question-id updated-question-data))
-
+                   ;; Update in the registry only, no need to update separate lists
+                   (state/update-question-in-registry question-id updated-question-data)
                    (state/set-answer-submitting question-id false nil)
                    (callback {:success true :data data}))
                  (do
@@ -220,29 +207,13 @@
              (fn [result]
                (if (:success result)
                  (do
-                   (let [;; Try to find in current questions
-                         current-questions @(state/get-current-set-questions)
-                         current-question (first (filter #(= (:question-id %) question-id) current-questions))
+                   (let [;; Get the question directly from the registry
+                         question (get-in @state/app-state [:questions-registry question-id])
+                         updated-user-answer (assoc (:user-answer question) :is-correct (if is-correct 1 0))]
 
-                         ;; If not found, check in advanced search
-                         advanced-search-questions (get-in @state/app-state [:advanced-search :results :list])
-                         advanced-search-question (when-not current-question
-                                                    (first (filter #(= (:question-id %) question-id)
-                                                                   advanced-search-questions)))
-
-                         ;; Use whichever question we found
-                         source-question (or current-question advanced-search-question)
-                         updated-user-answer (assoc (:user-answer source-question) :is-correct (if is-correct 1 0))]
-
-                     ;; Update in current set if found there
-                     (when current-question
-                       (state/update-current-question question-id
-                                                      {:user-answer updated-user-answer}))
-
-                     ;; Update in advanced search if found there
-                     (when advanced-search-question
-                       (state/update-advanced-search-question question-id
-                                                              {:user-answer updated-user-answer})))
+                     ;; Update in the registry only
+                     (state/update-question-in-registry question-id
+                                                        {:user-answer updated-user-answer}))
 
                    (state/set-self-evaluating question-id false)
                    (callback {:success true}))
@@ -258,22 +229,8 @@
                (fn [result]
                  (if (:success result)
                    (do
-                     ;; Check in current set
-                     (let [current-question (first (filter #(= (:question-id %) question-id)
-                                                           @(state/get-current-set-questions)))
-                           ;; Check in advanced search
-                           advanced-search-question (when-not current-question
-                                                      (first (filter #(= (:question-id %) question-id)
-                                                                     (get-in @state/app-state [:advanced-search :results :list]))))]
-
-                       ;; Update in current set if found there
-                       (when current-question
-                         (state/update-current-question question-id {:user-answer nil}))
-
-                       ;; Update in advanced search if found there
-                       (when advanced-search-question
-                         (state/update-advanced-search-question question-id {:user-answer nil})))
-
+                     ;; Update in the registry only
+                     (state/update-question-in-registry question-id {:user-answer nil})
                      (state/set-answer-submitting question-id false nil)
                      (callback {:success true
                                 :deleted_count (get-in result [:data :deleted_count])}))
@@ -290,7 +247,7 @@
                  (if (:success result)
                    (do
                      (js/console.log "Successfully deleted" (or (:deleted_count (:data result)) 0) "answers")
-                     ;; After deletion, reload the questions with current filters to reflect the changes
+                     ;; After deletion, reload the questions with current filters
                      (let [filters @(state/get-current-set-filters)]
                        (get-set-questions
                         set-id
@@ -298,7 +255,7 @@
                         (fn [result]
                           (if (:success result)
                             (do
-                              (state/set-current-set-questions (:questions (:data result)))
+                              ;; The questions are already stored in the registry by get-set-questions
                               (callback {:success true :deleted_count (:deleted_count (:data result))}))
                             (do
                               (state/set-current-set-questions-loading false)
@@ -314,23 +271,9 @@
              {:bookmarked bookmarked}
              (fn [result]
                (if (:success result)
-                 (let [new-bookmarked-state (:bookmarked (:data result))
-                       ;; Check in current set
-                       current-question (first (filter #(= (:question-id %) question-id)
-                                                       @(state/get-current-set-questions)))
-                       ;; Check in advanced search
-                       advanced-search-question (when-not current-question
-                                                  (first (filter #(= (:question-id %) question-id)
-                                                                 (get-in @state/app-state [:advanced-search :results :list]))))]
-
-                   ;; Update in current set if found there
-                   (when current-question
-                     (state/update-current-question question-id {:bookmarked new-bookmarked-state}))
-
-                   ;; Update in advanced search if found there
-                   (when advanced-search-question
-                     (state/update-advanced-search-question question-id {:bookmarked new-bookmarked-state}))
-
+                 (let [new-bookmarked-state (:bookmarked (:data result))]
+                   ;; Update in registry only
+                   (state/update-question-in-registry question-id {:bookmarked new-bookmarked-state})
                    (state/set-bookmark-toggling question-id false)
                    (callback {:success true :bookmarked new-bookmarked-state}))
                  (do
@@ -350,7 +293,6 @@
                   (state/set-bookmarks-error (:error result))
                   (callback {:success false :error (:error result)}))))))
 
-
 (defn advanced-search-questions [filters pagination callback]
   (let [current-page (or (:page pagination) 1)
         current-limit (or (:limit pagination) 15)
@@ -367,10 +309,9 @@
               (fn [result]
                 (if (:success result)
                   (do
-                    (state/set-advanced-search-results (:questions (:data result)) (:pagination (:data result)))
+                    ;; Use the new set-advanced-search-question-ids function
+                    (state/set-advanced-search-question-ids (:questions (:data result)) (:pagination (:data result)))
                     (callback {:success true :data (:data result)}))
                   (do
                     (state/set-advanced-search-error (:error result))
                     (callback {:success false :error (:error result)})))))))
-
-

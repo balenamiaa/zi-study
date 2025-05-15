@@ -267,7 +267,6 @@
                                 (hh/order-by :q.order_in_set :q.question_id))
 
                 questions-raw (execute! final-query)
-                _ (prn questions-raw)
                 questions (mapv (fn [q]
                                   (let [q (-> q
                                               (parse-edn-field :question-data)
@@ -519,17 +518,16 @@
                 count_query_map (-> (hh/select [[:count :*] :total])
                                     (hh/from [:questions_fts :q_fts])
                                     (hh/where [:raw "searchable_text MATCH " [:lift fts-match-query]]))
-                _ (println "FTS Count Query:" (h/format count_query_map))
                 total-items (:total (execute-one! count_query_map) 0)
                 total-pages (if (pos? total-items) (int (Math/ceil (/ (double total-items) limit))) 0)
 
                 questions (if (and (pos? total-items) (> total-pages (dec page)))
-                            (let [questions_query_map (-> (hh/select :q.* 
-                                                                   [:qs.title :question_set_title] ; Ensure set title is selected
-                                                                   [:ua.answer_data :user_answer_data]
-                                                                   [:ua.is_correct :user_is_correct]
-                                                                   [:ua.submitted_at :user_submitted_at]
-                                                                   [:ub.bookmarked_at :user_bookmarked_at])
+                            (let [questions_query_map (-> (hh/select :q.*
+                                                                     [:qs.title :question_set_title] ; Ensure set title is selected
+                                                                     [:ua.answer_data :user_answer_data]
+                                                                     [:ua.is_correct :user_is_correct]
+                                                                     [:ua.submitted_at :user_submitted_at]
+                                                                     [:ub.bookmarked_at :user_bookmarked_at])
                                                           (hh/from [:questions_fts :q_fts])
                                                           (hh/join [:questions :q] [:= :q.question_id :q_fts.question_id]
                                                                    [:question_sets :qs] [:= :q.set_id :qs.set_id])
@@ -539,7 +537,6 @@
                                                           ;; Relying on FTS default ordering by relevance
                                                           (hh/limit limit)
                                                           (hh/offset offset))
-                                  _ (println "FTS Combined Query:" (h/format questions_query_map))
                                   questions-raw (execute! questions_query_map)
                                   parsed-questions (mapv (fn [q]
                                                            (let [parsed-q (-> q

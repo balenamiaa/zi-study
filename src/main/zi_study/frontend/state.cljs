@@ -103,6 +103,9 @@
                  [:total_pages :int]
                  [:total_items :int]]]])
 
+(def questions-registry-schema
+  [:map-of :string :map]) ;; Map of question-id -> question data
+
 (def app-state-schema
   [:map
    [:auth auth-schema]
@@ -112,7 +115,8 @@
    [:advanced-search ; Key for the advanced search state
     [:map ; Schema for the advanced search state itself
      [:results advanced-search-results-schema]
-     [:filters advanced-search-filters-schema]]]])
+     [:filters advanced-search-filters-schema]]]
+   [:questions-registry questions-registry-schema]])
 
 ;; Core application state
 (defonce app-state
@@ -167,7 +171,8 @@
                                                     :total_pages 0}}
                              :filters {:keywords ""
                                        ; Initialize future filters if added
-                                       }}}))
+                                       }}
+           :questions-registry {}}))
 
 ;; Track the last applied filters to avoid redundant API calls
 (defonce last-applied-filters (r/atom nil))
@@ -193,7 +198,10 @@
   (r/reaction (get-in @app-state [:question-bank :current-set])))
 
 (defn get-current-set-questions []
-  (r/reaction (get-in @app-state [:question-bank :current-set :questions])))
+  (r/reaction
+   (let [question-ids (get-in @app-state [:question-bank :current-set :questions])
+         registry (:questions-registry @app-state)]
+     (mapv #(get registry %) question-ids))))
 
 (defn get-current-set-filters []
   (r/reaction (get-in @app-state [:question-bank :current-set :filters])))
@@ -214,7 +222,12 @@
   (r/reaction (get-in @app-state [:question-bank :self-eval question-id])))
 
 (defn get-advanced-search-results-state []
-  (r/reaction (get-in @app-state [:advanced-search :results])))
+  (r/reaction
+   (let [results (get-in @app-state [:advanced-search :results])
+         question-ids (:list results)
+         registry (:questions-registry @app-state)
+         questions (mapv #(get registry %) question-ids)]
+     (assoc results :list questions))))
 
 (defn get-advanced-search-results-pagination-state []
   (r/reaction (get-in @app-state [:advanced-search :results :pagination])))
@@ -229,6 +242,49 @@
 
 (defn get-last-applied-advanced-search-filters []
   last-applied-advanced-search-filters)
+
+(defn get-question-from-registry [question-id]
+  (r/reaction (get-in @app-state [:questions-registry question-id])))
+
+(defn get-questions-from-registry [question-ids]
+  (r/reaction (vals (select-keys (:questions-registry @app-state) question-ids))))
+
+;; Registry updaters
+(defn register-question
+  "Add or update a question in the registry"
+  [question]
+  (let [question-id (:question-id question)]
+    (swap! app-state assoc-in [:questions-registry question-id] question)))
+
+(defn register-questions
+  "Add or update multiple questions in the registry"
+  [questions]
+  (when (seq questions)
+    (swap! app-state update :questions-registry
+           (fn [registry]
+             (reduce (fn [reg q]
+                       (assoc reg (:question-id q) q))
+                     registry
+                     questions)))))
+
+(defn update-question-in-registry
+  "Update specific fields in a question in the registry"
+  [question-id updated-question-data]
+  (swap! app-state update-in [:questions-registry question-id]
+         (fn [question]
+           (if question
+             (merge question updated-question-data)
+             question))))
+
+(defn remove-question-from-registry
+  "Remove a question from the registry"
+  [question-id]
+  (swap! app-state update :questions-registry dissoc question-id))
+
+(defn clear-registry
+  "Clear all questions from the registry"
+  []
+  (swap! app-state assoc :questions-registry {}))
 
 ;; Auth state updaters
 (defn set-auth-loading-current-user [loading?]
@@ -336,25 +392,36 @@
                      :search ""}]
     ;; Reset last-applied-filters when loading a new set
     (reset! last-applied-filters new-filters)
-    (swap! app-state update :question-bank
-           #(assoc % :current-set {:details set-details
-                                   :questions questions
-                                   :loading? false
-                                   :questions-loading? false
-                                   :questions-error nil
-                                   :error nil
-                                   ;; Reset filters when loading a new set
-                                   :filters new-filters}))))
+    
+    ;; Register the questions in the registry
+    (register-questions questions)
+    
+    ;; Store only question IDs in the current-set
+    (let [question-ids (mapv :question-id questions)]
+      (swap! app-state update :question-bank
+             #(assoc % :current-set {:details set-details
+                                     :questions question-ids
+                                     :loading? false
+                                     :questions-loading? false
+                                     :questions-error nil
+                                     :error nil
+                                     ;; Reset filters when loading a new set
+                                     :filters new-filters})))))
 
 (defn set-current-set-questions [questions]
-  (swap! app-state update-in [:question-bank :current-set]
-         #(assoc % :questions questions
-                 :questions-loading? false
-                 :questions-error nil)))
+  ;; Register the questions in the registry
+  (register-questions questions)
+  
+  ;; Store only question IDs in the current-set
+  (let [question-ids (mapv :question-id questions)]
+    (swap! app-state update-in [:question-bank :current-set]
+           #(assoc % :questions question-ids
+                   :questions-loading? false
+                   :questions-error nil))))
 
 (defn update-current-question [question-id updated-question-data]
-  (swap! app-state update-in [:question-bank :current-set :questions]
-         (fn [questions] (mapv (fn [q] (if (= (:question-id q) question-id) (merge q updated-question-data) q)) questions))))
+  ;; Update the question directly in the registry
+  (update-question-in-registry question-id updated-question-data))
 
 (defn set-current-set-filters [filters-map]
   (swap! app-state assoc-in [:question-bank :current-set :filters] filters-map))
@@ -524,5 +591,26 @@
   (swap! app-state assoc-in [:advanced-search :results :pagination :page] page-num))
 
 (defn update-advanced-search-question [question-id updated-question-data]
-  (swap! app-state update-in [:advanced-search :results :list]
-         (fn [questions] (mapv (fn [q] (if (= (:question-id q) question-id) (merge q updated-question-data) q)) questions))))
+  ;; Update the question directly in the registry
+  (update-question-in-registry question-id updated-question-data))
+
+(defn set-current-set-question-ids
+  "Set question IDs for the current set and register the questions"
+  [questions]
+  (let [question-ids (mapv :question-id questions)]
+    (register-questions questions)
+    (swap! app-state assoc-in [:question-bank :current-set :questions] question-ids)
+    (swap! app-state assoc-in [:question-bank :current-set :questions-loading?] false)
+    (swap! app-state assoc-in [:question-bank :current-set :questions-error] nil)))
+
+(defn set-advanced-search-question-ids
+  "Set question IDs for advanced search results and register the questions"
+  [questions pagination]
+  (let [question-ids (mapv :question-id questions)]
+    (register-questions questions)
+    (swap! app-state update :advanced-search
+           #(assoc % :results
+                   {:list question-ids
+                    :pagination pagination
+                    :loading? false
+                    :error nil}))))
