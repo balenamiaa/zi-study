@@ -102,16 +102,19 @@
 
 ;; --- Question Bank API Client Functions ---
 
-(defn- build-query-params [params]
-  (->> params
-       (filter (fn [[_ v]] (if (coll? v) (seq v) (some? v))))
-       (map (fn [[k v]]
-              (let [param-name (name k)]
-                (if (coll? v)
-                  (str param-name "=" (str/join "," v))
-                  (str param-name "=" v)))))
-       (str/join "&")
-       (not-empty)))
+(defn build-query-params [params]
+  (let [processed-params (->> params
+                              (filter (fn [[_ v]]
+                                        (if (coll? v)
+                                          (seq v)
+                                          (some? v))))
+                              (map (fn [[k v]]
+                                     (let [encoded-key (js/encodeURIComponent (name k))]
+                                       (if (coll? v)
+                                         (str encoded-key "=" (->> v (map (comp js/encodeURIComponent str)) (str/join ",")))
+                                         (str encoded-key "=" (js/encodeURIComponent (str v))))))))]
+    (when (seq processed-params)
+      (str/join "&" processed-params))))
 
 (defn get-tags [callback]
   (state/set-tags-loading true)

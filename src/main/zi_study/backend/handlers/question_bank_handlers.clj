@@ -85,8 +85,10 @@
             filter-tags (parse-query-param params "tags" :csv)
             search-term (get params "search")
             search-where (when (not (str/blank? search-term))
-                           [:or [:like :qs.title (str "%" search-term "%")]
-                            [:like :qs.description (str "%" search-term "%")]])
+                           [:or
+                            [:like :qs.title (str "%" search-term "%")]
+                            [:like :qs.description (str "%" search-term "%")]
+                            [:like :t.tag-name (str "%" search-term "%")]])
 
             tag-having (when (seq filter-tags)
                          [:>= [:count [:distinct :t.tag-name]] (count filter-tags)])
@@ -125,9 +127,17 @@
                                                 (hh/group-by :qs.set_id)
                                                 (cond-> tag-having (hh/having tag-having)))
                                             :sub]))
-                              (-> (hh/select [[:count [:distinct :qs.set_id]] :total])
-                                  (hh/from [:question_sets :qs])
-                                  (cond-> search-where (hh/where search-where))))
+                              (if (not (str/blank? search-term))
+                                (-> (hh/select [[:count :*] :total])
+                                    (hh/from [(-> (hh/select :qs.set_id)
+                                                  (hh/from [:question_sets :qs])
+                                                  (hh/left-join [:question_set_tags :qst] [:= :qs.set_id :qst.set_id])
+                                                  (hh/left-join [:tags :t] [:= :qst.tag_id :t.tag_id])
+                                                  (hh/where search-where)
+                                                  (hh/group-by :qs.set_id))
+                                              :sub]))
+                                (-> (hh/select [[:count [:distinct :qs.set_id]] :total])
+                                    (hh/from [:question_sets :qs]))))
 
             total-count-result (execute-one! count-query-map)
             total-items (:total total-count-result 0)
@@ -252,7 +262,7 @@
                       (every? true? (map = (map str/trim correct-answers) (map str/trim user-answer)))))
         :emq (let [correct-matches-raw (:matches q-data)
                    ;; Normalize correct matches from either map or vector format
-                   correct-matches (set (cond 
+                   correct-matches (set (cond
                                           (map? correct-matches-raw) (map vec (seq correct-matches-raw))
                                           :else (map vec correct-matches-raw)))
                    ;; Normalize user answer from either map or vector format

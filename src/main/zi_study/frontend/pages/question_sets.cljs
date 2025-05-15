@@ -75,7 +75,7 @@
        (cond
          (not (and (some? total) (pos? total))) [:span "No questions"]
          (not (and (some? answered) (pos? answered))) [:span "Not started"]
-         :else [:<> 
+         :else [:<>
                 [:span (format-percentage percent-correct-of-answered)]
                 [:> lucide-icons/Check {:size 10 :strokeWidth 3}]])]]]))
 
@@ -121,10 +121,7 @@
 (defn question-set-card [{:keys [set-id title description created-at total-questions tags progress]}]
   (let [selected-tags (:tags @(state/get-sets-filters))
         answered (get-in progress [:answered] 0)
-        correct (get-in progress [:correct] 0)
-        answered-percent (get-in progress [:answered_percent] 0)
-        correct-percent (get-in progress [:correct_percent] 0)
-        correct-display-percent (if (pos? answered) (/ correct answered) 0)]
+        correct (get-in progress [:correct] 0)]
     [card {:hover-effect true
            :class "h-full animate-fade-in-up transition-all duration-300 transform hover:scale-[1.02]"
            :on-click #(rfe/push-state :zi-study.frontend.core/set-page {:set-id set-id})}
@@ -184,7 +181,7 @@
 ;; --- Pagination Component ---
 (defn pagination [{:keys [page total-pages total-items limit on-page-change]}]
   [:div {:class "flex flex-col sm:flex-row justify-center items-center gap-6 mt-10"
-         :key (str "pagination-" page)} ;; Add key to prevent re-rendering issues
+         :key (str "pagination-" page)}
 
    ;; Pages navigation
    [:div {:class "flex justify-center items-center"}
