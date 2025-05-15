@@ -2,7 +2,6 @@
   (:require
    [reagent.core :as r]
    ["lucide-react" :as lucide-icons]
-   [zi-study.frontend.components.button :refer [button]]
    [zi-study.frontend.components.image-upload-modal :refer [image-upload-modal]]
    [zi-study.frontend.utilities :refer [cx]]))
 
@@ -14,24 +13,24 @@
    - on-change: Function called with new avatar URL when changed
    - size: :sm, :md, :lg (default :md)
    - class: Additional CSS classes"
-  [{:keys [current-url on-change size class]
+  [{:keys [on-change size class]
     :or {size :md}}]
 
   (let [modal-open? (r/atom false)
         hover? (r/atom false)
-        
+
         size-class (case size
                      :sm "w-16 h-16"
                      :md "w-24 h-24"
                      :lg "w-32 h-32"
                      "w-24 h-24")
-        
+
         icon-size (case size
                     :sm 20
                     :md 28
                     :lg 36
                     28)]
-    
+
     (fn [{:keys [current-url disabled]}]
       [:div {:class (cx "relative inline-block group" class)}
        ;; Avatar display
@@ -49,7 +48,7 @@
                             "bg-gradient-to-br from-[var(--color-light-bg-paper)] to-[var(--color-light-bg)] dark:from-[var(--color-dark-bg-paper)] dark:to-[var(--color-dark-bg)]")}
            [:> lucide-icons/User {:size icon-size
                                   :className "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}]])]
-       
+
        ;; Edit overlay that appears on hover
        (when-not disabled
          [:div {:class (cx "absolute inset-0 rounded-full flex items-center justify-center"
@@ -64,7 +63,7 @@
           [:div {:class "text-white text-xs font-medium tracking-wide flex flex-col items-center justify-center gap-1"}
            [:> lucide-icons/Camera {:size icon-size :className "mb-1"}]
            [:span "Change"]]])
-       
+
        ;; Upload modal
        [image-upload-modal
         {:is-open @modal-open?

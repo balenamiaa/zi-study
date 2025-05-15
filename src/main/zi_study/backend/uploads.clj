@@ -1,6 +1,5 @@
 (ns zi-study.backend.uploads
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]
             [clojure.data.json :as json])
   (:import [java.util UUID]))
 

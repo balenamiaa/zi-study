@@ -1,9 +1,7 @@
 (ns zi-study.frontend.components.sidebar
   (:require [reagent.core :as r]
-            [reitit.frontend.easy :as rfe]
             [zi-study.frontend.utilities :refer [cx]]
-            ["lucide-react" :as lucide-icons]
-            [zi-study.frontend.components.button :refer [button]]))
+            ["lucide-react" :as lucide-icons]))
 
 (defn sidebar-link [{:keys [href text icon active? on-click collapsed?]}]
   [:a
@@ -47,15 +45,15 @@
 (defn sidebar [{:keys [current-page links mobile-open? toggle-mobile-sidebar on-desktop-toggle]}]
   (r/with-let [collapsed? (r/atom true) ;; Persistent state atom for desktop collapse
                toggle-collapsed (fn []
-                                 (swap! collapsed? not)
-                                 (when on-desktop-toggle (on-desktop-toggle (not @collapsed?))))]
+                                  (swap! collapsed? not)
+                                  (when on-desktop-toggle (on-desktop-toggle (not @collapsed?))))]
     [:<>
      ;; Backdrop for handling clicks outside sidebar
      [:div {:class (cx "fixed inset-0 z-40 bg-black/30 transition-opacity duration-300"
                        (if (or @mobile-open? (not @collapsed?))
                          "opacity-100 pointer-events-auto"
                          "opacity-0 pointer-events-none"))
-            :on-click (fn [] 
+            :on-click (fn []
                         (if (.-matches (js/window.matchMedia "(max-width: 768px)"))
                           (toggle-mobile-sidebar)
                           (toggle-collapsed)))}]
@@ -63,7 +61,7 @@
      ;; The toggle button (only shown when sidebar is collapsed on desktop)
      (when (and @collapsed? (not @mobile-open?))
        [sidebar-toggle-button {:on-click toggle-collapsed
-                              :collapsed? collapsed?}])
+                               :collapsed? collapsed?}])
 
      ;; Sidebar - positioned as overlay
      [:aside
@@ -74,7 +72,7 @@
                   "flex flex-col transition-all duration-300 ease-in-out"
                   "shadow-lg"
                   (if (or @mobile-open? (not @collapsed?))
-                    "translate-x-0" 
+                    "translate-x-0"
                     "-translate-x-full"))}
 
       ;; Toggle button (only shown when sidebar is expanded)

@@ -1,6 +1,5 @@
 (ns zi-study.frontend.pages.advanced-search
-  (:require [reagent.core :as r]
-            ["lucide-react" :as lucide-icons]))
+  (:require ["lucide-react" :as lucide-icons]))
 
 (defn advanced-search-page [match]
   [:div {:class "p-4 md:p-6 lg:p-8 animate-fade-in-up"}

@@ -5,125 +5,10 @@
             [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
             [next.jdbc.result-set :as rs]
-            [zi-study.backend.db :refer [db-pool]] ; Get the HikariDataSource atom
+            [zi-study.backend.db :refer [db-pool]]
             [malli.core :as m]
-            [malli.error :as me]))
-
-
-
-(def NonBlankString [:string {:min 1}])
-(def OptionalString [:maybe :string])
-(def Difficulty [:int {:min 1 :max 5}])
-(def QuestionType [:enum "written" "mcq-single" "mcq-multi" "emq" "cloze" "true-false"])
-(def TempId [:or :string :keyword]) ; Allow strings or keywords for temp IDs
-
-(def McqOption
-  [:map
-   [:temp_id TempId]
-   [:text NonBlankString]])
-
-(def McqSingleQuestion
-  [:map {:closed true}
-   [:temp_id TempId]
-   [:type [:enum :mcq-single "mcq-single"]] ; Allow keyword or string
-   [:difficulty {:optional true} Difficulty]
-   [:question_text NonBlankString]
-   [:retention_aid {:optional true} OptionalString]
-   [:options [:vector {:min 1} McqOption]]
-   [:correct_option_temp_id TempId]
-   [:explanation {:optional true} OptionalString]]) ; Optional explanation field
-
-(def McqMultiQuestion
-  [:map {:closed true}
-   [:temp_id TempId]
-   [:type [:enum :mcq-multi "mcq-multi"]]
-   [:difficulty {:optional true} Difficulty]
-   [:question_text NonBlankString]
-   [:retention_aid {:optional true} OptionalString]
-   [:options [:vector {:min 1} McqOption]]
-   [:correct_option_temp_ids [:vector {:min 1} TempId]]
-   [:explanation {:optional true} OptionalString]])
-
-(def WrittenQuestion
-  [:map {:closed true}
-   [:temp_id TempId]
-   [:type [:enum :written "written"]]
-   [:difficulty {:optional true} Difficulty]
-   [:question_text NonBlankString]
-   [:retention_aid {:optional true} OptionalString]
-   [:correct_answer_text NonBlankString]
-   [:explanation {:optional true} OptionalString]])
-
-(def TrueFalseQuestion
-  [:map {:closed true}
-   [:temp_id TempId]
-   [:type [:enum :true-false "true-false"]]
-   [:difficulty {:optional true} Difficulty]
-   [:question_text NonBlankString]
-   [:retention_aid {:optional true} OptionalString]
-   [:is_correct_answer_true :boolean]
-   [:explanation {:optional true} OptionalString]])
-
-(def ClozeQuestion
-  [:map {:closed true}
-   [:temp_id TempId]
-   [:type [:enum :cloze "cloze"]]
-   [:difficulty {:optional true} Difficulty]
-   [:cloze_text NonBlankString] ; Contains {{c1::hint}} or {{c1}} placeholders
-   [:retention_aid {:optional true} OptionalString]
-   [:answers [:vector {:min 1} NonBlankString]] ; Answers in order of placeholders
-   [:explanation {:optional true} OptionalString]])
-
-(def EmqPremise
-  [:map
-   [:temp_id TempId]
-   [:text NonBlankString]])
-
-(def EmqOption
-  [:map
-   [:temp_id TempId]
-   [:text NonBlankString]])
-
-(def EmqMatch [:tuple TempId TempId]) ; [premise_temp_id, option_temp_id]
-
-(def EmqQuestion
-  [:map {:closed true}
-   [:temp_id TempId]
-   [:type [:enum :emq "emq"]]
-   [:difficulty {:optional true} Difficulty]
-   [:instructions {:optional true} NonBlankString]
-   [:retention_aid {:optional true} OptionalString]
-   [:premises [:vector {:min 1} EmqPremise]]
-   [:options [:vector {:min 1} EmqOption]]
-   [:matches [:vector {:min 1} EmqMatch]]
-   [:explanation {:optional true} OptionalString]])
-
-(def Question
-  [:multi {:dispatch :type}
-   [:mcq-single McqSingleQuestion]
-   ["mcq-single" McqSingleQuestion] ; Handle string type
-   [:mcq-multi McqMultiQuestion]
-   ["mcq-multi" McqMultiQuestion]
-   [:written WrittenQuestion]
-   ["written" WrittenQuestion]
-   [:true-false TrueFalseQuestion]
-   ["true-false" TrueFalseQuestion]
-   [:cloze ClozeQuestion]
-   ["cloze" ClozeQuestion]
-   [:emq EmqQuestion]
-   ["emq" EmqQuestion]])
-
-(def QuestionSet
-  [:map {:closed true}
-   [:title NonBlankString]
-   [:description {:optional true} OptionalString]
-   [:tags {:optional true} [:vector NonBlankString]]
-   [:questions [:vector {:min 1} Question]]])
-
-(def ImportData [:vector {:min 1} QuestionSet])
-
-
-;; --- Helper Functions ---
+            [malli.error :as me]
+            [zi-study.backend.shapes.questions :refer [ImportData]]))
 
 (defn- to-str-temp-id [temp-id]
   (if (keyword? temp-id)
@@ -308,11 +193,8 @@
                         e))))))
 
 
-;; --- Example Usage (in REPL) ---
+; --- Example Usage (in REPL) ---
 (comment
-  (require '[zi-study.backend.db :as db])
-  (db/init-db!)
-
   (def edn-example-str
     [{:title "Neuroscience Basics Revised"
       :description "Fundamental concepts in neuroscience, using temp IDs."
@@ -371,25 +253,8 @@
                   ["p3" "oC"]]}]}])
 
   (import-question-set-data! (pr-str edn-example-str) :edn)
-  ;; Import from EDN string
+
   (import-question-set-data! "questionz/gyne_finals_00.edn" :edn)
-  ;; Assuming you have a file 'import_data.edn' or 'import_data.json'
-  ;; (import-question-set-data! "path/to/your/import_data.edn" :edn)
-  ;; (import-question-set-data! "path/to/your/import_data.json" :json)
 
-  (sql/query @zi-study.backend.db/db-pool ["DELETE FROM question_sets WHERE set_id = 12"])
-
-  ;; Verify insertion (using next.jdbc directly for quick check)
-  (jdbc/execute! @db/db-pool ["SELECT * FROM question_sets;"])
-  (jdbc/execute! @db/db-pool ["SELECT * FROM tags;"])
-  (jdbc/execute! @db/db-pool ["SELECT * FROM question_set_tags;"])
-  (jdbc/execute! @db/db-pool ["SELECT question_id, set_id, question_type, difficulty, order_in_set, question_data FROM questions ORDER BY set_id, order_in_set;"])
-
-  ;; Example: Read back and parse question_data for a specific question
-  (let [q-data-str (:question_data (first (sql/find-by-keys @db/db-pool :questions {:question_id 1})))]
-    (clojure.edn/read-string q-data-str))
-
-
-  (db/close-db!) ; Clean up pool if needed
-  )
+  (sql/query @zi-study.backend.db/db-pool ["DELETE FROM question_sets WHERE set_id = 12"]))
  

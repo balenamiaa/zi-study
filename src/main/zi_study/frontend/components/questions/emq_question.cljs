@@ -5,12 +5,10 @@
             [zi-study.frontend.components.questions.common :as q-common]
             [zi-study.frontend.components.dropdown :refer [dropdown menu-item]]
             [zi-study.frontend.components.button :refer [button]]
-            [zi-study.frontend.components.badge :refer [badge]]
             [zi-study.frontend.components.tooltip :refer [tooltip]]
             [zi-study.frontend.utilities :refer [cx]]
             ["lucide-react" :as lucide-icons]))
 
-;; Helper component for a single premise with dropdown selector
 (defn- premise-item
   "Renders a single premise item with a dropdown for selecting an option"
   [{:keys [premise options selected-option-idx disabled? pending? on-selection-change is-submitted? is-correct? actual-correct-option-idx]}]
@@ -21,10 +19,7 @@
                       (and is-submitted? (not is-correct?)) "bg-[var(--color-error-50)] dark:bg-[rgba(244,67,54,0.1)] border-[var(--color-error-200)] dark:border-[var(--color-error-700)]"
                       :else "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] dark:bg-[var(--color-dark-bg-paper)] hover:border-[var(--color-primary-300)] dark:hover:border-[var(--color-primary-500)]")
                     "transform transition-all duration-300 hover:shadow-sm")}
-
-   ;; Responsive layout for premise and dropdown
    [:div {:class "flex flex-col md:flex-row md:items-center gap-3 items-center"}
-    ;; Premise text with letter labeling (A, B, C, etc.)
     [:div {:class "flex items-start md:w-1/2"}
      [:div {:class (cx "rounded text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"
                        "py-2 px-4 text-left flex items-start justify-start font-bold w-full"
@@ -36,9 +31,7 @@
                        "scrollbar-thumb-rounded")}
       premise]]
 
-    ;; Dropdown selector for options
     [:div {:class "flex-grow w-full md:w-1/2"}
-     ;; Custom dropdown control
      (r/with-let [open? (r/atom false)]
        [dropdown {:trigger
                   [button
@@ -81,7 +74,7 @@
                      :delay 100}
             [:span {:class "truncate"} option-text]]])])]]
 
-   ;; Show correct answer indicator when submitted and incorrect
+
    (when (and is-submitted?
               (not is-correct?)
               (some? actual-correct-option-idx))
@@ -97,8 +90,7 @@
   "Extended Matching Questions component
    Displays a list of premises, each with a dropdown to select from a list of options"
   []
-  (let [;; Local state to track the user's current selections
-        selections-atom (r/atom {})
+  (let [selections-atom (r/atom {})
         show-explanation? (r/atom false)
         submitting? (r/atom false)]
 
@@ -106,9 +98,7 @@
      {:component-did-mount
       (fn [this]
         (let [props (r/props this)
-              ;; Initialize with any existing submitted answers
               existing-answers (get-in props [:user-answer :answer-data :answers] {})
-              ;; Ensure answers are converted to a map format consistently
               normalized-answers (if (sequential? existing-answers)
                                    (into {} existing-answers)
                                    existing-answers)]
@@ -117,10 +107,8 @@
       :component-did-update
       (fn [this [_ old-props]]
         (let [new-props (r/props this)
-              ;; Check if answers in props have changed
               old-answers (get-in old-props [:user-answer :answer-data :answers] {})
               new-answers (get-in new-props [:user-answer :answer-data :answers] {})
-              ;; Ensure new answers are converted to a map format consistently
               normalized-answers (if (sequential? new-answers)
                                    (into {} new-answers)
                                    new-answers)]
@@ -131,25 +119,15 @@
       :reagent-render
       (fn [props]
         (let [{:keys [question-id question-data user-answer retention-aid bookmarked index]} props
-
-              ;; Extract data from question
               instructions (get question-data :instructions "Match each premise with the correct option.")
               premises (get question-data :premises [])
               options (get question-data :options [])
               matches (get question-data :matches [])
               explanation (get question-data :explanation)
-
-              ;; Create a map of correct matches {premise-idx -> option-idx}
-              ;; Handle both formats: vector of vectors [[0 0] [1 2]] or map format {0 0, 1 2}
               correct-matches (if (map? matches)
-                                ;; If already a map, just ensure keys are integers
                                 (into {} (map (fn [[k v]] [(if (keyword? k) (parse-long (name k)) k) v]) matches))
-                                ;; If vector of vectors, convert to map
                                 (into {} matches))
-
-              ;; Derive state from props
               is-submitted? (boolean user-answer)
-              ;; Handle both formats for submitted answers
               submitted-answers (let [answers (get-in user-answer [:answer-data :answers])]
                                   (if (map? answers)
                                     answers
@@ -157,15 +135,9 @@
                                       (into {} answers))))
               submission-state (q-common/get-deref-answer-submission-state question-id)
               pending? (or (:loading? submission-state) @submitting?)
-
-              ;; Check if all premises have selections
               all-premises-selected? (every? #(contains? @selections-atom %) (range (count premises)))
-
-              ;; Function to handle selection change for a premise
               handle-selection-change (fn [premise-idx option-idx]
                                         (swap! selections-atom assoc premise-idx option-idx))
-
-              ;; Function to submit all answers
               submit-answers (fn []
                                (reset! submitting? true)
                                (http/submit-answer
@@ -174,17 +146,11 @@
                                 {:answers (vec (map vec @selections-atom))}
                                 (fn [_]
                                   (reset! submitting? false))))
-
-              ;; Function to clear answers
               clear-answers (fn [callback]
                               (http/delete-answer question-id callback)
                               (reset! selections-atom {}))
-
-              ;; Function to check if a selection is correct
               is-selection-correct? (fn [premise-idx selection]
                                       (= (get correct-matches premise-idx) selection))
-
-              ;; Calculate overall correctness
               correct-count (when is-submitted?
                               (count (filter (fn [[premise-idx option-idx]]
                                                (is-selection-correct? premise-idx option-idx))
@@ -196,7 +162,6 @@
                                      0))]
 
           [card {:class "mb-8 overflow-hidden border-2 hover:shadow-md transition-all duration-300" :variant :outlined}
-           ;; Common question header with number, text, and bookmark
            [q-common/question-header {:index (inc index)
                                       :question-id question-id
                                       :text instructions
@@ -209,10 +174,7 @@
                                       :bookmarked bookmarked
                                       :clear-fn clear-answers}]
 
-           ;; Main content area with the premises and dropdowns
            [:div {:class "p-4"}
-
-            ;; Progress indicator (when submitted)
             (when is-submitted?
               [:div {:class "mb-6 px-3 py-2 rounded-lg bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
                [:div {:class "flex justify-between text-sm mb-1"}
@@ -231,7 +193,6 @@
                                     :else "bg-[var(--color-error)]"))
                        :style {:width (str percentage-correct "%")}}]]])
 
-            ;; Render each premise with its dropdown
             (doall
              (for [premise-idx (range (count premises))]
                ^{:key (str "premise-" premise-idx)}
@@ -250,7 +211,6 @@
                               :actual-correct-option-idx (when is-submitted?
                                                            (get correct-matches premise-idx))}]))
 
-            ;; Submit button (only shown if not already submitted)
             (when (and (not is-submitted?) (not pending?))
               [:div {:class "mt-6 flex justify-end"}
                [button
@@ -261,7 +221,6 @@
                  :class "px-6 py-2 shadow-md hover:shadow-lg transition-all"}
                 "Submit Answers"]])]
 
-           ;; Explanation section (only shown after submission)
            (when (and is-submitted? explanation)
              [q-common/explanation-section
               {:explanation explanation
