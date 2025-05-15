@@ -83,12 +83,36 @@
    [:bookmark-toggle [:map-of :any :map]]
    [:self-eval [:map-of :any :map]]])
 
+(def advanced-search-filters-schema
+  [:map
+   [:keywords :string]
+   ;; Future: Add other filters like tags, difficulty, types
+   ;; [:tags {:optional true} [:set :string]]
+   ;; [:difficulty {:optional true} [:maybe :int]]
+   ;; [:types {:optional true} [:vector QuestionType]] ;; Assuming QuestionType is defined or imported
+   ])
+
+(def advanced-search-results-schema
+  [:map
+   [:list [:vector :map]] ; Will store question objects with set_title etc.
+   [:loading? :boolean]
+   [:error {:optional true} [:maybe :string]]
+   [:pagination [:map
+                 [:page :int]
+                 [:limit :int]
+                 [:total_pages :int]
+                 [:total_items :int]]]])
+
 (def app-state-schema
   [:map
    [:auth auth-schema]
    [:ui ui-schema]
    [:router router-schema]
-   [:question-bank question-bank-schema]])
+   [:question-bank question-bank-schema]
+   [:advanced-search ; Key for the advanced search state
+    [:map ; Schema for the advanced search state itself
+     [:results advanced-search-results-schema]
+     [:filters advanced-search-filters-schema]]]])
 
 ;; Core application state
 (defonce app-state
@@ -133,10 +157,21 @@
                         :error nil}
             :answer-submission {}
             :bookmark-toggle {}
-            :self-eval {}}}))
+            :self-eval {}}
+           :advanced-search {:results {:list []
+                                       :loading? false
+                                       :error nil
+                                       :pagination {:page 1
+                                                    :limit 15
+                                                    :total_items 0
+                                                    :total_pages 0}}
+                             :filters {:keywords ""
+                                       ; Initialize future filters if added
+                                       }}}))
 
 ;; Track the last applied filters to avoid redundant API calls
 (defonce last-applied-filters (r/atom nil))
+(defonce last-applied-advanced-search-filters (r/atom nil)) ;; For advanced search
 
 ;; Selectors
 (defn get-auth-state []
@@ -178,10 +213,22 @@
 (defn get-self-eval-state [question-id]
   (r/reaction (get-in @app-state [:question-bank :self-eval question-id])))
 
+(defn get-advanced-search-results-state []
+  (r/reaction (get-in @app-state [:advanced-search :results])))
+
+(defn get-advanced-search-results-pagination-state []
+  (r/reaction (get-in @app-state [:advanced-search :results :pagination])))
+
+(defn get-advanced-search-filters-state []
+  (r/reaction (get-in @app-state [:advanced-search :filters])))
+
 (defn get-last-applied-filters
-  "Returns an atom containing the last set of filters that were actually applied"
+  "Returns an atom containing the last set of filters that were actually applied for current set questions"
   []
   last-applied-filters)
+
+(defn get-last-applied-advanced-search-filters []
+  last-applied-advanced-search-filters)
 
 ;; Auth state updaters
 (defn set-auth-loading-current-user [loading?]
@@ -451,3 +498,27 @@
 ;;     (when-not (m/validate app-state-schema new-state)
 ;;       (let [explain-data (m/explain app-state-schema new-state)]
 ;;         (js/console.error "App state schema validation failed:" (m/humanize explain-data))))))
+
+;; Advanced Search Updaters
+(defn set-advanced-search-loading [loading?]
+  (swap! app-state assoc-in [:advanced-search :results :loading?] loading?))
+
+(defn set-advanced-search-error [error]
+  (swap! app-state update :advanced-search
+         (fn [old]
+           (-> (assoc-in old [:results :error] error)
+               (assoc-in [:results :loading?] false)))))
+
+
+(defn set-advanced-search-results [results pagination]
+  (swap! app-state update :advanced-search
+         #(assoc % :results {:list results
+                             :pagination pagination
+                             :loading? false
+                             :error nil})))
+
+(defn set-advanced-search-keywords [keywords-str]
+  (swap! app-state assoc-in [:advanced-search :filters :keywords] keywords-str))
+
+(defn set-advanced-search-page [page-num]
+  (swap! app-state assoc-in [:advanced-search :results :pagination :page] page-num))

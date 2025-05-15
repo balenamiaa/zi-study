@@ -62,6 +62,54 @@
         (assoc data field-key {:error "Failed to parse EDN data"})))
     data))
 
+(defn- extract-text-from-question-data
+  "Extracts all searchable text from a question's data map and retention aid.
+   Input: question-type (keyword), question-data (Clojure map), retention-aid (string or nil)."
+  [question-type question-data retention-aid]
+  (let [q-data (if (string? question-data) (edn/read-string question-data) question-data)]
+    (str/join " "
+              (filter some?
+                      (conj
+                       (case question-type
+                         :mcq-single
+                         (concat [(get q-data :question_text) (get q-data :explanation)]
+                                 (map :text (get q-data :options)))
+                         :mcq-multi
+                         (concat [(get q-data :question_text) (get q-data :explanation)]
+                                 (map :text (get q-data :options)))
+                         :written
+                         [(get q-data :question_text) (get q-data :correct_answer_text) (get q-data :explanation)]
+                         :true-false
+                         [(get q-data :question_text) (get q-data :explanation)]
+                         :cloze
+                         (concat [(get q-data :cloze_text) (get q-data :explanation)]
+                                 (get q-data :answers))
+                         :emq
+                         (concat [(get q-data :instructions) (get q-data :explanation)]
+                                 (map :text (get q-data :premises))
+                                 (map :text (get q-data :options)))
+                         ;; Default case for unknown types or if some data is missing
+                         (list (str q-data))) ; Convert the whole map to string if unknown structure
+                       retention-aid)))))
+
+(defn- update-question-fts!
+  "Updates the questions_fts table for a given question."
+  [db-conn question-id set-id question-type question-data-str retention-aid]
+  (try
+    (let [parsed-data (edn/read-string question-data-str)
+          searchable-text (extract-text-from-question-data
+                           (keyword question-type)
+                           parsed-data
+                           retention-aid)]
+      (jdbc/execute-one! db-conn
+                         ["INSERT OR REPLACE INTO questions_fts (question_id, set_id, searchable_text)
+                           VALUES (?, ?, ?)" question-id set-id searchable-text]
+                         jdbc-opts))
+    (catch Exception e
+      (println (str "Error updating questions_fts for question_id " question-id ": " (ex-message e)))
+      ;; Optionally re-throw or handle more gracefully
+      )))
+
 (defn list-tags-handler [_request]
   (try
     (let [tags (map :tag-name (query ["SELECT DISTINCT tag_name FROM tags ORDER BY tag_name"]))]
@@ -307,7 +355,10 @@
                                                   "(user_id, question_id, answer_data, is_correct, submitted_at) "
                                                   "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)")
                                              user-id question-id answer-data-str is-correct-int]
-                                         jdbc-opts))]
+                                         jdbc-opts))
+                      ;; Update FTS table after successful answer submission if it implies question data change (though it usually doesn\'t)
+                      ;; For now, FTS update is primarily tied to question creation/update
+                      ]
 
                   (resp/response {:correct (when (some? is-correct-int) (= 1 is-correct-int))
                                   :correct_answer (:question-data (parse-edn-field question :question-data))}))))
@@ -450,3 +501,93 @@
             (server-error (str "Failed to delete answers for set ID: " set-id) e)))
         (bad-request "Invalid or missing Set ID in path." nil)))
     (unauthorized "Authentication required to delete answers.")))
+
+(defn search-questions-handler [request]
+  (if-let [user-id (get-user-id request)]
+    (try
+      (let [params (:query-params request)
+            keywords (get params "keywords")
+            page (max 1 (or (parse-query-param params "page" :int) 1))
+            limit (max 1 (or (parse-query-param params "limit" :int) 15)) ;; Default limit for search results
+            offset (* (dec page) limit)]
+
+        (if (str/blank? keywords)
+          (bad-request "Search keywords are required." nil)
+          (let [fts-match-query (str keywords "*") ;; Use prefix matching for FTS
+
+                ;; First, get matching question_ids from FTS table with pagination
+                matching_q_ids_map (-> (hh/select :q_fts.question_id)
+                                       (hh/from [:questions_fts :q_fts])
+                                       (hh/where [:match :q_fts.searchable_text fts-match-query])
+                                       ;; Potentially add other filters here if passed (e.g., by joining with questions on q_fts.question_id)
+                                       (hh/order-by [:rank]) ;; FTS rank, if available and desired
+                                       (hh/limit limit)
+                                       (hh/offset offset))
+                matching_q_ids_results (execute! matching_q_ids_map)
+                question-ids (mapv :question-id matching_q_ids_results)
+
+                ;; Get total count for pagination
+                count-query-map (-> (hh/select [[:count :*] :total])
+                                    (hh/from [:questions_fts :q_fts])
+                                    (hh/where [:match :q_fts.searchable_text fts-match-query]))
+                total-items (:total (execute-one! count-query-map) 0)
+                total-pages (if (pos? total-items) (int (Math/ceil (/ (double total-items) limit))) 0)
+
+                questions (if (seq question-ids)
+                            (let [query-base {:select [:q.* :qs.title :set_title
+                                                       [:ua.answer_data :user_answer_data]
+                                                       [:ua.is_correct :user_is_correct]
+                                                       [:ua.submitted_at :user_submitted_at]
+                                                       [:ub.bookmarked_at :user_bookmarked_at]]
+                                              :from [[:questions :q]]
+                                              :join [[:question_sets :qs] [:= :q.set_id :qs.set_id]]
+                                              :left-join [[:user_answers :ua] [:and [:= :q.question_id :ua.question_id] [:= :ua.user_id user-id]]
+                                                          [:user_bookmarks :ub] [:and [:= :q.question_id :ub.question_id] [:= :ub.user_id user-id]]]
+                                              :where [:in :q.question_id question-ids]}
+                                  ;; To maintain the order from FTS results, we might need to fetch and then sort in Clojure,
+                                  ;; or rely on the DB if :in preserves order (not guaranteed for all DBs)
+                                  ;; For simplicity now, we'll fetch and then re-order if needed, or accept DB default for :in
+                                  final-query (-> query-base (hh/order-by :q.set_id :q.order_in_set :q.question_id))
+                                  questions-raw (execute! final-query)
+                                  parsed-questions (mapv (fn [q]
+                                                           (let [parsed-q (-> q
+                                                                              (parse-edn-field :question-data)
+                                                                              (#(if (:user-answer-data %) (parse-edn-field % :user-answer-data) %)))]
+                                                             (-> parsed-q
+                                                                 (assoc :bookmarked (some? (:user-bookmarked-at parsed-q)))
+                                                                 (assoc :user-answer (when (:user-answer-data parsed-q)
+                                                                                       {:answer-data (:user-answer-data parsed-q)
+                                                                                        :is-correct (:user-is-correct parsed-q)
+                                                                                        :submitted-at (:user-submitted-at parsed-q)}))
+                                                                 (dissoc :user-answer-data :user-is-correct :user-submitted-at :user-bookmarked-at))))
+                                                         questions-raw)
+                                  id-to-question (zipmap (map :question-id parsed-questions) parsed-questions)]
+
+                              ;; Re-order based on original FTS match order if necessary
+                              (mapv id-to-question question-ids))
+                            [])]
+
+            (resp/response {:questions questions
+                            :pagination {:page page
+                                         :limit limit
+                                         :total_items total-items
+                                         :total_pages total-pages}
+                            :filters {:keywords keywords}}))))
+      (catch Exception e
+        (server-error (str "Failed to perform advanced search for keywords: " (get-in request [:query-params "keywords"])) e)))
+    (unauthorized "Authentication required for advanced search.")))
+
+
+
+(comment
+  ; Update FTS for existing questions
+  (jdbc/with-transaction [tx @db-pool {:builder-fn rs/as-unqualified-kebab-maps}]
+    (let [questions (jdbc/execute! tx ["SELECT question_id, set_id, question_type, question_data, retention_aid FROM questions"] jdbc-opts)]
+      (doseq [q questions]
+        (update-question-fts! tx
+                              (:question-id q)
+                              (:set-id q)
+                              (:question-type q)
+                              (:question-data q)
+                              (:retention-aid q)))
+      (println "Updated FTS index for" (count questions) "questions"))))

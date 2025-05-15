@@ -58,7 +58,8 @@
     [""
      {:name ::active-learning
       :controllers [{:start (fn [_]
-                              (js/setTimeout #(rfe/push-state ::active-learning-question-sets {}) 0))}]}]
+                              (js/setTimeout #(when (:authenticated? @(state/get-auth-state))
+                                                (rfe/push-state ::active-learning-question-sets {})) 0))}]}]
     ["/question-sets"
      {:name ::active-learning-question-sets
       :view question-sets-page

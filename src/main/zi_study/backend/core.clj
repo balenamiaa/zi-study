@@ -20,7 +20,8 @@
             [zi-study.backend.db :as db]
             [zi-study.backend.auth :as auth]
             [zi-study.backend.uploads :as uploads]
-            [zi-study.backend.handlers.question-bank-handlers :as qb]))
+            [zi-study.backend.handlers.question-bank-handlers :as qb]
+            [clojure.string :as str]))
 
 
 
@@ -29,6 +30,15 @@
     (-> response
         (resp/content-type "text/html")
         (assoc-in [:headers "Content-Disposition"] "inline"))))
+
+
+(defn spa-handler [request]
+  (if (str/starts-with? (:uri request) "/api")
+    (resp/not-found "Not Found")
+    (let [response (resp/file-response "index.html" {:root "public"})]
+      (-> response
+          (resp/content-type "text/html")
+          (assoc-in [:headers "Content-Disposition"] "inline")))))
 
 (def routes
   [["/" {:get index-handler}]
@@ -51,6 +61,8 @@
      ["" {:get {:handler qb/get-set-details-handler}}]
      ["/questions" {:get {:handler qb/get-set-questions-handler}}]
      ["/answers" {:delete {:handler qb/delete-set-answers-handler}}]]
+    ["/questions" {}
+     ["/search" {:get {:handler qb/search-questions-handler}}]]
     ["/questions/:question-id" {}
      ["/answer" {:post {:handler qb/submit-answer-handler}
                  :delete {:handler qb/delete-answer-handler}}]
@@ -73,7 +85,8 @@
                              wrap-nested-params]}})
        (ring/routes
         (ring/create-file-handler {:path "/" :root "public"})
-        index-handler))
+        ; use spa-handler for all unmatched routes
+        spa-handler))
       (wrap-file "public" {:index-files? false})
       (wrap-content-type)
       (wrap-not-modified)
@@ -88,8 +101,7 @@
 
 (comment
   (System/setProperty "JVM_ENV" "production")
-  (dev-mode?)
-  )
+  (dev-mode?))
 
 (defn dev-mode? []
   (= "development" (or (System/getProperty "JVM_ENV") "development")))
@@ -167,14 +179,6 @@
       (catch Exception e
         (println "Failed to start backend:" (ex-message e))
         (System/exit 1)))))
-
-(defn reload []
-  (when (dev-mode?)
-    (println "\n--- Reloading backend code ---")
-    (stop-server)
-    (require 'zi-study.backend.db :reload)
-    (require 'zi-study.backend.core :reload)
-    (println "Code reloaded. Restart the process to apply changes or use a REPL workflow.")))
 
 
 (comment

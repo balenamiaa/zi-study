@@ -290,3 +290,26 @@
                   (callback {:success false :error (:error result)}))))))
 
 
+(defn advanced-search-questions [filters pagination callback]
+  (let [current-page (or (:page pagination) 1)
+        current-limit (or (:limit pagination) 15)
+        query-params (cond-> {:keywords (:keywords filters)
+                              :page current-page
+                              :limit current-limit}
+                       ;; Add other optional filters here if they exist in `filters`
+                       ;; e.g. (:tags filters) (assoc :tags (str/join "," (:tags filters)))
+                       )
+        query-string (build-query-params query-params)]
+
+    (state/set-advanced-search-loading true)
+    (get-auth (str "/api/questions/search" (when query-string (str "?" query-string)))
+              (fn [result]
+                (if (:success result)
+                  (do
+                    (state/set-advanced-search-results (:questions (:data result)) (:pagination (:data result)))
+                    (callback {:success true :data (:data result)}))
+                  (do
+                    (state/set-advanced-search-error (:error result))
+                    (callback {:success false :error (:error result)})))))))
+
+
