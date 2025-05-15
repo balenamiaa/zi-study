@@ -7,7 +7,8 @@
             [clojure.string :as str]
             [zi-study.backend.db :refer [db-pool]]
             [honey.sql :as h]
-            [honey.sql.helpers :as hh]))
+            [honey.sql.helpers :as hh]
+            [zi-study.backend.fts :as fts]))
 
 (defn- unauthorized [message]
   (-> (resp/response {:error (or message "Unauthorized")})
@@ -61,54 +62,6 @@
       (catch Exception _
         (assoc data field-key {:error "Failed to parse EDN data"})))
     data))
-
-(defn- extract-text-from-question-data
-  "Extracts all searchable text from a question's data map and retention aid.
-   Input: question-type (keyword), question-data (Clojure map), retention-aid (string or nil)."
-  [question-type question-data retention-aid]
-  (let [q-data (if (string? question-data) (edn/read-string question-data) question-data)]
-    (str/join " "
-              (filter some?
-                      (conj
-                       (case question-type
-                         :mcq-single
-                         (concat [(get q-data :question_text) (get q-data :explanation)]
-                                 (map :text (get q-data :options)))
-                         :mcq-multi
-                         (concat [(get q-data :question_text) (get q-data :explanation)]
-                                 (map :text (get q-data :options)))
-                         :written
-                         [(get q-data :question_text) (get q-data :correct_answer_text) (get q-data :explanation)]
-                         :true-false
-                         [(get q-data :question_text) (get q-data :explanation)]
-                         :cloze
-                         (concat [(get q-data :cloze_text) (get q-data :explanation)]
-                                 (get q-data :answers))
-                         :emq
-                         (concat [(get q-data :instructions) (get q-data :explanation)]
-                                 (map :text (get q-data :premises))
-                                 (map :text (get q-data :options)))
-                         ;; Default case for unknown types or if some data is missing
-                         (list (str q-data))) ; Convert the whole map to string if unknown structure
-                       retention-aid)))))
-
-(defn- update-question-fts!
-  "Updates the questions_fts table for a given question."
-  [db-conn question-id set-id question-type question-data-str retention-aid]
-  (try
-    (let [parsed-data (edn/read-string question-data-str)
-          searchable-text (extract-text-from-question-data
-                           (keyword question-type)
-                           parsed-data
-                           retention-aid)]
-      (jdbc/execute-one! db-conn
-                         ["INSERT OR REPLACE INTO questions_fts (question_id, set_id, searchable_text)
-                           VALUES (?, ?, ?)" question-id set-id searchable-text]
-                         jdbc-opts))
-    (catch Exception e
-      (println (str "Error updating questions_fts for question_id " question-id ": " (ex-message e)))
-      ;; Optionally re-throw or handle more gracefully
-      )))
 
 (defn list-tags-handler [_request]
   (try
@@ -355,9 +308,14 @@
                                                   "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)")
                                              user-id question-id answer-data-str is-correct-int]
                                          jdbc-opts))
-                      ;; Update FTS table after successful answer submission if it implies question data change (though it usually doesn\'t)
-                      ;; For now, FTS update is primarily tied to question creation/update
-                      ]
+                      _ (when (contains? #{"cloze" "written"} q-type)
+                          (fts/update-question-fts! tx
+                                                    question-id
+                                                    (:questions/set_id question)
+                                                    q-type
+                                                    q-data-str
+                                                    (:questions/retention_aid question)
+                                                    answer-data-str))]
 
                   (resp/response {:correct (when (some? is-correct-int) (= 1 is-correct-int))
                                   :correct_answer (:question-data (parse-edn-field question :question-data))}))))
@@ -384,8 +342,8 @@
         :else
         (jdbc/with-transaction [tx @db-pool {:builder-fn rs/as-unqualified-kebab-maps}]
           (try
-            (let [question (sql/get-by-id tx :questions question-id :question_id {:columns [:question_type]})
-                  user-answer (sql/find-by-keys tx :user_answers {:user_id user-id :question_id question-id} {:columns [:answer_id]})]
+            (let [question (sql/get-by-id tx :questions question-id :question_id {:columns [:question_type :set_id :question_data :retention_aid]})
+                  user-answer (sql/find-by-keys tx :user_answers {:user_id user-id :question_id question-id} {:columns [:answer_id :answer_data]})]
 
               (cond
                 (not question)
@@ -400,7 +358,18 @@
                 (let [rows-affected (:next.jdbc/update-count
                                      (sql/update! tx :user_answers
                                                   {:is_correct (if is-correct 1 0)}
-                                                  {:user_id user-id :question_id question-id}))]
+                                                  {:user_id user-id :question_id question-id}))
+                      
+                      ;; After self-evaluation, update the FTS with the user's written answer for better search
+                      _ (when (= "written" (:questions/question_type question))
+                          (fts/update-question-fts! tx
+                                                 question-id
+                                                 (:questions/set_id question)
+                                                 (:questions/question_type question)
+                                                 (:questions/question_data question)
+                                                 (:questions/retention_aid question)
+                                                 (:answer_data user-answer)))]
+                  
                   (if (= 1 rows-affected)
                     (resp/response {:success true})
                     (server-error (str "Failed to update self-evaluation status for answer: user " user-id ", question " question-id) (ex-info "0 rows affected" {}))))))
@@ -570,12 +539,12 @@
   (jdbc/with-transaction [tx @db-pool {:builder-fn rs/as-unqualified-kebab-maps}]
     (let [questions (jdbc/execute! tx ["SELECT question_id, set_id, question_type, question_data, retention_aid FROM questions"] jdbc-opts)]
       (doseq [q questions]
-        (update-question-fts! tx
-                              (:question-id q)
-                              (:set-id q)
-                              (:question-type q)
-                              (:question-data q)
-                              (:retention-aid q)))
+        (fts/update-question-fts! tx
+                                  (:question-id q)
+                                  (:set-id q)
+                                  (:question-type q)
+                                  (:question-data q)
+                                  (:retention-aid q)))
       (println "Updated FTS index for" (count questions) "questions")))
 
 

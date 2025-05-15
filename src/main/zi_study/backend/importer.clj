@@ -2,13 +2,15 @@
   (:require [clojure.edn :as edn]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
             [next.jdbc.result-set :as rs]
             [zi-study.backend.db :refer [db-pool]]
             [malli.core :as m]
             [malli.error :as me]
-            [zi-study.backend.shapes.questions :refer [ImportData]]))
+            [zi-study.backend.shapes.questions :refer [ImportData]]
+            [zi-study.backend.fts :as fts]))
 
 (defn- to-str-temp-id [temp-id]
   (if (keyword? temp-id)
@@ -126,8 +128,6 @@
      :question_data (pr-str (processor question)) ; Store processed data as EDN string
      :retention_aid (:retention_aid question)}))
 
-;; --- Main Import Function ---
-
 (defn import-question-set-data!
   "Imports question set data from an EDN or JSON string or file path.
       Validates the data structure, resolves temporary IDs, and inserts into the database.
@@ -169,7 +169,15 @@
                                            :order_in_set idx) ; Use index as order
                       ;; Use lower-case keys for result map
                       {:keys [question_id]} (sql/insert! tx :questions q-insert-data {:builder-fn rs/as-unqualified-lower-maps})]
-                  (println (str "    Inserted question " idx " (temp: " (:temp_id question) ") -> ID: " question_id)))
+                  (println (str "    Inserted question " idx " (temp: " (:temp_id question) ") -> ID: " question_id))
+
+                  ;; Update FTS table for the newly inserted question
+                  (fts/update-question-fts! tx
+                                            question_id
+                                            set-id
+                                            (:question_type q-insert-data)
+                                            (:question_data q-insert-data)
+                                            (:retention_aid q-insert-data)))
                 (catch Exception e
                   (throw (ex-info (str "Failed to process/insert question at index " idx " in set '" (:title set-data) "'")
                                   {:error :question-processing-failed
