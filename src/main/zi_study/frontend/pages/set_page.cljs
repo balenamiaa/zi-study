@@ -451,7 +451,7 @@
           [button {:variant :text
                    :start-icon lucide-icons/ArrowLeft
                    :class "hover:bg-[var(--color-light-bg)] dark:hover:bg-[var(--color-dark-bg)] -ml-3"
-                   :on-click #(rfe/push-state :zi-study.frontend.core/question-sets)}
+                   :on-click #(rfe/push-state :zi-study.frontend.core/active-learning-question-sets)}
            "Back to Question Sets"]]
 
          (cond

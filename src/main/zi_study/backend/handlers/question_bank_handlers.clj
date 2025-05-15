@@ -9,8 +9,6 @@
             [honey.sql :as h]
             [honey.sql.helpers :as hh]))
 
-;; --- Helper Functions ---
-
 (defn- unauthorized [message]
   (-> (resp/response {:error (or message "Unauthorized")})
       (resp/status 401)))
@@ -63,8 +61,6 @@
       (catch Exception _
         (assoc data field-key {:error "Failed to parse EDN data"})))
     data))
-
-;; --- Handlers Implementation ---
 
 (defn list-tags-handler [_request]
   (try
@@ -220,7 +216,7 @@
                                  (not (str/blank? search-term)) (hh/where [:like :q.question_data (str "%" search-term "%")]))
 
                 final-query (-> filtered-query
-                                (hh/order-by :q.order_in_set :q.question_id)) ; Ensure consistent order
+                                (hh/order-by :q.order_in_set :q.question_id))
 
                 questions-raw (execute! final-query)
                 _ (prn questions-raw)
@@ -261,11 +257,11 @@
                  (and (= (count correct-answers) (count user-answer))
                       (every? true? (map = (map str/trim correct-answers) (map str/trim user-answer)))))
         :emq (let [correct-matches-raw (:matches q-data)
-                   ;; Normalize correct matches from either map or vector format
+                   ; Normalize correct matches from either map or vector format
                    correct-matches (set (cond
                                           (map? correct-matches-raw) (map vec (seq correct-matches-raw))
                                           :else (map vec correct-matches-raw)))
-                   ;; Normalize user answer from either map or vector format
+                   ; Normalize user answer from either map or vector format
                    user-matches (set (cond
                                        (map? user-answer) (map vec (seq user-answer))
                                        :else (map vec user-answer)))]
@@ -301,15 +297,12 @@
                                        :else 0)
                       answer-data-str (pr-str raw-answer-data)
 
-                      ;; Use parameterized query that properly handles NULL values
                       _ (if (nil? is-correct-int)
-                          ;; For written questions (is_correct is NULL)
                           (jdbc/execute! tx [(str "INSERT OR REPLACE INTO user_answers "
                                                   "(user_id, question_id, answer_data, is_correct, submitted_at) "
                                                   "VALUES (?, ?, ?, NULL, CURRENT_TIMESTAMP)")
                                              user-id question-id answer-data-str]
                                          jdbc-opts)
-                          ;; For other question types with automatic checking
                           (jdbc/execute! tx [(str "INSERT OR REPLACE INTO user_answers "
                                                   "(user_id, question_id, answer_data, is_correct, submitted_at) "
                                                   "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)")
@@ -381,9 +374,7 @@
                                                {:user_id user-id :question_id question-id}
                                                {:columns [:user_id]})]
                 (if (seq existing)
-                  ;; If exists, do nothing or update timestamp if needed
                   (resp/response {:bookmarked true})
-                  ;; If not exists, insert new bookmark
                   (do
                     (sql/insert! tx :user_bookmarks
                                  {:user_id user-id
@@ -413,7 +404,7 @@
                                            {:set-id set-id
                                             :set-title set-title
                                             :questions (mapv #(dissoc % :set-id :set-title) questions)}))
-                                   (sort-by :set-title))] ; Sort sets by title
+                                   (sort-by :set-title))]
         (resp/response {:bookmarks bookmarks-grouped}))
       (catch Exception e
         (server-error "Failed to retrieve bookmarks" e)))
@@ -441,7 +432,6 @@
     (let [set-id (parse-query-param (:path-params request) :set-id :int)]
       (if set-id
         (try
-          ;; First verify the set exists
           (let [set-exists? (boolean (sql/find-by-keys @db-pool :question_sets {:set_id set-id} {:columns [:set_id]}))]
             (if set-exists?
               (let [result (jdbc/execute! @db-pool

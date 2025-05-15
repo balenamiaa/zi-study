@@ -17,7 +17,7 @@
 (def nav-links
   [{:name :zi-study.frontend.core/home :path "/" :label "Home" :icon lucide-icons/Home}
    {:name :zi-study.frontend.core/components :path "/components" :label "Components" :icon lucide-icons/Layers}
-   {:name :zi-study.frontend.core/question-sets :path "/question-sets" :label "Sets" :icon lucide-icons/Library}])
+   {:name :zi-study.frontend.core/active-learning :path "/active-learning" :label "Active Learning" :icon lucide-icons/Brain}])
 
 ;; Animated logo component
 (defn logo []
@@ -84,7 +84,13 @@
            (:email current-user)]]]))
 
     (for [{:keys [name label icon]} nav-links]
-      (let [is-active (= name current-route)]
+      (let [is-active (or (= name current-route)
+                          ;; Check if current route is a child of this route
+                          (and 
+                           (= name :zi-study.frontend.core/active-learning)
+                           (contains? #{:zi-study.frontend.core/active-learning-question-sets 
+                                        :zi-study.frontend.core/advanced-search} 
+                                      current-route)))]
         ^{:key (str name)}
         [:a {:href (rfe/href name)
              :class (cx "nav-link py-2 px-4 w-36 text-center flex items-center justify-center space-x-2"
@@ -211,12 +217,12 @@
           [:div
            ;; Mobile menu overlay
            [mobile-menu show-mobile-menu current-route]
-           ;; Main navigation header - pill design with show/hide scroll behavior
+
            [:header {:class (cx "sticky-header z-50"
                                 "bg-[var(--color-light-bg-paper)]/95 dark:bg-[var(--color-dark-bg-paper)]/95"
                                 "border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"
                                 "mx-auto mt-2 rounded-full shadow-md max-w-6xl py-1"
-                                "transform-gpu" ;; For smoother animations
+                                "transform-gpu"
                                 (if @topbar-visible
                                   "opacity-100 translate-y-0"
                                   "opacity-0 -translate-y-full pointer-events-none"))
@@ -230,17 +236,20 @@
             [:div {:class "mx-auto px-2 sm:px-4 w-full"}
              [:div {:class "flex items-center justify-between"}
 
-              ;; Left section: Logo and desktop navigation
               [:div {:class "flex items-center flex-shrink-0"}
-               ;; Logo
                [:a {:href (rfe/href :zi-study.frontend.core/home)
                     :class (cx "mr-2 sm:mr-4 transition-transform duration-300 scale-90 sm:scale-95")}
                 [logo]]
 
-               ;; Desktop navigation - more compact design
                [:nav {:class "hidden md:flex space-x-1"}
                 (for [{:keys [name label icon]} nav-links]
-                  (let [is-active (= name current-route)]
+                  (let [is-active (or (= name current-route)
+                                      ;; Check if current route is a child of this route
+                                      (and 
+                                       (= name :zi-study.frontend.core/active-learning)
+                                       (contains? #{:zi-study.frontend.core/active-learning-question-sets 
+                                                    :zi-study.frontend.core/advanced-search} 
+                                                  current-route)))]
                     ^{:key (str name)}
                     [:a {:href (rfe/href name)
                          :class (cx "nav-link py-1.5 px-2 rounded-md flex items-center text-sm transition-all duration-200"
@@ -249,36 +258,29 @@
                      [:> icon {:size 16 :className "mr-1 flex-shrink-0"}]
                      label]))]]
 
-              ;; Right section: Actions
               [:div {:class "flex items-center space-x-0.5 sm:space-x-1"}
 
-               ;; Search button - visible on all screens
                [action-button
                 {:icon lucide-icons/Search
                  :tooltip-text "Search"
                  :aria-label "Search"
                  :shrink true}]
 
-
                [:div {:class (cx "transition-all duration-300 scale-90")}
                 [theme-switcher]]
 
-               ;; Authentication-based UI
                (cond
                  auth-loading?
-                 ;; Show loading indicator
                  [:div {:class "w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center"}
                   [:div {:class "animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-t-2 border-[var(--color-primary)]"}]]
 
                  authenticated?
-                 ;; User is logged in - show user menu
                  (when current-user
                    [:div {:class (cx "transition-all duration-300 scale-95")}
                     [user-menu {:user-info current-user
                                 :on-logout handle-logout}]])
 
                  :else
-                 ;; User is not logged in - show login/register buttons with more compact design
                  [:div {:class (cx "flex flex-shrink-0 items-center space-x-1 transition-all duration-300 scale-95")}
                   [:div {:class "hidden sm:block"}
                    [button {:variant :outlined
@@ -294,7 +296,7 @@
                            :on-click #(rfe/push-state :zi-study.frontend.core/register)}
                    "Register"]])
 
-               ;; Mobile menu toggle - Fixed the overflow issue
+               ;; Mobile menu toggle - standard button for topbar's own mobile menu
                [button {:variant :text
                         :class "ml-0.5 md:hidden flex-shrink-0"
                         :size :xs

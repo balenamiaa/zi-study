@@ -278,10 +278,6 @@
             filters (:filters sets-state)
             selected-tags (:tags filters)]
 
-        ;; Add debug log to inspect the structure of a set
-        (when (seq question-sets)
-          (js/console.log "First set example:" (clj->js (first question-sets))))
-
         [:div {:class "container mx-auto px-4 py-8 max-w-7xl"}
          [:div {:class "mb-8"}
           [:div {:class "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"}
