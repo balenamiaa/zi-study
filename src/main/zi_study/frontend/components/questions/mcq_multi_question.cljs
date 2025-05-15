@@ -170,7 +170,7 @@
                         :on-click handle-submit}
                 "Submit Answer"]])
 
-            (when (and is-globally-answered? (not is-submission-pending-globally?) explanation)
+            (when (and is-globally-answered? explanation)
               [q-common/explanation-section {:explanation explanation
                                              :rx-show-explanation? show-explanation?
                                              :on-toggle #(swap! show-explanation? not)
