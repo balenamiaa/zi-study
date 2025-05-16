@@ -20,8 +20,9 @@
             [zi-study.backend.db :as db]
             [zi-study.backend.auth :as auth]
             [zi-study.backend.uploads :as uploads]
-            [zi-study.backend.handlers.question-bank-handlers :as qb]
-            [clojure.string :as str]))
+            [zi-study.backend.handlers.active-learning-handlers :as alh]
+            [clojure.string :as str]
+            [clojure.java.shell :as shell]))
 
 
 
@@ -40,6 +41,7 @@
           (resp/content-type "text/html")
           (assoc-in [:headers "Content-Disposition"] "inline")))))
 
+
 (def routes
   [["/" {:get index-handler}]
    ["/api/auth" {}
@@ -55,21 +57,23 @@
     ["/profile-picture" {:post {:handler uploads/profile-picture-upload-handler
                                 :middleware [multipart-params/wrap-multipart-params]}}]]
    ["/api" {:middleware [auth/wrap-authentication]}
-    ["/tags" {:get {:handler qb/list-tags-handler}}]
-    ["/question-sets" {:get {:handler qb/list-sets-handler}}]
+    ["/tags" {:get {:handler alh/list-tags-handler}}]
+    ["/question-sets" {:get {:handler alh/list-sets-handler}}]
     ["/question-sets/:set-id"
-     ["" {:get {:handler qb/get-set-details-handler}}]
-     ["/questions" {:get {:handler qb/get-set-questions-handler}}]
-     ["/answers" {:delete {:handler qb/delete-set-answers-handler}}]]
+     ["" {:get {:handler alh/get-set-details-handler}}]
+     ["/questions" {:get {:handler alh/get-set-questions-handler}}]
+     ["/answers" {:delete {:handler alh/delete-set-answers-handler}}]]
     ["/questions" {}
-     ["/search" {:get {:handler qb/search-questions-handler}}]]
+     ["/search" {:get {:handler alh/search-questions-handler}}]]
     ["/questions/:question-id" {}
-     ["/answer" {:post {:handler qb/submit-answer-handler}
-                 :delete {:handler qb/delete-answer-handler}}]
-     ["/self-evaluate" {:post {:handler qb/self-evaluate-handler}}]
-     ["/bookmark" {:post {:handler qb/toggle-bookmark-handler}}]]
-    ["/bookmarks" {:get {:handler qb/list-bookmarks-handler}}]]])
+     ["/answer" {:post {:handler alh/submit-answer-handler}
+                 :delete {:handler alh/delete-answer-handler}}]
+     ["/self-evaluate" {:post {:handler alh/self-evaluate-handler}}]
+     ["/bookmark" {:post {:handler alh/toggle-bookmark-handler}}]]
+    ["/bookmarks" {:get {:handler alh/list-bookmarks-handler}}]]])
 
+(defn dev-mode? []
+  (= "development" (or (System/getProperty "JVM_ENV") "development")))
 
 (def app
   (-> (ring/ring-handler
@@ -83,44 +87,52 @@
                              coercion/coerce-response-middleware
                              wrap-keyword-params
                              wrap-nested-params]}})
-       (ring/routes
-        (ring/create-file-handler {:path "/" :root "public"})
-        ; use spa-handler for all unmatched routes
-        spa-handler))
-      (wrap-file "public" {:index-files? false})
+       (if (dev-mode?)
+         (ring/routes
+          (ring/create-file-handler {:path "/public" :root "public"})
+               ; use spa-handler for all unmatched routes
+          spa-handler)
+         spa-handler))
       (wrap-content-type)
-      (wrap-not-modified)
-      gzip/wrap-gzip))
+      (wrap-not-modified)))
 
 (defonce server-state (atom nil))
 (defonce shadow-state (atom nil))
 
-; Forward declare stop-server
 (declare stop-server)
 
+(defn run-postcss [& args]
+  (prn)
+  (let [result (apply shell/sh "cmd" "/c" "npx" "postcss" "public/app.input.css" "-o" "public/app.output.css" args)]
+    (println "PostCSS result:" result)))
 
-(comment
-  (System/setProperty "JVM_ENV" "production")
-  (dev-mode?))
+(defn run-postcss-prod [& args]
+  (apply run-postcss :env (merge (into {} (System/getenv)) {"NODE_ENV" "production"}) args))
 
-(defn dev-mode? []
-  (= "development" (or (System/getProperty "JVM_ENV") "development")))
+
+(run-postcss-prod)
+
 
 (defn start-server [port]
   (println "Initializing backend...")
 
-  ; Initialize DB first
   (db/init-db!)
 
-  (println "Starting shadow-cljs server and watcher...")
-  (try
-    (when (dev-mode?)
+  (if (dev-mode?)
+    (try
       (shadow-server/start!)
       (shadow/watch :frontend)
       (reset! shadow-state true)
-      (println "Development mode: Shadow-CLJS watcher started"))
-    (catch Exception e
-      (println "Error starting shadow-cljs:" (ex-message e))))
+      (println "Development mode: Shadow-CLJS watcher started")
+      (catch Exception e
+        (println "Error starting shadow-cljs:" (ex-message e))))
+
+    (try
+      (run-postcss-prod)
+      (shadow/release :frontend)
+      (println "Shadow-CLJS release-mode build complete")
+      (catch Exception e
+        (println "Error starting shadow-cljs:" (ex-message e)))))
 
   (println "Starting server on port" port)
   (println "Serving static files from public directory")
@@ -137,20 +149,18 @@
       (println "HTTP Server started."))
     (catch Exception e
       (println "Error starting http-kit server:" (ex-message e))
-      ; Attempt to stop already started components if server fails
-      (stop-server) ; Use the declared stop-server
+      (stop-server)
       (throw e)))
 
   @server-state)
 
-; Define stop-server implementation
 (defn stop-server []
   (println "Shutting down backend...")
-  ; Stop server first to prevent new requests
+
   (when-let [server-instance @server-state]
     (println "Stopping http-kit server...")
     (try
-      (server-instance :timeout 100) ; Call the stop function returned by run-server
+      (server-instance :timeout 100)
       (catch Exception e
         (println "Error stopping http-kit server:" (ex-message e))))
     (reset! server-state nil))
@@ -163,17 +173,14 @@
         (println "Error stopping shadow-cljs:" (ex-message e))))
     (reset! shadow-state nil))
 
-  ; Close DB pool last
   (db/close-db!)
 
   (println "Backend shutdown complete."))
-
 
 (defn -main [& args]
   (let [port (or (some-> (first args) (Integer/parseInt)) 3000)]
     (try
       (start-server port)
-      ; Now stop-server is declared before its use here
       (.addShutdownHook (Runtime/getRuntime) (Thread. #'stop-server))
       (println "Backend started successfully.")
       (catch Exception e
@@ -182,4 +189,12 @@
 
 
 (comment
-  (-main))
+  (-main)
+
+  (stop-server)
+
+  (System/setProperty "JVM_ENV" "production")
+  (System/setProperty "NODE_ENV" "production")
+
+  (System/setProperty "JVM_ENV" "development")
+  (System/setProperty "NODE_ENV" "development"))

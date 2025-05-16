@@ -4,7 +4,8 @@
             [next.jdbc.sql :as sql]
             [next.jdbc.result-set :as rs]
             [zi-study.backend.db :as db]
-            [ring.util.response :as resp])
+            [ring.util.response :as resp]
+            [zi-study.backend.uploads :as uploads])
   (:import [com.auth0.jwt JWT]
            [com.auth0.jwt.algorithms Algorithm]
            [com.auth0.jwt.exceptions JWTVerificationException]
@@ -37,7 +38,7 @@
                     (.withClaim "user-id" (:id user-payload))
                     (.withClaim "email" (:email user-payload))
                     (.withClaim "role" (:role user-payload)))]
-    (-> (if-let [pfp-url (:profile_picture_url user-payload)]
+    (-> (if-let [pfp-url (uploads/get-pfp-full-path (:profile_picture_url user-payload))]
           (.withClaim builder "profile_picture_url" pfp-url)
           builder) ; Pass builder through if no pfp
         (.sign jwt-algorithm))))

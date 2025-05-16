@@ -262,7 +262,7 @@
 
   (import-question-set-data! (pr-str edn-example-str) :edn)
 
-  (import-question-set-data! "questionz/gyne_finals_00.edn" :edn)
+  (import-question-set-data! "questionz/OBGYN_st4_13_05_2025.edn" :edn)
 
   (sql/query @zi-study.backend.db/db-pool ["DELETE FROM question_sets WHERE set_id = 12"]))
  

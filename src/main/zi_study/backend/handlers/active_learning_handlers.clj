@@ -1,4 +1,4 @@
-(ns zi-study.backend.handlers.question-bank-handlers
+(ns zi-study.backend.handlers.active-learning-handlers
   (:require [ring.util.response :as resp]
             [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]

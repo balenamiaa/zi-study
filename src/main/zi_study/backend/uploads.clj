@@ -10,6 +10,10 @@
         uuid (UUID/randomUUID)]
     (str uuid (when extension (str "." extension)))))
 
+
+(defn get-pfp-full-path [filename]
+  (str uploads-dir filename))
+
 (defn save-profile-picture!
   "Saves an uploaded profile picture file and returns its public URL path.
    Expects a file map like {:filename \"...\" :tempfile ... :content-type \"...\"}"
@@ -29,7 +33,7 @@
         (io/copy tempfile target-path)
 
         ; Return the public URL path (relative to web root)
-        (str "/uploads/profiles/" unique-filename))
+        (get-pfp-full-path unique-filename))
       (catch Exception e
         (println "Error saving profile picture:" (ex-message e))
         (.printStackTrace e)
