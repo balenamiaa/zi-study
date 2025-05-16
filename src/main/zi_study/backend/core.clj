@@ -8,7 +8,6 @@
             [reitit.ring.coercion :as coercion]
             [reitit.coercion.spec]
             [muuntaja.core :as m]
-            [ring.middleware.file :refer [wrap-file]]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [ring.middleware.not-modified :refer [wrap-not-modified]]
             [ring.middleware.multipart-params :as multipart-params]
@@ -16,7 +15,6 @@
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.nested-params :refer [wrap-nested-params]]
-            [ring.middleware.gzip :as gzip]
             [zi-study.backend.db :as db]
             [zi-study.backend.auth :as auth]
             [zi-study.backend.uploads :as uploads]
@@ -194,7 +192,6 @@
   (stop-server)
 
   (System/setProperty "JVM_ENV" "production")
-  (System/setProperty "NODE_ENV" "production")
 
   (System/setProperty "JVM_ENV" "development")
   (System/setProperty "NODE_ENV" "development"))

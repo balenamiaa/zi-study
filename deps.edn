@@ -18,7 +18,6 @@
         com.auth0/java-jwt {:mvn/version "4.5.0"}
         javax.servlet/javax.servlet-api {:mvn/version "4.0.1"}
         org.clojure/data.json {:mvn/version "2.5.1"}
-        ;; Database & Migrations
         org.xerial/sqlite-jdbc {:mvn/version "3.49.1.0"}
         com.zaxxer/HikariCP {:mvn/version "6.3.0"}
         migratus/migratus {:mvn/version "1.6.3"}
@@ -26,8 +25,7 @@
         com.github.seancorfield/honeysql {:mvn/version "2.7.1295"}
         org.slf4j/slf4j-api {:mvn/version "2.0.13"}
         org.slf4j/slf4j-nop {:mvn/version "2.0.13"}
-        buddy/buddy-hashers {:mvn/version "2.0.167"}
-        amalloy/ring-gzip-middleware {:mvn/version "0.1.4"}}
+        buddy/buddy-hashers {:mvn/version "2.0.167"}}
 
  :aliases
  {:main
