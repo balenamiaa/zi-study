@@ -12,6 +12,9 @@
             [zi-study.frontend.pages.question-sets :refer [question-sets-page]]
             [zi-study.frontend.pages.advanced-search :refer [advanced-search-page]]
             [zi-study.frontend.pages.set-page :refer [set-page]]
+            [zi-study.frontend.pages.my-folders :refer [my-folders-page]]
+            [zi-study.frontend.pages.public-folders :refer [public-folders-page]]
+            [zi-study.frontend.pages.folder-details :refer [folder-details-page]]
             [zi-study.frontend.layouts.main-layout :refer [main-layout]]
             [zi-study.frontend.layouts.active-learning-layout :refer [active-learning-layout]]
             [zi-study.frontend.state :as state]
@@ -67,7 +70,26 @@
     ["/advanced-search"
      {:name ::advanced-search
       :view advanced-search-page
-      :active-learning-page :advanced-search}]]
+      :active-learning-page :advanced-search}]
+    ["/my-folders"
+     {:name ::my-folders
+      :view my-folders-page
+      :active-learning-page :my-folders}]
+    ["/folders/:folder-id"
+     {:name ::folder-details
+      :view folder-details-page
+      :layout active-learning-layout
+      :active-learning-page :folder-details
+      :controllers common-auth-controllers
+      :protected? true
+      :auth-opts common-auth-opts
+      :parameters {:path {:folder-id int?}}}]
+    ["/public-folders"
+     {:name ::public-folders
+      :view public-folders-page
+      :layout active-learning-layout
+      :active-learning-page :public-folders
+      }]]
 
    ["/question-sets/:set-id"
     {:name ::set-page

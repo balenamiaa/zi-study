@@ -18,6 +18,14 @@
                         :href (rfe/href :zi-study.frontend.core/active-learning-question-sets)
                         :text "Question Sets"
                         :icon lucide-icons/LayoutGrid}
+                       {:id :my-folders
+                        :href (rfe/href :zi-study.frontend.core/my-folders)
+                        :text "My Folders"
+                        :icon lucide-icons/Folder}
+                       {:id :public-folders
+                        :href (rfe/href :zi-study.frontend.core/public-folders)
+                        :text "Public Folders"
+                        :icon lucide-icons/FolderGit2}
                        {:id :advanced-search
                         :href (rfe/href :zi-study.frontend.core/advanced-search)
                         :text "Advanced Search"

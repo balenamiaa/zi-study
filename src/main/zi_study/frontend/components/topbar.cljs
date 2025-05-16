@@ -86,10 +86,10 @@
     (for [{:keys [name label icon]} nav-links]
       (let [is-active (or (= name current-route)
                           ;; Check if current route is a child of this route
-                          (and 
+                          (and
                            (= name :zi-study.frontend.core/active-learning)
-                           (contains? #{:zi-study.frontend.core/active-learning-question-sets 
-                                        :zi-study.frontend.core/advanced-search} 
+                           (contains? #{:zi-study.frontend.core/active-learning-question-sets
+                                        :zi-study.frontend.core/advanced-search}
                                       current-route)))]
         ^{:key (str name)}
         [:a {:href (rfe/href name)
@@ -136,7 +136,7 @@
   (r/with-let [open? (r/atom false)
                force-update (r/atom 0)
                user-trigger [:div {:class "flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"}
-                             [avatar {:src (:profile_picture_url user-info)
+                             [avatar {:src (str "/" (:profile_picture_url user-info))
                                       :alt "User profile"
                                       :size :sm
                                       :initials (when (:email user-info)
@@ -245,10 +245,10 @@
                 (for [{:keys [name label icon]} nav-links]
                   (let [is-active (or (= name current-route)
                                       ;; Check if current route is a child of this route
-                                      (and 
+                                      (and
                                        (= name :zi-study.frontend.core/active-learning)
-                                       (contains? #{:zi-study.frontend.core/active-learning-question-sets 
-                                                    :zi-study.frontend.core/advanced-search} 
+                                       (contains? #{:zi-study.frontend.core/active-learning-question-sets
+                                                    :zi-study.frontend.core/advanced-search}
                                                   current-route)))]
                     ^{:key (str name)}
                     [:a {:href (rfe/href name)

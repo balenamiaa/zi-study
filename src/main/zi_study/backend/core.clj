@@ -22,8 +22,6 @@
             [clojure.string :as str]
             [clojure.java.shell :as shell]))
 
-
-
 (defn index-handler [_]
   (let [response (resp/file-response "index.html" {:root "public"})]
     (-> response
@@ -38,7 +36,6 @@
       (-> response
           (resp/content-type "text/html")
           (assoc-in [:headers "Content-Disposition"] "inline")))))
-
 
 (def routes
   [["/" {:get index-handler}]
@@ -55,6 +52,17 @@
     ["/profile-picture" {:post {:handler uploads/profile-picture-upload-handler
                                 :middleware [multipart-params/wrap-multipart-params]}}]]
    ["/api" {:middleware [auth/wrap-authentication]}
+    ["/folders" {}
+     ["" {:post {:handler alh/create-folder-handler}
+          :get {:handler alh/list-user-folders-handler}}]
+     ["/public" {:get {:handler alh/list-public-folders-handler}}]
+     ["/folder/:folder-id" {}
+      ["" {:get {:handler alh/get-folder-details-handler}
+           :put {:handler alh/update-folder-handler}
+           :delete {:handler alh/delete-folder-handler}}]
+      ["/sets" {:post {:handler alh/add-set-to-folder-handler}
+                :put {:handler alh/reorder-sets-in-folder-handler}}]
+      ["/sets/:set-id" {:delete {:handler alh/remove-set-from-folder-handler}}]]]
     ["/tags" {:get {:handler alh/list-tags-handler}}]
     ["/question-sets" {:get {:handler alh/list-sets-handler}}]
     ["/question-sets/:set-id"
@@ -106,9 +114,6 @@
 
 (defn run-postcss-prod [& args]
   (apply run-postcss :env (merge (into {} (System/getenv)) {"NODE_ENV" "production"}) args))
-
-
-(run-postcss-prod)
 
 
 (defn start-server [port]

@@ -359,17 +359,17 @@
                                      (sql/update! tx :user_answers
                                                   {:is_correct (if is-correct 1 0)}
                                                   {:user_id user-id :question_id question-id}))
-                      
+
                       ;; After self-evaluation, update the FTS with the user's written answer for better search
                       _ (when (= "written" (:questions/question_type question))
                           (fts/update-question-fts! tx
-                                                 question-id
-                                                 (:questions/set_id question)
-                                                 (:questions/question_type question)
-                                                 (:questions/question_data question)
-                                                 (:questions/retention_aid question)
-                                                 (:answer_data user-answer)))]
-                  
+                                                    question-id
+                                                    (:questions/set_id question)
+                                                    (:questions/question_type question)
+                                                    (:questions/question_data question)
+                                                    (:questions/retention_aid question)
+                                                    (:answer_data user-answer)))]
+
                   (if (= 1 rows-affected)
                     (resp/response {:success true})
                     (server-error (str "Failed to update self-evaluation status for answer: user " user-id ", question " question-id) (ex-info "0 rows affected" {}))))))
@@ -531,6 +531,292 @@
       (catch Exception e
         (server-error (str "Failed to perform advanced search for keywords: " (get-in request [:query-params "keywords"])) e)))
     (unauthorized "Authentication required for advanced search.")))
+
+(defn create-folder-handler [request]
+  (if-let [user-id (get-user-id request)]
+    (let [body (:body-params request)
+          name (:name body)
+          description (:description body)
+          is-public (boolean (:is_public body false))] ; Default to false if not provided
+      (if (str/blank? name)
+        (bad-request "Folder name cannot be empty." nil)
+        (try
+          (let [new-folder-id (:folder_id (execute-one!
+                                           (-> (hh/insert-into :folders)
+                                               (hh/values [{:user_id user-id
+                                                            :name name
+                                                            :description description
+                                                            :is_public is-public}])
+                                               (hh/returning :folder_id))))]
+            (if new-folder-id
+              (resp/response {:folder_id new-folder-id :name name :description description :is_public is-public})
+              (server-error "Failed to create folder, no ID returned." nil)))
+          (catch Exception e
+            (server-error (str "Failed to create folder: " (.getMessage e)) e)))))
+    (unauthorized "Authentication required to create a folder.")))
+
+(defn list-user-folders-handler [request]
+  (if-let [user-id (get-user-id request)]
+    (try
+      (let [folders (execute!
+                     (-> (hh/select :f.folder_id :f.name :f.description :f.is_public :f.created_at :f.updated_at
+                                    [[:count :fqs.set_id] :set_count])
+                         (hh/from [:folders :f])
+                         (hh/left-join [:folder_question_sets :fqs] [:= :f.folder_id :fqs.folder_id])
+                         (hh/where [:= :f.user_id user-id])
+                         (hh/group-by :f.folder_id :f.name :f.description :f.is_public :f.created_at :f.updated_at)
+                         (hh/order-by [:f.updated_at :desc])))]
+        (resp/response {:folders folders}))
+      (catch Exception e
+        (server-error "Failed to retrieve user folders." e)))
+    (unauthorized "Authentication required to list your folders.")))
+
+(defn list-public-folders-handler [request]
+  (try
+    (let [params (:query-params request)
+          page (max 1 (or (parse-query-param params "page" :int) 1))
+          limit (max 1 (or (parse-query-param params "limit" :int) 10))
+          offset (* (dec page) limit)
+          sort-by (keyword (get params "sort_by" "updated_at"))
+          sort-order (keyword (get params "sort_order" "desc"))
+          search-term (get params "search")
+
+          search-where (when-not (str/blank? search-term)
+                         [:or
+                          [:like :f.name (str "%" search-term "%")]
+                          [:like :f.description (str "%" search-term "%")]
+                          [:like :u.username (str "%" search-term "%")]])
+
+          base-query (-> (hh/select :f.folder_id :f.name :f.description :f.created_at :f.updated_at
+                                    :u.username :u.profile_picture_url
+                                    [[:count :fqs.set_id] :set_count])
+                         (hh/from [:folders :f])
+                         (hh/join [:users :u] [:= :f.user_id :u.user_id])
+                         (hh/left-join [:folder_question_sets :fqs] [:= :f.folder_id :fqs.folder_id])
+                         (hh/where [:= :f.is_public true])
+                         (cond-> search-where (hh/where search-where))
+                         (hh/group-by :f.folder_id :f.name :f.description :f.created_at :f.updated_at :u.username :u.profile_picture_url))
+
+          folders-query (-> base-query
+                            (hh/order-by [sort-by sort-order])
+                            (hh/limit limit)
+                            (hh/offset offset))
+
+          count-query (-> (hh/select [[:count :*] :total])
+                          (hh/from [base-query :sub]))
+
+          total-items (:total (execute-one! count-query) 0)
+          total-pages (if (pos? total-items) (int (Math/ceil (/ (double total-items) limit))) 0)
+          folders (execute! folders-query)]
+
+      (resp/response {:folders folders
+                      :pagination {:page page
+                                   :limit limit
+                                   :total_items total-items
+                                   :total_pages total-pages}}))
+    (catch Exception e
+      (server-error "Failed to retrieve public folders." e))))
+
+(defn get-folder-details-handler [request]
+  (let [folder-id (parse-query-param (:path-params request) :folder-id :int)]
+    (if-not folder-id
+      (bad-request "Invalid Folder ID." nil)
+      (if-let [user-id (get-user-id request)] ; Check if user is authenticated
+        (try
+          (let [folder-details (execute-one!
+                                (-> (hh/select :f.folder_id :f.name :f.description :f.is_public :f.user_id :f.created_at :f.updated_at
+                                               :u.username :u.profile_picture_url)
+                                    (hh/from [:folders :f])
+                                    (hh/join [:users :u] [:= :f.user_id :u.user_id])
+                                    (hh/where [:= :f.folder_id folder-id])))]
+            (if folder-details
+              (if (or (:is_public folder-details) (= (:user_id folder-details) user-id))
+                (let [question-sets (execute!
+                                     (-> (hh/select :qs.* :fqs.order_in_folder :fqs.added_at
+                                                    [[:coalesce [:count [:distinct [:case [:<> :ua.answer_id nil] :q.question_id]]] 0] :answered_count]
+                                                    [[:coalesce [:count [:distinct [:case [:= :ua.is_correct 1] :q.question_id]]] 0] :correct_count]
+                                                    [[:count [:distinct :q.question_id]] :total_questions])
+                                         (hh/from [:folder_question_sets :fqs])
+                                         (hh/join [:question_sets :qs] [:= :fqs.set_id :qs.set_id])
+                                         (hh/left-join [:questions :q] [:= :qs.set_id :q.set_id])
+                                         (hh/left-join [:user_answers :ua] [:and [:= :q.question_id :ua.question_id] [:= :ua.user_id user-id]])
+                                         (hh/where [:= :fqs.folder_id folder-id])
+                                         (hh/group-by :qs.set_id :fqs.order_in_folder :fqs.added_at)
+                                         (hh/order-by :fqs.order_in_folder :asc :qs.title :asc)))]
+                  (resp/response (assoc folder-details :question_sets (mapv (fn [s]
+                                                                              (let [total (:total_questions s 0)
+                                                                                    answered (:answered_count s 0)
+                                                                                    correct (:correct_count s 0)]
+                                                                                (assoc s :progress {:total total
+                                                                                                    :answered answered
+                                                                                                    :correct correct
+                                                                                                    :answered_percent (if (pos? total) (double (/ answered total)) 0.0)
+                                                                                                    :correct_percent (if (pos? answered) (double (/ correct answered)) 0.0)}))) question-sets))))
+                (unauthorized "You do not have permission to view this folder."))
+              (not-found "Folder not found.")))
+          (catch Exception e
+            (server-error (str "Failed to retrieve folder details for ID: " folder-id) e)))
+        ;; If user is not authenticated, only allow access to public folders
+        (try
+          (let [folder-details (execute-one!
+                                (-> (hh/select :f.folder_id :f.name :f.description :f.is_public :f.user_id :f.created_at :f.updated_at
+                                               :u.username :u.profile_picture_url)
+                                    (hh/from [:folders :f])
+                                    (hh/join [:users :u] [:= :f.user_id :u.user_id])
+                                    (hh/where [:and [:= :f.folder_id folder-id] [:= :f.is_public true]])))]
+            (if folder-details
+              (let [question-sets (execute!
+                                   (-> (hh/select :qs.* :fqs.order_in_folder :fqs.added_at
+                                                  [[:count [:distinct :q.question_id]] :total_questions]) ; No progress for anonymous users
+                                       (hh/from [:folder_question_sets :fqs])
+                                       (hh/join [:question_sets :qs] [:= :fqs.set_id :qs.set_id])
+                                       (hh/left-join [:questions :q] [:= :qs.set_id :q.set_id])
+                                       (hh/where [:= :fqs.folder_id folder-id])
+                                       (hh/group-by :qs.set_id :fqs.order_in_folder :fqs.added_at)
+                                       (hh/order-by :fqs.order_in_folder :asc :qs.title :asc)))]
+                (resp/response (assoc folder-details :question_sets (mapv (fn [s]
+                                                                            (assoc s :progress {:total (:total_questions s 0)
+                                                                                                :answered 0
+                                                                                                :correct 0
+                                                                                                :answered_percent 0.0
+                                                                                                :correct_percent 0.0})) question-sets))))
+              (not-found "Public folder not found or you do not have permission.")))
+          (catch Exception e
+            (server-error (str "Failed to retrieve public folder details for ID: " folder-id) e)))))))
+
+(defn update-folder-handler [request]
+  (if-let [user-id (get-user-id request)]
+    (let [folder-id (parse-query-param (:path-params request) :folder-id :int)
+          {:keys [name description is_public] :as body-params} (:body-params request)]
+      (cond
+        (not folder-id) (bad-request "Invalid Folder ID." nil)
+        (empty? (select-keys body-params [:name :description :is_public])) (bad-request "No update data provided." nil)
+        (and (contains? body-params :name) (str/blank? name)) (bad-request "Folder name cannot be empty." nil)
+        (and (contains? body-params :is_public) (not (boolean? is_public))) (bad-request "is_public must be a boolean." nil)
+        :else
+        (try
+          (let [folder (execute-one! (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id])))]
+            (if folder
+              (if (= (:user_id folder) user-id)
+                (let [update-payload (cond-> {}
+                                       (contains? body-params :name) (assoc :name name)
+                                       (contains? body-params :description) (assoc :description description)
+                                       (contains? body-params :is_public) (assoc :is_public is_public))
+                      _ (execute-one! (-> (hh/update :folders)
+                                          (hh/set update-payload)
+                                          (hh/where [:= :folder_id folder-id])))
+                      updated-folder (execute-one! (-> (hh/select :*) (hh/from :folders) (hh/where [:= :folder_id folder-id])))]
+                  (resp/response updated-folder))
+                (unauthorized "You do not have permission to update this folder."))
+              (not-found "Folder not found.")))
+          (catch Exception e
+            (server-error (str "Failed to update folder ID: " folder-id) e)))))
+    (unauthorized "Authentication required to update a folder.")))
+
+(defn delete-folder-handler [request]
+  (if-let [user-id (get-user-id request)]
+    (let [folder-id (parse-query-param (:path-params request) :folder-id :int)]
+      (if-not folder-id
+        (bad-request "Invalid Folder ID." nil)
+        (jdbc/with-transaction [tx @db-pool jdbc-opts]
+          (try
+            (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
+              (if folder
+                (if (= (:user_id folder) user-id)
+                  (do
+                    (jdbc/execute! tx (h/format (-> (hh/delete-from :folder_question_sets) (hh/where [:= :folder_id folder-id]))) jdbc-opts) ; Delete associations first
+                    (let [deleted-count (:next.jdbc/update-count (jdbc/execute! tx (h/format (-> (hh/delete-from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts))]
+                      (resp/response {:success true :deleted_count deleted-count})))
+                  (unauthorized "You do not have permission to delete this folder."))
+                (not-found "Folder not found.")))
+            (catch Exception e
+              (.rollback tx)
+              (server-error (str "Failed to delete folder ID: " folder-id) e))))))
+    (unauthorized "Authentication required to delete a folder.")))
+
+(defn add-set-to-folder-handler [request]
+  (if-let [user-id (get-user-id request)]
+    (let [folder-id (parse-query-param (:path-params request) :folder-id :int)
+          {:keys [set_id order_in_folder]} (:body-params request)]
+      (cond
+        (not folder-id) (bad-request "Invalid Folder ID." nil)
+        (not set_id) (bad-request "Missing set_id in request body." nil)
+        :else
+        (jdbc/with-transaction [tx @db-pool jdbc-opts]
+          (try
+            (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
+              (if folder
+                (if (= (:user_id folder) user-id)
+                  (let [question-set (jdbc/execute-one! tx (h/format (-> (hh/select :set_id) (hh/from :question_sets) (hh/where [:= :set_id set_id]))) jdbc-opts)]
+                    (if question-set
+                      (let [final-order (if (integer? order_in_folder)
+                                          order_in_folder
+                                          (or (:max_order (jdbc/execute-one! tx (h/format (-> (hh/select [[:max :order_in_folder] :max_order])
+                                                                                              (hh/from :folder_question_sets)
+                                                                                              (hh/where [:= :folder_id folder-id]))) jdbc-opts)) -1))]
+                        (jdbc/execute! tx (h/format (-> (hh/insert-into :folder_question_sets)
+                                                        (hh/values [{:folder_id folder-id :set_id set_id :order_in_folder final-order}]))) jdbc-opts)
+                        (resp/response {:success true :folder_id folder-id :set_id set_id :order_in_folder final-order}))
+                      (not-found "Question set not found.")))
+                  (unauthorized "You do not have permission to modify this folder."))
+                (not-found "Folder not found.")))
+            (catch Exception e ; Could be unique constraint violation if set already in folder
+              (.rollback tx)
+              (if (str/includes? (or (.getMessage e) "") "UNIQUE constraint failed: folder_question_sets.folder_id, folder_question_sets.set_id")
+                (bad-request "Question set already exists in this folder." {:folder_id folder-id :set_id set_id})
+                (server-error (str "Failed to add set to folder. F_ID: " folder-id " S_ID: " set_id) e)))))))
+    (unauthorized "Authentication required to add set to folder.")))
+
+(defn remove-set-from-folder-handler [request]
+  (if-let [user-id (get-user-id request)]
+    (let [folder-id (parse-query-param (:path-params request) :folder-id :int)
+          set-id (parse-query-param (:path-params request) :set-id :int)]
+      (cond
+        (not folder-id) (bad-request "Invalid Folder ID." nil)
+        (not set-id) (bad-request "Invalid Set ID." nil)
+        :else
+        (jdbc/with-transaction [tx @db-pool jdbc-opts]
+          (try
+            (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
+              (if folder
+                (if (= (:user_id folder) user-id)
+                  (let [deleted-count (:next.jdbc/update-count (jdbc/execute! tx (h/format (-> (hh/delete-from :folder_question_sets)
+                                                                                               (hh/where [:and [:= :folder_id folder-id] [:= :set_id set-id]]))) jdbc-opts))]
+                    (resp/response {:success true :deleted_count deleted-count}))
+                  (unauthorized "You do not have permission to modify this folder."))
+                (not-found "Folder not found.")))
+            (catch Exception e
+              (.rollback tx)
+              (server-error (str "Failed to remove set from folder. F_ID: " folder-id " S_ID: " set-id) e))))))
+    (unauthorized "Authentication required to remove set from folder.")))
+
+(defn reorder-sets-in-folder-handler [request]
+  (if-let [user-id (get-user-id request)]
+    (let [folder-id (parse-query-param (:path-params request) :folder-id :int)
+          ordered-sets (:sets (:body-params request))] ; Expecting a list of {:set_id int :order_in_folder int}
+      (cond
+        (not folder-id) (bad-request "Invalid Folder ID." nil)
+        (not (seq ordered-sets)) (bad-request "Missing or empty 'sets' array in request body." nil)
+        (not (every? (fn [s] (and (integer? (:set_id s)) (integer? (:order_in_folder s)))) ordered-sets))
+        (bad-request "Each item in 'sets' array must have integer 'set_id' and 'order_in_folder'." nil)
+        :else
+        (jdbc/with-transaction [tx @db-pool jdbc-opts]
+          (try
+            (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
+              (if folder
+                (if (= (:user_id folder) user-id)
+                  (do
+                    (doseq [s ordered-sets]
+                      (jdbc/execute! tx (h/format (-> (hh/update :folder_question_sets)
+                                                      (hh/set {:order_in_folder (:order_in_folder s)})
+                                                      (hh/where [:and [:= :folder_id folder-id] [:= :set_id (:set_id s)]]))) jdbc-opts))
+                    (resp/response {:success true}))
+                  (unauthorized "You do not have permission to reorder sets in this folder."))
+                (not-found "Folder not found.")))
+            (catch Exception e
+              (.rollback tx)
+              (server-error (str "Failed to reorder sets in folder ID: " folder-id) e))))))
+    (unauthorized "Authentication required to reorder sets.")))
 
 
 
