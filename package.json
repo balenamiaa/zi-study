@@ -3,10 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "frontend": "npx shadow-cljs watch frontend",
-    "backend": "npx shadow-cljs watch backend",
-    "dev": "npx shadow-cljs -A:dev watch backend",
-    "build": "npx shadow-cljs release frontend backend",
     "clean": "rm -rf target public/js"
   },
   "devDependencies": {

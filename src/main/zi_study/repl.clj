@@ -4,6 +4,7 @@
             [clojure.tools.logging :as log]))
 
 (defonce nrepl-server (atom nil))
+(defonce passed-args (atom nil))
 
 (defn start-nrepl
   "Starts an nREPL server on a configured port with CIDER middleware."
@@ -33,6 +34,7 @@
 
 (defn -main
   [& args]
+  (reset! passed-args args)
   (start-nrepl)
   ;; Add a shutdown hook to stop the nREPL server gracefully
   (.addShutdownHook (Runtime/getRuntime) (Thread. #'stop-nrepl))

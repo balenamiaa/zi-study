@@ -1,0 +1,24 @@
+# nixpacks.toml
+# Configuration for deploying your Clojure application on Railway with Nixpacks.
+
+providers = ["java", "node"]
+
+[phases.setup]
+nixFile = "./environment.nix"
+
+[phases.build]
+cmds = [
+  "echo 'Downloading Clojure dependencies...'",
+  "clojure -P", # Prepares and downloads all dependencies specified in deps.edn.
+  "echo 'Clojure dependencies ready.'",
+  "echo 'Installing npm dependencies...'",
+  "npm ci",
+  "echo 'npm dependencies ready.'"
+]
+
+[start]
+cmd = "clojure -M -m zi-study.repl $PORT"
+
+[env]
+JVM_ENV = "production"
+NODE_ENV = "production"
