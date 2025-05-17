@@ -10,6 +10,6 @@ pkgs.mkShellNoCC {
     sqlite
     clojure
     jdk23_headless
-    nodejs_24
+    nodejs_23
   ];
 } 
