@@ -410,17 +410,19 @@
                    (let [error-msg (get-in result [:data :error] (:error result "Failed to delete folder."))]
                      (when error-callback (error-callback error-msg (:data result))))))))
 
-(defn add-set-to-folder [folder-id set-id order success-callback error-callback]
+(defn add-multiple-sets-to-folder!
+  "Adds one or more sets to a folder in a single batch request."
+  [folder-id sets-payload success-callback error-callback]
   (state/set-folder-managing-sets-state folder-id true nil)
   (post-auth (str "/api/folders/folder/" folder-id "/sets")
-             {:set-id set-id :order-in-folder order}
+             sets-payload ; Expects a payload like {:sets [{:set-id s1 :order-in-folder 0}, ...]}
              (fn [result]
                (state/set-folder-managing-sets-state folder-id false (when-not (:success result) (:error result)))
                (if (:success result)
                  (let [response-data (:data result)]
-                   (state/add-set-to-current-folder-details response-data) ; Assuming backend returns the added set or full folder
+                   ;; Depending on backend response, you might want to refresh folder details or update state
                    (when success-callback (success-callback response-data)))
-                 (let [error-msg (get-in result [:data :error] (:error result "Failed to add set to folder."))]
+                 (let [error-msg (get-in result [:data :error] (:error result "Failed to add sets to folder."))]
                    (when error-callback (error-callback error-msg (:data result))))))))
 
 (defn remove-set-from-folder [folder-id set-id success-callback error-callback]

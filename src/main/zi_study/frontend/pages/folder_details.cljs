@@ -222,25 +222,23 @@
 
             handle-add-sets (fn []
                               (reset! submitting-add true)
-                              (let [sets-to-add (vec @selected-set-ids)
-                                    add-promises (map-indexed
-                                                  (fn [idx set-id]
-                                                    (js/Promise. (fn [resolve reject]
-                                                                   (http/add-set-to-folder
-                                                                    current-folder-id set-id idx
-                                                                    (fn [res] (resolve res))
-                                                                    (fn [err _] (reject err))))))
-                                                  sets-to-add)]
-                                (-> (js/Promise.all add-promises)
-                                    (.then (fn [_results]
-                                             (reset! submitting-add false)
-                                             (reset! selected-set-ids #{}) ; Clear selection after adding
-                                             (state/flash-success (str (count sets-to-add) " set(s) added successfully."))
-                                             (when (:on-success props) ((:on-success props)))
-                                             (when current-on-close (current-on-close))))
-                                    (.catch (fn [error]
-                                              (reset! submitting-add false)
-                                              (state/flash-error (str "Error adding sets: " error)))))))
+                              (let [selected-ids @selected-set-ids
+                                    sets-payload {:sets (map-indexed
+                                                       (fn [idx set-id]
+                                                         {:set-id set-id :order-in-folder idx})
+                                                       (vec selected-ids))}]
+                                (http/add-multiple-sets-to-folder!
+                                 current-folder-id
+                                 sets-payload
+                                 (fn [_results]
+                                   (reset! submitting-add false)
+                                   (reset! selected-set-ids #{})
+                                   (state/flash-success (str (count selected-ids) " set(s) added successfully."))
+                                   (when (:on-success props) ((:on-success props)))
+                                   (when current-on-close (current-on-close)))
+                                 (fn [error]
+                                   (reset! submitting-add false)
+                                   (state/flash-error (str "Error adding sets: " error))))))
 
             handle-search-input-change (fn [event]
                                          ;; Just update the reactive atom for the input value

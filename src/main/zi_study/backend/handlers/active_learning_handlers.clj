@@ -778,34 +778,47 @@
 (defn add-set-to-folder-handler [request]
   (if-let [user-id (get-user-id request)]
     (let [folder-id (parse-query-param (:path-params request) :folder-id :int)
-          {:keys [set-id order-in-folder] :as _body} (:body-params request)]
+          {:keys [sets] :as _body} (:body-params request)] ; Changed to expect a list of sets
       (cond
         (not folder-id) (bad-request "Invalid Folder ID." nil)
-        (not set-id) (bad-request "Missing set-id in request body." nil)
+        (or (nil? sets) (not (seq sets)) (not (vector? sets)))
+        (bad-request "Missing or invalid 'sets' array in request body. Expecting [{:set-id ..., :order-in-folder ...}, ...]." nil)
+
+        (not (every? (fn [s] (and (map? s)
+                                  (integer? (:set-id s))
+                                  (integer? (:order-in-folder s))))
+                     sets))
+        (bad-request "Each item in 'sets' array must be an object with integer 'set-id' and 'order-in-folder'." nil)
+
         :else
         (jdbc/with-transaction [tx @db-pool jdbc-opts]
           (try
             (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
               (if folder
                 (if (= (:user-id folder) user-id)
-                  (let [question-set (jdbc/execute-one! tx (h/format (-> (hh/select :set_id) (hh/from :question_sets) (hh/where [:= :set_id set-id]))) jdbc-opts)]
-                    (if question-set
-                      (let [final-order (if (integer? order-in-folder)
-                                          order-in-folder
-                                          (or (:max_order (jdbc/execute-one! tx (h/format (-> (hh/select [[:max :order_in_folder] :max_order])
-                                                                                              (hh/from :folder_question_sets)
-                                                                                              (hh/where [:= :folder_id folder-id]))) jdbc-opts)) -1))]
-                        (jdbc/execute! tx (h/format (-> (hh/insert-into :folder_question_sets)
-                                                        (hh/values [{:folder_id folder-id :set_id set-id :order_in_folder final-order}]))) jdbc-opts)
-                        (resp/response {:success true :folder-id folder-id :set-id set-id :order-in-folder final-order}))
-                      (not-found "Question set not found.")))
+                  (do
+                    (doseq [set-item sets]
+                      (let [current-set-id (:set-id set-item)
+                            current-order-in-folder (:order-in-folder set-item)
+                            question-set (jdbc/execute-one! tx (h/format (-> (hh/select :set_id) (hh/from :question_sets) (hh/where [:= :set_id current-set-id]))) jdbc-opts)]
+                        (if question-set
+                          ;; Assuming order-in-folder is now always provided by the client for batch operations
+                          (jdbc/execute! tx (h/format (-> (hh/insert-into :folder_question_sets)
+                                                          (hh/values [{:folder_id folder-id
+                                                                       :set_id current-set-id
+                                                                       :order_in_folder current-order-in-folder}])))
+                                         jdbc-opts)
+                          (throw (ex-info (str "Question set with ID " current-set-id " not found.") {:type :not-found :set-id current-set-id})))))
+                    (resp/response {:success true :folder-id folder-id :added-count (count sets)}))
                   (unauthorized "You do not have permission to modify this folder."))
                 (not-found "Folder not found.")))
-            (catch Exception e ; Could be unique constraint violation if set already in folder
+            (catch Exception e
               (.rollback tx)
-              (if (str/includes? (or (.getMessage e) "") "UNIQUE constraint failed: folder_question_sets.folder_id, folder_question_sets.set_id")
-                (bad-request "Question set already exists in this folder." {:folder-id folder-id :set-id set-id})
-                (server-error (str "Failed to add set to folder. F_ID: " folder-id " S_ID: " set-id) e)))))))
+              (if (and (ex-data e) (= :not-found (:type (ex-data e))))
+                (not-found (ex-message e))
+                (if (str/includes? (or (.getMessage e) "") "UNIQUE constraint failed: folder_question_sets.folder_id, folder_question_sets.set_id")
+                  (bad-request "One or more question sets already exist in this folder." {:folder-id folder-id :sets sets})
+                  (server-error (str "Failed to add sets to folder. F_ID: " folder-id) e))))))))
     (unauthorized "Authentication required to add set to folder.")))
 
 (defn remove-set-from-folder-handler [request]
