@@ -3,6 +3,7 @@
    [reagent.core :as r]
    ["lucide-react" :as lucide-icons]
    [reitit.frontend.easy :as rfe]
+   [zi-study.frontend.routes :as routes]
    [zi-study.frontend.components.button :refer [button]]))
 
 (defn not-found-page []
@@ -72,7 +73,7 @@
         {:class "flex flex-wrap gap-4 justify-center"}
         [button {:variant :primary
                  :start-icon lucide-icons/Home
-                 :on-click #(rfe/push-state :zi-study.frontend.core/home)}
+                 :on-click #(rfe/push-state routes/sym-home-route)}
          "Go Home"]
 
         [button {:variant :outlined

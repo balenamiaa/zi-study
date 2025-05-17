@@ -1,6 +1,7 @@
 (ns zi-study.frontend.pages.question-sets
   (:require [reagent.core :as r]
             [reitit.frontend.easy :as rfe]
+            [zi-study.frontend.routes :as routes]
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.http :as http]
             [zi-study.frontend.components.card :refer [card]]
@@ -125,7 +126,7 @@
         correct (get-in progress [:correct] 0)]
     [card {:hover-effect true
            :class "h-full animate-fade-in-up transition-all duration-300 transform hover:scale-[1.02]"
-           :on-click #(rfe/push-state :zi-study.frontend.core/set-page {:set-id set-id})}
+           :on-click #(rfe/push-state routes/sym-set-page-route {:set-id set-id})}
      [:div {:class "p-6"}
       [:div {:class "flex items-start justify-between gap-4 mb-4"}
        [:div

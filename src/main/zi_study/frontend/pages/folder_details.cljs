@@ -4,6 +4,7 @@
    [reitit.frontend.easy :as rfe]
    ["lucide-react" :as lucide-icons]
    [clojure.string :as str]
+   [zi-study.frontend.routes :as routes]
    [zi-study.frontend.state :as state]
    [zi-study.frontend.utilities.http :as http]
    [zi-study.frontend.components.button :refer [button]]
@@ -13,6 +14,7 @@
    [zi-study.frontend.components.modal :refer [modal]]
    [zi-study.frontend.components.toggle :refer [toggle]]
    [zi-study.frontend.components.dropdown :refer [dropdown menu-item menu-divider]]
+   [zi-study.frontend.components.pagination :refer [pagination]]
    [zi-study.frontend.utilities :refer [cx]]))
 
 ;; --- Helper Components ---
@@ -47,24 +49,29 @@
                  [:button {:class "p-1 rounded-full hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)] transition-colors"
                            :aria-label "Set options"}
                   [:> lucide-icons/MoreVertical {:size 18}]]}
-       [menu-item {:on-click #(rfe/push-state :zi-study.frontend.core/set-page {:set-id set-id})}
-        [:> lucide-icons/ExternalLink {:size 16 :class "mr-2"}] "Open Set"]
+       [menu-item {:on-click #(rfe/push-state routes/sym-set-page-route {:set-id set-id})
+                   :class "select-none"
+                   :start-icon lucide-icons/ExternalLink} "Open Set"]
        (when (or on-move-up on-move-down on-remove)
          [menu-divider])
        (when on-move-up
-         [menu-item {:on-click #(on-move-up set-id) :disabled is-first?}
-          [:> lucide-icons/ArrowUpCircle {:size 16 :class "mr-2"}] "Move Up"])
+         [menu-item {:on-click #(on-move-up set-id) :disabled is-first?
+                     :class "select-none"
+                     :start-icon lucide-icons/ArrowUpCircle} "Move Up"])
        (when on-move-down
-         [menu-item {:on-click #(on-move-down set-id) :disabled is-last?}
-          [:> lucide-icons/ArrowDownCircle {:size 16 :class "mr-2"}] "Move Down"])
+         [menu-item {:on-click #(on-move-down set-id) :disabled is-last?
+                     :class "select-none"
+                     :start-icon lucide-icons/ArrowDownCircle} "Move Down"])
        (when on-remove
          (when (or on-move-up on-move-down) [menu-divider])
-         [menu-item {:on-click #(on-remove set-id) :danger true}
-          [:> lucide-icons/Trash2 {:size 16 :class "mr-2"}] "Remove from Folder"])])))
+         [menu-item {:on-click #(on-remove set-id) :danger true
+                     :class "select-none"
+                     :start-icon lucide-icons/Trash2} "Remove from Folder"])])))
 
-(defn set-card [{:keys [set-data on-remove can-remove? on-move-up on-move-down is-first? is-last?]}]
+(defn set-card [{:keys [set-data on-remove can-remove? on-move-up on-move-down is-first? is-last? folder-id]}]
   (let [{:keys [set-id title description total-questions progress]} set-data]
-    [card {:class "h-full flex flex-col shadow hover:shadow-lg transition-all duration-200 bg-[var(--color-light-bg-card)] dark:bg-[var(--color-dark-bg-card)]"}
+    [card {:class "h-full flex flex-col shadow hover:shadow-lg transition-all duration-200 bg-[var(--color-light-bg-card)] dark:bg-[var(--color-dark-bg-card)] cursor-pointer"
+           :on-click #(rfe/push-state routes/sym-set-page-route {:set-id set-id} (when folder-id {:from-folder folder-id}))}
      [card-header {:title title
                    :subtitle (str total-questions " " (if (= 1 total-questions) "question" "questions"))
                    :action (when can-remove?
@@ -76,14 +83,7 @@
        (if (str/blank? description)
          [:span {:class "italic"} "No description provided."]
          description)]
-      [set-card-progress {:progress progress}]]
-     [card-footer {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-      [button {:variant :solid
-               :color :primary
-               :class "w-full"
-               :size :sm
-               :on-click #(rfe/push-state :zi-study.frontend.core/set-page {:set-id set-id})}
-       "Start Learning"]]]))
+      [set-card-progress {:progress progress}]]]))
 
 ;; --- Modal Components (Defined with def and r/create-class for state and lifecycle) ---
 
@@ -157,54 +157,72 @@
 
 (defn delete-folder-confirmation-modal [props] [delete-folder-confirmation-modal-internal props])
 
+(defn- fetch-modal-sets-data [state-atoms props page-to-fetch query-term]
+  (let [{:keys [pagination-state loading-available-sets available-sets-list]} state-atoms
+        folder-id-to-exclude (:folder-id props)]
+    (reset! loading-available-sets true)
+    (http/get-sets-for-modal {:search query-term :exclude-sets-from-folder-id folder-id-to-exclude}
+                             {:page page-to-fetch :limit (:limit @pagination-state)}
+                             (fn [result]
+                               (if (:success result)
+                                 (let [data (:data result)
+                                       api-pagination (:pagination data)]
+                                   (reset! available-sets-list (:sets data))
+                                   (swap! pagination-state assoc
+                                          :page page-to-fetch
+                                          :total_pages (or (:total_pages api-pagination) 0)
+                                          :total_items (or (:total_items api-pagination) 0)))
+                                 (state/flash-error (str "Could not load your question sets: " (:error result))))
+                               (reset! loading-available-sets false)))))
+
 (def add-sets-modal-internal
   (r/create-class
    {:display-name "add-sets-modal-internal"
     :get-initial-state
     (fn [_this]
-      {:all-user-sets (r/atom [])
-       :local-folder-set-ids (r/atom #{})
-       :selected-sets (r/atom #{})
+      {:available-sets-list (r/atom [])       ; Stores the current page of sets
+       :local-folder-set-ids (r/atom #{})    ; IDs of sets already in the current folder
+       :selected-set-ids (r/atom #{})         ; IDs selected by the user across pages
+       :pagination-state (r/atom {:page 1 :limit 10 :total_pages 0 :total_items 0})
        :loading-available-sets (r/atom true)
-       :submitting (r/atom false)
-       :search-term (r/atom "")})
+       :submitting-add (r/atom false)
+       :search-query (r/atom "")})
 
     :component-did-mount
-    (fn [this]
+    (fn [this] ; `this` is the component instance
       (let [props (r/props this)
-            state (r/state this)
+            state-atoms (r/state this)
             initial-folder-set-ids (:current-folder-set-ids props)]
-        (reset! (:loading-available-sets state) true)
-        (reset! (:selected-sets state) #{})
-        (reset! (:search-term state) "")
-        (reset! (:local-folder-set-ids state) (or initial-folder-set-ids #{}))
+        (reset! (:loading-available-sets state-atoms) true)
+        (reset! (:selected-set-ids state-atoms) #{})
+        (reset! (:search-query state-atoms) "")
+        (reset! (:local-folder-set-ids state-atoms) (or initial-folder-set-ids #{}))
+        (fetch-modal-sets-data state-atoms props 1 "")))
 
-        (http/get-sets {} {:page 1 :limit 999}
-                       (fn [user-sets-result]
-                         (reset! (:loading-available-sets state) false)
-                         (if (:success user-sets-result)
-                           (reset! (:all-user-sets state) (:sets (:data user-sets-result)))
-                           (state/flash-error "Could not load your question sets."))))))
+    ;; Correctly handle updates to current-folder-set-ids from props
     :component-did-update
     (fn [this old-argv]
       (let [old-props (second old-argv)
             new-props (r/props this)
-            state (r/state this)
+            state-atoms (r/state this)
             old-folder-set-ids (:current-folder-set-ids old-props)
-            new-folder-set-ids (:current-folder-set-ids new-props)]
-        (when (not= old-folder-set-ids new-folder-set-ids)
-          (reset! (:local-folder-set-ids state) (or new-folder-set-ids #{})))))
+            new-folder-set-ids (:current-folder-set-ids new-props)
+            local-folder-set-ids-atom (:local-folder-set-ids state-atoms)]
+        (when (and local-folder-set-ids-atom (not= old-folder-set-ids new-folder-set-ids))
+          (reset! local-folder-set-ids-atom (or new-folder-set-ids #{})))
+        nil))
 
     :reagent-render
     (fn [props]
-      (let [component-state (r/state (r/current-component))
-            {:keys [all-user-sets local-folder-set-ids selected-sets loading-available-sets submitting search-term]} component-state
+      (let [component (r/current-component)
+            state-atoms (r/state component)
+            {:keys [available-sets-list local-folder-set-ids selected-set-ids pagination-state loading-available-sets submitting-add search-query]} state-atoms
             current-on-close (:on-close props)
             current-folder-id (:folder-id props)
 
             handle-add-sets (fn []
-                              (reset! submitting true)
-                              (let [sets-to-add (vec @selected-sets)
+                              (reset! submitting-add true)
+                              (let [sets-to-add (vec @selected-set-ids)
                                     add-promises (map-indexed
                                                   (fn [idx set-id]
                                                     (js/Promise. (fn [resolve reject]
@@ -215,41 +233,61 @@
                                                   sets-to-add)]
                                 (-> (js/Promise.all add-promises)
                                     (.then (fn [_results]
-                                             (reset! submitting false)
+                                             (reset! submitting-add false)
+                                             (reset! selected-set-ids #{}) ; Clear selection after adding
                                              (state/flash-success (str (count sets-to-add) " set(s) added successfully."))
                                              (when (:on-success props) ((:on-success props)))
                                              (when current-on-close (current-on-close))))
                                     (.catch (fn [error]
-                                              (reset! submitting false)
+                                              (reset! submitting-add false)
                                               (state/flash-error (str "Error adding sets: " error)))))))
-            filtered-and-available-sets
-            (->> @all-user-sets
-                 (remove #(contains? @local-folder-set-ids (:set-id %)))
-                 (filter #(or (str/blank? @search-term)
-                              (str/includes? (str/lower-case (:title % "")) (str/lower-case @search-term))
-                              (str/includes? (str/lower-case (:description % "")) (str/lower-case @search-term)))))]
+
+            handle-search-input-change (fn [event]
+                                         ;; Just update the reactive atom for the input value
+                                         (reset! search-query (.. event -target -value)))
+
+            handle-debounced-search (fn [event]
+                                      ;; This will be called after debounce period
+                                      (let [current-query (.. event -target -value)]
+                                        (fetch-modal-sets-data state-atoms props 1 current-query)))
+
+            handle-page-change (fn [new-page]
+                                 (fetch-modal-sets-data state-atoms props new-page @search-query))
+
+            displayable-sets @available-sets-list]
 
         [modal
          {:show? true :on-close current-on-close :size :lg :title "Add Your Question Sets"
           :footer
-          [:div {:class "flex justify-end gap-2"}
-           [button {:variant :text :on-click current-on-close :disabled @submitting} "Cancel"]
-           [button {:on-click handle-add-sets
-                    :loading @submitting
-                    :disabled (or (empty? @selected-sets) @submitting @loading-available-sets)}
-            (str "Add " (count @selected-sets) " " (if (= 1 (count @selected-sets)) "Set" "Sets"))]]}
+          [:div {:class "flex justify-between items-center w-full"}
+           [:div {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+            (when (pos? (:total_items @pagination-state))
+              (let [current-page (:page @pagination-state)
+                    limit (:limit @pagination-state)
+                    total-items (:total_items @pagination-state)
+                    start-item (if (zero? total-items) 0 (inc (* (dec current-page) limit)))
+                    end-item (min (* current-page limit) total-items)]
+                (str "Showing " start-item "–" end-item " of " total-items)))]
+           [:div {:class "flex justify-end gap-2"}
+            [button {:variant :text :on-click current-on-close :disabled @submitting-add} "Cancel"]
+            [button {:on-click handle-add-sets
+                     :loading @submitting-add
+                     :disabled (or (empty? @selected-set-ids) @submitting-add @loading-available-sets)}
+             (str "Add " (count @selected-set-ids) " " (if (= 1 (count @selected-set-ids)) "Set" "Sets"))]]]}
 
          ^{:key "add-sets-modal-content"}
          [:div {:class "p-1 space-y-4"}
           [text-input {:placeholder "Search your sets by title or description..."
                        :start-icon lucide-icons/Search
-                       :value @search-term
-                       :on-change #(reset! search-term (.. % -target -value))}]
+                       :value @search-query
+                       :on-change handle-search-input-change ;; Updates search-query atom immediately
+                       :on-change-debounced {:time 300 :callback handle-debounced-search} ;; Triggers fetch after debounce
+                       }]
 
-          [:div {:class "border dark:border-[var(--color-dark-divider)] rounded-md max-h-[400px] overflow-y-auto divide-y dark:divide-[var(--color-dark-divider)]"}
+          [:div {:class "border dark:border-[var(--color-dark-divider)] rounded-md min-h-[200px] max-h-[400px] overflow-y-auto divide-y dark:divide-[var(--color-dark-divider)]"}
            (cond
              @loading-available-sets
-             (for [idx (range 3)]
+             (for [idx (range 3)] ; Show a few skeletons based on typical page limit
                ^{:key (str "skel-" idx)}
                [:div {:class "p-4 animate-pulse flex space-x-3 items-center"}
                 [:div {:class "h-5 w-5 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-md"}]
@@ -257,36 +295,53 @@
                  [:div {:class "h-4 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded w-3/4"}]
                  [:div {:class "h-3 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded w-1/2"}]]])
 
-             (empty? filtered-and-available-sets)
+             (empty? displayable-sets)
              [:div {:class "p-6 text-center text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
               [:> lucide-icons/Inbox {:size 32 :class "mx-auto mb-3 opacity-70"}]
               (cond
-                (empty? @all-user-sets) [:p "You haven't created any question sets yet, or they couldn't be loaded."]
-                (str/blank? @search-term) [:p "All of your available sets are already in this folder, or no other sets were found."]
-                :else [:p "No question sets match your search criteria."])]
+                (and @loading-available-sets (empty? displayable-sets))
+                [:p "Loading..."]
+
+                (and (empty? displayable-sets) (not (str/blank? @search-query)))
+                [:p "No question sets match your search criteria that aren't already in this folder."]
+
+                (empty? displayable-sets)
+                [:p "All of your available sets are already in this folder, or no other sets were found."]
+
+                :else
+                [:p "No available question sets to add. Try a different search or create some sets first."])]
 
              :else
              (doall
-              (for [{:keys [set-id title description total-questions]} filtered-and-available-sets]
+              (for [{:keys [set-id title description total-questions]} displayable-sets]
                 ^{:key set-id}
                 [:div {:class (cx "p-3 flex items-center cursor-pointer transition-colors"
-                                  (if (contains? @selected-sets set-id)
+                                  (if (contains? @selected-set-ids set-id)
                                     "bg-[var(--color-light-bg-selected)] dark:bg-[var(--color-dark-bg-selected)] hover:bg-[var(--color-light-bg-selected)] dark:hover:bg-[var(--color-dark-bg-selected)]"
                                     "hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)]"))
-                       :on-click #(swap! selected-sets (if (contains? @selected-sets set-id) disj conj) set-id)}
+                       :on-click #(swap! selected-set-ids (if (contains? @selected-set-ids set-id) disj conj) set-id)}
                  [:div {:class "flex-shrink-0 mr-3"}
                   [:div {:class (cx "w-5 h-5 rounded border-2 flex items-center justify-center transition-all"
-                                    (if (contains? @selected-sets set-id)
+                                    (if (contains? @selected-set-ids set-id)
                                       "bg-[var(--color-primary)] border-[var(--color-primary)] text-white"
                                       "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] bg-transparent"))}
-                   (when (contains? @selected-sets set-id)
+                   (when (contains? @selected-set-ids set-id)
                      [:> lucide-icons/Check {:size 14 :stroke-width 3}])]]
                  [:div {:class "flex-grow min-w-0"}
                   [:div {:class "font-medium text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] truncate"} title]
                   [:p {:class "text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] truncate"}
                    (if (str/blank? description) "No description" description)]]
                  [:div {:class "flex-shrink-0 ml-3 text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-                  (str total-questions "Q")]])))]]]))}))
+                  (str total-questions "Q")]])))]
+
+          (when (and (not @loading-available-sets) (pos? (:total_pages @pagination-state)) (> (:total_pages @pagination-state) 1))
+            [:div {:class "mt-4"}
+             [pagination {:page (:page @pagination-state)
+                          :total-pages (:total_pages @pagination-state)
+                          :total-items (:total_items @pagination-state)
+                          :limit (:limit @pagination-state)
+                          :on-page-change handle-page-change
+                          :item-name (if (= 1 (:total_items @pagination-state)) "set" "sets")}]])]]))}))
 
 (defn add-sets-modal [props] [add-sets-modal-internal props])
 
@@ -357,7 +412,7 @@
                                                          (fn [_]
                                                            (reset! deleting-folder? false)
                                                            (state/flash-success "Folder deleted successfully.")
-                                                           (rfe/push-state :zi-study.frontend.core/my-folders))
+                                                           (rfe/push-state routes/sym-my-folders-route))
                                                          (fn [err _]
                                                            (reset! deleting-folder? false)
                                                            (state/flash-error (str "Error deleting folder: " err))
@@ -401,8 +456,10 @@
                             [:div {:class "mb-8 pb-6 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
                              [:div {:class "mb-4"}
                               [button {:variant :text :size :sm :start-icon lucide-icons/ArrowLeft
-                                       :class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] hover:text-[var(--color-light-text-primary)] dark:hover:text-[var(--color-dark-text-primary)]"
-                                       :on-click #(rfe/push-state :zi-study.frontend.core/my-folders)}
+                                       :class (cx "px-2 py-1 rounded-md transition-colors duration-150"
+                                                  "text-[var(--color-light-back-button-text)] hover:text-[var(--color-light-back-button-text-hover)] hover:bg-[var(--color-light-back-button-bg-hover)]"
+                                                  "dark:text-[var(--color-dark-back-button-text)] dark:hover:text-[var(--color-dark-back-button-text-hover)] dark:hover:bg-[var(--color-dark-back-button-bg-hover)]")
+                                       :on-click #(rfe/push-state routes/sym-my-folders-route)}
                                "Back to My Folders"]]
                              (if details
                                [:div
@@ -482,7 +539,8 @@
                                                    :on-move-up (when is-owner? #(handle-reorder-set! (:set-id set-data) :up))
                                                    :on-move-down (when is-owner? #(handle-reorder-set! (:set-id set-data) :down))
                                                    :is-first? (zero? idx)
-                                                   :is-last? (= idx (dec (count question-sets)))}])])])
+                                                   :is-last? (= idx (dec (count question-sets)))
+                                                   :folder-id folder-id}])])])
 
             render-loading-state (fn []
                                    [:div {:class "animate-pulse"}
@@ -512,7 +570,7 @@
                                       [:h2 {:class "text-2xl font-semibold text-[var(--color-light-text-heading)] dark:text-[var(--color-dark-text-heading)] mb-2"} "Folder Not Found"]
                                       [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] max-w-md mx-auto mb-6"}
                                        "The folder you are looking for does not exist, has been moved, or you may not have permission to view it."]
-                                      [button {:on-click #(rfe/push-state :zi-study.frontend.core/my-folders) :start-icon lucide-icons/Home}
+                                      [button {:on-click #(rfe/push-state routes/sym-my-folders-route) :start-icon lucide-icons/Home}
                                        "Go to My Folders"]])]
 
         [:div {:class "container max-w-6xl mx-auto px-4 py-8 antialiased"}
@@ -543,4 +601,4 @@
                             :on-close #(reset! show-add-sets-modal false)}])]))}))
 
 (defn folder-details-page [match]
-  [folder-details-component match]) 
+  [folder-details-component match])

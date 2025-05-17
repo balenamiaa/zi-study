@@ -1,11 +1,10 @@
 (ns zi-study.frontend.components.folder-display-card
-  (:require
-   [reagent.core :as r]
-   [reitit.frontend.easy :as rfe]
-   ["lucide-react" :as lucide-icons]
-   [zi-study.frontend.components.card :refer [card card-content card-footer card-header]]
-   [zi-study.frontend.components.spinner :refer [spinner]]
-   [zi-study.frontend.utilities :refer [cx]]))
+  (:require [reitit.frontend.easy :as rfe]
+            ["lucide-react" :as lucide-icons]
+            [zi-study.frontend.routes :as routes]
+            [zi-study.frontend.components.card :refer [card card-content card-footer card-header]]
+            [zi-study.frontend.components.spinner :refer [spinner]]
+            [zi-study.frontend.utilities :refer [cx]]))
 
 (defn folder-display-card [{:keys [folder on-click show-privacy-badge?]
                             :or {show-privacy-badge? true}}]
@@ -28,7 +27,7 @@
                        (fn [_]
                          (if on-click
                            (on-click folder-id)
-                           (rfe/push-state :zi-study.frontend.core/folder-details {:folder-id folder-id}))))}
+                           (rfe/push-state routes/sym-folder-details-route {:folder-id folder-id}))))}
      [card-header {:title name
                    :subtitle display-subtitle
                    :accent-color :primary

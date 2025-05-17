@@ -1,6 +1,7 @@
 (ns zi-study.frontend.pages.set-page
   (:require [reagent.core :as r]
             [reitit.frontend.easy :as rfe]
+            [zi-study.frontend.routes :as routes]
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.http :as http]
             [zi-study.frontend.components.button :refer [button]]
@@ -11,6 +12,7 @@
             [zi-study.frontend.components.dropdown :refer [dropdown menu-item]]
             [zi-study.frontend.components.card :refer [card]]
             [zi-study.frontend.components.skeleton :as skeleton]
+            [zi-study.frontend.utilities :refer [cx]]
 
             [zi-study.frontend.components.questions.written-question :refer [written-question]]
             [zi-study.frontend.components.questions.mcq-single-question :refer [mcq-single-question]]
@@ -400,10 +402,10 @@
    {:component-did-mount
     (fn [_this]
       (let [set-id (get-in match [:parameters :path :set-id])
-            focus-question-id (when-let [query-params (.-search js/window.location)]
-                                (when-not (str/blank? query-params)
-                                  (let [params (js/URLSearchParams. query-params)]
-                                    (.get params "focus_question_id"))))
+            query-params (when-let [search-str (.-search js/window.location)]
+                           (when-not (str/blank? search-str)
+                             (js/URLSearchParams. search-str)))
+            focus-question-id (when query-params (.get query-params "focus-question-id"))
             initial-filters @(state/get-current-set-filters)]
         ;; Clear previous set data and errors before fetching new set
         (state/set-current-set nil [])
@@ -417,7 +419,7 @@
                                   (do
                                     (state/set-current-set-questions-loading true) ;; For questions of the new set
                                     (http/get-set-questions set-id initial-filters
-                                                            (fn [{success-questions :success questions-data :data error-questions :error}]
+                                                            (fn [{success-questions :success _questions-data :data error-questions :error}]
                                                               (if success-questions
                                                                 (do
                                                                   ;; We now just set the details directly since questions go through the registry
@@ -460,27 +462,32 @@
             details (:details current-set-state)
             set-loading? (:loading? current-set-state)
             set-error (:error current-set-state)
-            focus-question-id (r/atom nil)] ; For potential re-focus if questions reload
 
-        ;; Check for focus_question_id on initial render or match update
-        (let [query-params (.-search js/window.location)]
-          (when-not (str/blank? query-params)
-            (let [params (js/URLSearchParams. query-params)]
-              (when-let [fqid (.get params "focus_question_id")]
-                (reset! focus-question-id fqid)
-                ;; Clear the param from URL after reading to prevent re-triggering on unrelated re-renders
-                ;; Consider if this is desired UX, or if it should persist for reloads.
-                ;; For now, let's assume we try to focus once.
-                ;; (js/history.replaceState nil "" (str (.-pathname js/window.location) "")) 
-                ))))
+            ;; Get from-folder from query parameters for render
+            from-folder-id (when-let [search-str (.-search js/window.location)]
+                             (when-not (str/blank? search-str)
+                               (let [params (js/URLSearchParams. search-str)]
+                                 (.get params "from-folder"))))
+            from-search? (when-let [search-str (.-search js/window.location)]
+                           (when-not (str/blank? search-str)
+                             (let [params (js/URLSearchParams. search-str)]
+                               (= "true" (.get params "from-search")))))]
 
         [:div {:class "max-w-3xl mx-auto px-4 py-8"}
          [:div {:class "mb-6"}
           [button {:variant :text
                    :start-icon lucide-icons/ArrowLeft
-                   :class "hover:bg-[var(--color-light-bg)] dark:hover:bg-[var(--color-dark-bg)] -ml-3"
-                   :on-click #(rfe/push-state :zi-study.frontend.core/active-learning-question-sets)}
-           "Back to Question Sets"]]
+                   :class (cx "-ml-3 px-2 py-1 rounded-md transition-colors duration-150"
+                              "text-[var(--color-light-back-button-text)] hover:text-[var(--color-light-back-button-text-hover)] hover:bg-[var(--color-light-back-button-bg-hover)]"
+                              "dark:text-[var(--color-dark-back-button-text)] dark:hover:text-[var(--color-dark-back-button-text-hover)] dark:hover:bg-[var(--color-dark-back-button-bg-hover)]")
+                   :on-click (cond
+                               from-folder-id #(rfe/push-state routes/sym-folder-details-route {:folder-id (js/parseInt from-folder-id)})
+                               from-search? #(rfe/push-state routes/sym-advanced-search-route)
+                               :else #(rfe/push-state routes/sym-active-learning-question-sets-route))}
+           (cond
+             from-folder-id "Back to Folder"
+             from-search? "Back to Search"
+             :else "Back to Question Sets")]]
 
          (cond
            set-loading? ;; Initial loading for the set details

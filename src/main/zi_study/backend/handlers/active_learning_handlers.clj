@@ -92,7 +92,7 @@
             sort-order (keyword (get params "sort_order" "desc"))
             filter-tags (parse-query-param params "tags" :csv)
             search-term (get params "search")
-            user-owned? (parse-query-param params "user_owned" :bool)
+            exclude-folder-id (parse-query-param params "exclude-sets-from-folder-id" :int)
 
             search-where (when (not (str/blank? search-term))
                            [:or
@@ -105,6 +105,14 @@
 
             tag-where (when (seq filter-tags)
                         [:in :t.tag-name filter-tags])
+
+            ;; Subquery condition to exclude sets from a specific folder
+            exclude-folder-subquery_condition (when exclude-folder-id
+                                                [:not [:exists (-> (hh/select 1)
+                                                                   (hh/from [:folder_question_sets :fqs_exclude])
+                                                                   (hh/where [:and
+                                                                              [:= :fqs_exclude.folder_id exclude-folder-id]
+                                                                              [:= :fqs_exclude.set_id :qs.set_id]]))]])
 
             query-map (-> (hh/select [:qs.set_id :set_id]
                                      [:qs.title :title]
@@ -120,6 +128,7 @@
                           (hh/left-join [:tags :t] [:= :qst.tag_id :t.tag_id])
                           (cond-> search-where (hh/where search-where))
                           (cond-> tag-where (hh/where tag-where))
+                          (cond-> exclude-folder-subquery_condition (hh/where exclude-folder-subquery_condition))
                           (hh/group-by :qs.set_id :qs.title :qs.description :qs.created_at)
                           (cond-> tag-having (hh/having tag-having))
                           (hh/order-by [sort-by sort-order])
@@ -134,20 +143,24 @@
                                                 (hh/left-join [:tags :t] [:= :qst.tag_id :t.tag_id])
                                                 (cond-> search-where (hh/where search-where))
                                                 (cond-> tag-where (hh/where tag-where))
+                                                (cond-> exclude-folder-subquery_condition (hh/where exclude-folder-subquery_condition))
                                                 (hh/group-by :qs.set_id)
                                                 (cond-> tag-having (hh/having tag-having)))
                                             :sub]))
-                              (if (or (not (str/blank? search-term)) user-owned?)
+                              (if (not (str/blank? search-term))
                                 (-> (hh/select [[:count :*] :total])
                                     (hh/from [(-> (hh/select :qs.set_id)
                                                   (hh/from [:question_sets :qs])
                                                   (hh/left-join [:question_set_tags :qst] [:= :qs.set_id :qst.set_id])
                                                   (hh/left-join [:tags :t] [:= :qst.tag_id :t.tag_id])
                                                   (cond-> search-where (hh/where search-where))
+                                                  (cond-> exclude-folder-subquery_condition (hh/where exclude-folder-subquery_condition))
                                                   (hh/group-by :qs.set_id))
                                               :sub]))
                                 (-> (hh/select [[:count [:distinct :qs.set_id]] :total])
-                                    (hh/from [:question_sets :qs]))))
+                                    (hh/from [:question_sets :qs])
+                                    ;; Apply exclusion directly if no other complex joins/groups are involved in this simplest count path
+                                    (cond-> exclude-folder-subquery_condition (hh/where exclude-folder-subquery_condition)))))
 
             total-count-result (execute-one! count-query-map)
             total-items (:total total-count-result 0)
@@ -168,8 +181,8 @@
                            (assoc s :progress {:total total
                                                :answered answered
                                                :correct correct
-                                               :answered_percent (if (pos? total) (double (/ answered total)) 0.0)
-                                               :correct_percent (if (pos? answered) (double (/ correct answered)) 0.0)})))
+                                               :answered-percent (if (pos? total) (double (/ answered total)) 0.0)
+                                               :correct-percent (if (pos? answered) (double (/ correct answered)) 0.0)})))
                        sets-with-tags)]
 
         (resp/response {:sets sets
@@ -678,8 +691,8 @@
                                                                                 (assoc s :progress {:total total
                                                                                                     :answered answered
                                                                                                     :correct correct
-                                                                                                    :answered_percent (if (pos? total) (double (/ answered total)) 0.0)
-                                                                                                    :correct_percent (if (pos? answered) (double (/ correct answered)) 0.0)}))) question-sets))))
+                                                                                                    :answered-percent (if (pos? total) (double (/ answered total)) 0.0)
+                                                                                                    :correct-percent (if (pos? answered) (double (/ correct answered)) 0.0)}))) question-sets))))
                 (unauthorized "You do not have permission to view this folder."))
               (not-found "Folder not found.")))
           (catch Exception e
@@ -706,8 +719,8 @@
                                                                             (assoc s :progress {:total (:total-questions s 0)
                                                                                                 :answered 0
                                                                                                 :correct 0
-                                                                                                :answered_percent 0.0
-                                                                                                :correct_percent 0.0})) question-sets))))
+                                                                                                :answered-percent 0.0
+                                                                                                :correct-percent 0.0})) question-sets))))
               (not-found "Public folder not found or you do not have permission.")))
           (catch Exception e
             (server-error (str "Failed to retrieve public folder details for ID: " folder-id) e)))))))
@@ -765,7 +778,7 @@
 (defn add-set-to-folder-handler [request]
   (if-let [user-id (get-user-id request)]
     (let [folder-id (parse-query-param (:path-params request) :folder-id :int)
-          {:keys [set-id order-in-folder] :as body} (:body-params request)]
+          {:keys [set-id order-in-folder] :as _body} (:body-params request)]
       (cond
         (not folder-id) (bad-request "Invalid Folder ID." nil)
         (not set-id) (bad-request "Missing set-id in request body." nil)
@@ -851,7 +864,6 @@
 
   ;; --- Migration script to convert existing question_data keys to kebab-case ---
   (require '[clojure.walk :as walk])
-  (require '[clojure.string :as str])
 
   (defn- transform-keys-to-kebab [data]
     (letfn [(kebab-key [k]
@@ -866,7 +878,7 @@
        data)))
 
   (defn- migrate-question-data-to-kebab-case [db-connection]
-    (println "Starting migration of question_data to kebab-case keys...")
+    (println "Starting migration of question_data to kebab-case...")
     (let [questions (jdbc/execute! db-connection
                                    ["SELECT question_id, question_data FROM questions"]
                                    {:builder-fn rs/as-unqualified-kebab-maps})]

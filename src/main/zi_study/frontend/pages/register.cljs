@@ -3,6 +3,7 @@
    ["lucide-react" :as lucide-icons]
    [clojure.string :as str]
    [reagent.core :as r]
+   [zi-study.frontend.routes :as routes]
    [reitit.frontend.easy :as rfe]
    [zi-study.frontend.components.alert :refer [alert]]
    [zi-study.frontend.components.avatar-upload :refer [avatar-upload]]
@@ -275,5 +276,5 @@
                      :full-width true
                      :start-icon lucide-icons/LogIn
                      :disabled @loading
-                     :on-click #(rfe/push-state :zi-study.frontend.core/login)}
+                     :on-click #(rfe/push-state routes/sym-login-route)}
              "Sign in"]]]]]))))

@@ -1,6 +1,7 @@
 (ns zi-study.frontend.pages.login
   (:require [reagent.core :as r]
             [reitit.frontend.easy :as rfe]
+            [zi-study.frontend.routes :as routes]
             [zi-study.frontend.components.input :refer [text-input]]
             [zi-study.frontend.components.button :refer [button]]
             [zi-study.frontend.components.card :refer [card card-header card-content card-footer]]
@@ -36,7 +37,7 @@
                                      (if (:success result)
                                        (do
                                          (state/set-fully-authenticated (:token result) (:user result))
-                                         (rfe/push-state :zi-study.frontend.core/home))
+                                         (rfe/push-state routes/sym-home-route))
                                        (reset! error (:error result))))))
 
         valid-form? #(and (-> @email str/blank? not)
@@ -128,7 +129,7 @@
                    :full-width true
                    :start-icon lucide-icons/UserPlus
                    :disabled @loading
-                   :on-click #(rfe/push-state :zi-study.frontend.core/register)}
+                   :on-click #(rfe/push-state routes/sym-register-route)}
            "Create account"]]]]
 
        ;; Optional: Additional help links

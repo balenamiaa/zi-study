@@ -1,6 +1,7 @@
 (ns zi-study.frontend.pages.advanced-search
   (:require [reagent.core :as r]
             [reitit.frontend.easy :as rfe]
+            [zi-study.frontend.routes :as routes]
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.http :as http]
             [zi-study.frontend.components.input :refer [text-input]]
@@ -8,7 +9,6 @@
             [zi-study.frontend.components.card :refer [card]]
             [zi-study.frontend.components.skeleton :as skeleton]
             [zi-study.frontend.components.pagination :refer [pagination]]
-            ;; Import question components
             [zi-study.frontend.components.questions.written-question :refer [written-question]]
             [zi-study.frontend.components.questions.mcq-single-question :refer [mcq-single-question]]
             [zi-study.frontend.components.questions.true-false-question :refer [true-false-question]]
@@ -34,7 +34,7 @@
       [:div {:class "mb-3 pb-3 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] flex items-center gap-2"}
        [:span {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
         "From set:"]
-       [:a {:href (rfe/href :zi-study.frontend.core/set-page {:set-id set-id} {:focus_question_id question-id})
+       [:a {:href (rfe/href routes/sym-set-page-route {:set-id set-id} {:focus-question-id question-id :from-search "true"})
             :class "group flex items-center text-md font-semibold text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)] hover:text-[var(--color-primary-500)] dark:hover:text-[var(--color-primary-200)] transition-colors duration-200"}
         [:span question-set-title]
         [:> lucide-icons/ArrowUpRight {:size 18 :className "ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"}]]]

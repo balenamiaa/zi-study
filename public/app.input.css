@@ -56,6 +56,15 @@
     --color-dark-divider: #42353F;
     /* Divider with pink tint */
 
+    /* Back Button Specific Colors */
+    --color-light-back-button-text: var(--color-light-text-secondary);
+    --color-light-back-button-text-hover: var(--color-light-text-primary);
+    --color-light-back-button-bg-hover: var(--color-light-bg-hover);
+
+    --color-dark-back-button-text: var(--color-dark-text-secondary);
+    --color-dark-back-button-text-hover: var(--color-dark-text-primary);
+    --color-dark-back-button-bg-hover: var(--color-dark-bg-hover);
+
     /* Surface Colors */
     --color-surface-light: #FFFFFF;
     --color-surface-dark: #261A25;

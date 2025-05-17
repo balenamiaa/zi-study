@@ -4,6 +4,7 @@
    ["lucide-react" :as lucide-icons]
    [reitit.frontend.easy :as rfe]
    [zi-study.frontend.state :as state]
+   [zi-study.frontend.routes :as routes]
    [zi-study.frontend.utilities.auth-core :as auth-core]
    [zi-study.frontend.components.theme-switcher :refer [theme-switcher]]
    [zi-study.frontend.components.button :refer [button]]
@@ -13,11 +14,6 @@
    [zi-study.frontend.utilities :refer [cx]]
    [clojure.string :as str]))
 
-;; Define navigation links internally
-(def nav-links
-  [{:name :zi-study.frontend.core/home :path "/" :label "Home" :icon lucide-icons/Home}
-   {:name :zi-study.frontend.core/components :path "/components" :label "Components" :icon lucide-icons/Layers}
-   {:name :zi-study.frontend.core/active-learning :path "/active-learning" :label "Active Learning" :icon lucide-icons/Brain}])
 
 ;; Animated logo component
 (defn logo []
@@ -29,7 +25,7 @@
     "ZiStudy"]
    [:> lucide-icons/Sparkles
     {:size 20
-     :className "text-[var(--color-secondary)] animate-pulse transition-all"}]])
+     :className "text-[var(--color-secondary)] transition-all"}]])
 
 (defn action-button [{:keys [icon tooltip-text on-click aria-label shrink]}]
   [tooltip {:content tooltip-text
@@ -83,13 +79,11 @@
           [:div {:class "text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
            (:email current-user)]]]))
 
-    (for [{:keys [name label icon]} nav-links]
+    (for [{:keys [name label icon]} routes/topbar-nav-links]
       (let [is-active (or (= name current-route)
-                          ;; Check if current route is a child of this route
                           (and
-                           (= name :zi-study.frontend.core/active-learning)
-                           (contains? #{:zi-study.frontend.core/active-learning-question-sets
-                                        :zi-study.frontend.core/advanced-search}
+                           (= name routes/sym-active-learning-route)
+                           (contains? routes/active-learning-sub-route-names
                                       current-route)))]
         ^{:key (str name)}
         [:a {:href (rfe/href name)
@@ -112,7 +106,7 @@
                   :on-click #(do
                                (auth-core/remove-token)
                                (state/reset-auth-state!)
-                               (rfe/push-state :zi-study.frontend.core/home)
+                               (rfe/push-state routes/sym-home-route)
                                (reset! show-mobile-menu false))}
           "Sign Out"]
          [:<>
@@ -120,14 +114,14 @@
                    :size :md
                    :start-icon lucide-icons/LogIn
                    :on-click #(do
-                                (rfe/push-state :zi-study.frontend.core/login)
+                                (rfe/push-state routes/sym-login-route)
                                 (reset! show-mobile-menu false))}
            "Sign In"]
           [button {:variant :primary
                    :size :md
                    :start-icon lucide-icons/UserPlus
                    :on-click #(do
-                                (rfe/push-state :zi-study.frontend.core/register)
+                                (rfe/push-state routes/sym-register-route)
                                 (reset! show-mobile-menu false))}
            "Register"]]))]]])
 
@@ -197,7 +191,7 @@
         handle-logout (fn []
                         (auth-core/remove-token)
                         (state/reset-auth-state!)
-                        (rfe/push-state :zi-study.frontend.core/home))]
+                        (rfe/push-state routes/sym-home-route))]
 
     (r/create-class
      {:component-did-mount
@@ -237,18 +231,17 @@
              [:div {:class "flex items-center justify-between"}
 
               [:div {:class "flex items-center flex-shrink-0"}
-               [:a {:href (rfe/href :zi-study.frontend.core/home)
+               [:a {:href (rfe/href routes/sym-home-route)
                     :class (cx "mr-2 sm:mr-4 transition-transform duration-300 scale-90 sm:scale-95")}
                 [logo]]
 
                [:nav {:class "hidden md:flex space-x-1"}
-                (for [{:keys [name label icon]} nav-links]
+                (for [{:keys [name label icon]} routes/topbar-nav-links]
                   (let [is-active (or (= name current-route)
                                       ;; Check if current route is a child of this route
                                       (and
-                                       (= name :zi-study.frontend.core/active-learning)
-                                       (contains? #{:zi-study.frontend.core/active-learning-question-sets
-                                                    :zi-study.frontend.core/advanced-search}
+                                       (= name routes/sym-active-learning-route)
+                                       (contains? routes/active-learning-sub-route-names
                                                   current-route)))]
                     ^{:key (str name)}
                     [:a {:href (rfe/href name)
@@ -286,14 +279,14 @@
                    [button {:variant :outlined
                             :size :xs
                             :start-icon lucide-icons/LogIn
-                            :on-click #(rfe/push-state :zi-study.frontend.core/login)}
+                            :on-click #(rfe/push-state routes/sym-login-route)}
                     "Sign in"]]
 
                   [button {:variant :primary
                            :size :xs
                            :start-icon lucide-icons/UserPlus
                            :class "hidden sm:block shadow-md hover:shadow-lg transition-shadow"
-                           :on-click #(rfe/push-state :zi-study.frontend.core/register)}
+                           :on-click #(rfe/push-state routes/sym-register-route)}
                    "Register"]])
 
                ;; Mobile menu toggle - standard button for topbar's own mobile menu

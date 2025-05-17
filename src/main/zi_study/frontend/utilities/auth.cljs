@@ -1,9 +1,10 @@
 (ns zi-study.frontend.utilities.auth
-  (:require [zi-study.frontend.utilities.auth-core :as auth-core]
-            [zi-study.frontend.utilities.http :as http]
+  (:require [goog.object :as gobj]
             [reitit.frontend.easy :as rfe]
-            [zi-study.frontend.state :as state]
-            [goog.object :as gobj]))
+            [zi-study.frontend.routes :as routes]
+            [zi-study.frontend.utilities.auth-core :as auth-core]
+            [zi-study.frontend.utilities.http :as http]
+            [zi-study.frontend.state :as state]))
 
 
 
@@ -65,7 +66,7 @@
                          (do
                            (auth-core/remove-token)
                            (state/reset-auth-state!)
-                           (rfe/push-state :zi-study.frontend.core/login)
+                           (rfe/push-state routes/sym-login-route)
                            (callback {:success false
                                       :error "Authentication failed"})))))
     (callback {:success false

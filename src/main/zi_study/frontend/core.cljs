@@ -5,7 +5,6 @@
             [reitit.frontend.controllers :as rfc]
             [reitit.coercion.spec :as rss]
             [zi-study.frontend.pages.home :refer [home-page]]
-            [zi-study.frontend.pages.components :refer [components-page]]
             [zi-study.frontend.pages.not-found :refer [not-found-page]]
             [zi-study.frontend.pages.login :refer [login-page]]
             [zi-study.frontend.pages.register :refer [register-page]]
@@ -15,90 +14,15 @@
             [zi-study.frontend.pages.my-folders :refer [my-folders-page]]
             [zi-study.frontend.pages.public-folders :refer [public-folders-page]]
             [zi-study.frontend.pages.folder-details :refer [folder-details-page]]
+            [zi-study.frontend.routes :refer [mk-routes]]
             [zi-study.frontend.layouts.main-layout :refer [main-layout]]
             [zi-study.frontend.layouts.active-learning-layout :refer [active-learning-layout]]
             [zi-study.frontend.state :as state]
             [zi-study.frontend.utilities.auth :as auth]
             [zi-study.frontend.utilities.auth-core :as auth-core]
-            [zi-study.frontend.utilities.auth-guard :refer [auth-controller-start]]
             [zi-study.frontend.utilities.theme :as theme]))
 
-(def common-auth-controllers
-  [{:identity (fn [match] match)
-    :start auth-controller-start}])
 
-(def common-auth-opts
-  {:redirect-to ::login
-   :message "Please log in to access this page."})
-
-(def routes
-  [["/"
-    {:name ::home
-     :view home-page
-     :layout main-layout}]
-
-   ["/components"
-    {:name ::components
-     :view components-page
-     :layout main-layout}]
-
-   ["/login"
-    {:name ::login
-     :view login-page
-     :layout main-layout}]
-
-   ["/register"
-    {:name ::register
-     :view register-page
-     :layout main-layout}]
-
-   ["/active-learning"
-    {:layout active-learning-layout
-     :controllers common-auth-controllers
-     :view question-sets-page
-     :protected? true
-     :auth-opts common-auth-opts}
-    [""
-     {:name ::active-learning
-      :controllers [{:start (fn [_]
-                              (js/setTimeout #(when (:authenticated? @(state/get-auth-state))
-                                                (rfe/push-state ::active-learning-question-sets {})) 0))}]}]
-    ["/question-sets"
-     {:name ::active-learning-question-sets
-      :view question-sets-page
-      :active-learning-page :question-sets}]
-    ["/advanced-search"
-     {:name ::advanced-search
-      :view advanced-search-page
-      :active-learning-page :advanced-search}]
-    ["/my-folders"
-     {:name ::my-folders
-      :view my-folders-page
-      :active-learning-page :my-folders}]
-    ["/folders/:folder-id"
-     {:name ::folder-details
-      :view folder-details-page
-      :layout active-learning-layout
-      :active-learning-page :folder-details
-      :controllers common-auth-controllers
-      :protected? true
-      :auth-opts common-auth-opts
-      :parameters {:path {:folder-id int?}}}]
-    ["/public-folders"
-     {:name ::public-folders
-      :view public-folders-page
-      :layout active-learning-layout
-      :active-learning-page :public-folders}]]
-
-   ["/question-sets/:set-id"
-    {:name ::set-page
-     :view set-page
-     :layout main-layout
-     :controllers common-auth-controllers
-     :protected? true
-     :auth-opts {:redirect-to ::login
-                 :message "Please log in to view the question set"}
-     :parameters {:path {:set-id int?}}}]])
 
 (defn fetch-current-user-details
   "Fetches current user details if a token exists."
@@ -146,7 +70,18 @@
   (theme/initialize-theme)
   (initial-auth-check)
 
-  (let [app-state-current-route-atom (state/get-current-route)]
+  (let [routes (mk-routes {:main-layout main-layout
+                           :active-learning-layout active-learning-layout
+                           :home-page home-page
+                           :login-page login-page
+                           :register-page register-page
+                           :question-sets-page question-sets-page
+                           :set-page set-page
+                           :advanced-search-page advanced-search-page
+                           :my-folders-page my-folders-page
+                           :folder-details-page folder-details-page
+                           :public-folders-page public-folders-page})
+        app-state-current-route-atom (state/get-current-route)]
     (rfe/start!
      (rf/router routes {:data {:coercion rss/coercion
                                :controllers []}})

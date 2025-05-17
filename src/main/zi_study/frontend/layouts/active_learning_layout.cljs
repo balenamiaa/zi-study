@@ -4,6 +4,7 @@
             [zi-study.frontend.components.topbar :refer [topbar]]
             [zi-study.frontend.components.flashgroup :refer [flashgroup]]
             [reitit.frontend.easy :as rfe]
+            [zi-study.frontend.routes :as routes]
             ["lucide-react" :as lucide-icons]))
 
 (defn active-learning-layout [props]
@@ -15,19 +16,19 @@
                                         (reset! desktop-sidebar-expanded? is-expanded))
         ;; Define sidebar links here, so they can be customized per layout
         sidebar-links [{:id :question-sets
-                        :href (rfe/href :zi-study.frontend.core/active-learning-question-sets)
+                        :href (rfe/href routes/sym-active-learning-question-sets-route)
                         :text "Question Sets"
                         :icon lucide-icons/LayoutGrid}
                        {:id :my-folders
-                        :href (rfe/href :zi-study.frontend.core/my-folders)
+                        :href (rfe/href routes/sym-my-folders-route)
                         :text "My Folders"
                         :icon lucide-icons/Folder}
                        {:id :public-folders
-                        :href (rfe/href :zi-study.frontend.core/public-folders)
+                        :href (rfe/href routes/sym-public-folders-route)
                         :text "Public Folders"
                         :icon lucide-icons/FolderGit2}
                        {:id :advanced-search
-                        :href (rfe/href :zi-study.frontend.core/advanced-search)
+                        :href (rfe/href routes/sym-advanced-search-route)
                         :text "Advanced Search"
                         :icon lucide-icons/SearchCode}]]
 

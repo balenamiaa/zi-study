@@ -86,10 +86,7 @@
       [:> lucide-icons/FolderOpen {:size 64 :className "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] mb-4 opacity-50"}]
       [:h3 {:class "text-xl font-medium mb-2"} "No folders yet"]
       [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] max-w-md mb-6"}
-       "Create your first folder to organize your question sets."]
-      [button {:on-click #(reset! show-create-modal true)
-               :start-icon lucide-icons/FolderPlus}
-       "Create Folder"]]
+       "Create your first folder to organize your question sets."]]
 
      :else
      (for [folder folders]

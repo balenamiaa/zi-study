@@ -143,6 +143,20 @@
                     (state/set-sets-error (:error result))
                     (callback {:success false :error (:error result)})))))))
 
+(defn get-sets-for-modal
+  "Similar to get-sets, but does not interact with global state.
+  Intended for use in components that manage their own set lists, like modals."
+  [filters pagination callback]
+  (let [params (merge filters pagination)
+        query-string (build-query-params params)
+        url (str "/api/question-sets" (when query-string (str "?" query-string)))]
+    (get-auth url
+              (fn [result]
+                ;; Directly pass the result to the callback without global state updates
+                (if (:success result)
+                  (callback {:success true :data (:data result)})
+                  (callback {:success false :error (:error result)}))))))
+
 (defn get-set-details [set-id callback]
   (state/set-current-set-loading true)
   (get-auth (str "/api/question-sets/" set-id)
