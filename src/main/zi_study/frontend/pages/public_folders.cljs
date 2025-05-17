@@ -1,18 +1,13 @@
 (ns zi-study.frontend.pages.public-folders
   (:require
    [reagent.core :as r]
-   [reitit.frontend.easy :as rfe]
    ["lucide-react" :as lucide-icons]
-   [clojure.string :as str]
    [zi-study.frontend.state :as state]
    [zi-study.frontend.utilities.http :as http]
-   [zi-study.frontend.components.button :refer [button]]
-   [zi-study.frontend.components.card :refer [card card-content card-footer card-header]]
+   [zi-study.frontend.components.card :refer [card card-content  card-header]]
    [zi-study.frontend.components.skeleton :refer [skeleton-text]]
    [zi-study.frontend.components.input :refer [text-input]]
-   [zi-study.frontend.components.pagination :refer [pagination]]
-   [zi-study.frontend.components.folder-display-card :refer [folder-display-card]]
-   [zi-study.frontend.utilities :refer [cx]]))
+   [zi-study.frontend.components.folder-display-card :refer [folder-display-card]]))
 
 (defn folder-filters [{:keys [search-term on-search-change]}]
   [:div {:class "flex flex-col md:flex-row gap-4 mb-6"}

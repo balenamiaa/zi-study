@@ -51,7 +51,6 @@
                                     scroll-x (.-scrollX js/window)
                                     scroll-y (.-scrollY js/window)
                                     trigger-width (.-width trigger-element-rect)
-                                    trigger-height (.-height trigger-element-rect)
                                     window-width (.-innerWidth js/window)
                                     window-height (.-innerHeight js/window)]
 

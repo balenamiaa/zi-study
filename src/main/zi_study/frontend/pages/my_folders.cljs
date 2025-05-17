@@ -66,7 +66,7 @@
          [:div {:class "text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] mt-1 ml-9"}
           "Public folders are visible to all users"]]]])))
 
-(defn folder-grid [{:keys [folders loading? show-create-modal]}]
+(defn folder-grid [{:keys [folders loading?]}]
   [:div {:class "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6"}
    (cond
      loading?
