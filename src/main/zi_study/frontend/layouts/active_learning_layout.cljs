@@ -29,7 +29,7 @@
                         :icon lucide-icons/FolderGit2}
                        {:id :advanced-search
                         :href (rfe/href routes/sym-advanced-search-route)
-                        :text "Advanced Search"
+                        :text "Search All Questions"
                         :icon lucide-icons/SearchCode}]]
 
     [:div {:class "min-h-screen flex flex-col bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)]"}

@@ -230,8 +230,8 @@
    [:ui ui-schema]
    [:router router-schema]
    [:question-bank question-bank-schema]
-   [:advanced-search ; Key for the advanced search state
-    [:map ; Schema for the advanced search state itself
+   [:advanced-search ; Key for the 'search all questions' state
+    [:map ; Schema for the 'search all questions' state itself
      [:results advanced-search-results-schema]
      [:filters advanced-search-filters-schema]]]
    [:questions-registry questions-registry-schema]
@@ -705,7 +705,7 @@
 ;;       (let [explain-data (m/explain app-state-schema new-state)]
 ;;         (js/console.error "App state schema validation failed:" (m/humanize explain-data))))))
 
-;; Advanced Search Updaters
+;; Search All Questions Updaters
 (defn set-advanced-search-loading [loading?]
   (swap! app-state assoc-in [:advanced-search :results :loading?] loading?))
 
@@ -743,7 +743,7 @@
     (swap! app-state assoc-in [:question-bank :current-set :questions-error] nil)))
 
 (defn set-advanced-search-question-ids
-  "Set question IDs for advanced search results and register the questions"
+  "Set question IDs for 'search all questions' results and register the questions"
   [questions pagination]
   (let [question-ids (mapv (comp str :question-id) questions)]
     (register-questions questions)

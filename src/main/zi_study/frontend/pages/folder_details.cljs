@@ -1,23 +1,25 @@
 (ns zi-study.frontend.pages.folder-details
   (:require
-   [reagent.core :as r]
-   [reitit.frontend.easy :as rfe]
    ["lucide-react" :as lucide-icons]
    [clojure.string :as str]
-   [zi-study.frontend.routes :as routes]
-   [zi-study.frontend.state :as state]
-   [zi-study.frontend.utilities.http :as http]
+   [reagent.core :as r]
+   [reitit.frontend.easy :as rfe]
    [zi-study.frontend.components.button :refer [button]]
-   [zi-study.frontend.components.card :refer [card card-content card-footer card-header]]
-   [zi-study.frontend.components.skeleton :refer [skeleton]]
+   [zi-study.frontend.components.card :refer [card card-content card-footer
+                                              card-header]]
+   [zi-study.frontend.components.dropdown :refer [dropdown menu-divider
+                                                  menu-item]]
    [zi-study.frontend.components.input :refer [text-input textarea]]
    [zi-study.frontend.components.modal :refer [modal]]
-   [zi-study.frontend.components.toggle :refer [toggle]]
-   [zi-study.frontend.components.dropdown :refer [dropdown menu-item menu-divider]]
    [zi-study.frontend.components.pagination :refer [pagination]]
-   [zi-study.frontend.utilities :refer [cx]]))
+   [zi-study.frontend.components.skeleton :refer [skeleton]]
+   [zi-study.frontend.components.toggle :refer [toggle]]
+   [zi-study.frontend.routes :as routes]
+   [zi-study.frontend.state :as state]
+   [zi-study.frontend.utilities :refer [cx]]
+   [zi-study.frontend.utilities.http :as http]))
 
-;; --- Helper Components ---
+; --- Helper Components ---
 
 (defn- set-card-progress [{:keys [progress]}]
   (when progress
@@ -43,30 +45,33 @@
 (defn- set-card-menu [_props]
   (let [menu-open? (r/atom false)]
     (fn [{:keys [set-id on-remove on-move-up on-move-down is-first? is-last?]}]
-      [dropdown {:open? menu-open?
-                 :placement :bottom-center
-                 :trigger
-                 [:button {:class "p-1 rounded-full hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)] transition-colors"
-                           :aria-label "Set options"}
-                  [:> lucide-icons/MoreVertical {:size 18}]]}
-       [menu-item {:on-click #(rfe/push-state routes/sym-set-page-route {:set-id set-id})
-                   :class "select-none"
-                   :start-icon lucide-icons/ExternalLink} "Open Set"]
-       (when (or on-move-up on-move-down on-remove)
-         [menu-divider])
-       (when on-move-up
-         [menu-item {:on-click #(on-move-up set-id) :disabled is-first?
+      (let [show-move-up? (and on-move-up (not is-first?))
+            show-move-down? (and on-move-down (not is-last?))]
+        [dropdown {:open? menu-open?
+                   :placement :bottom-center
+                   :trigger
+                   [:button {:class "p-1 rounded-full hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)] transition-colors"
+                             :aria-label "Set options"}
+                    [:> lucide-icons/MoreVertical {:size 18}]]}
+         [menu-item {:on-click #(rfe/push-state routes/sym-set-page-route {:set-id set-id})
                      :class "select-none"
-                     :start-icon lucide-icons/ArrowUpCircle} "Move Up"])
-       (when on-move-down
-         [menu-item {:on-click #(on-move-down set-id) :disabled is-last?
-                     :class "select-none"
-                     :start-icon lucide-icons/ArrowDownCircle} "Move Down"])
-       (when on-remove
-         (when (or on-move-up on-move-down) [menu-divider])
-         [menu-item {:on-click #(on-remove set-id) :danger true
-                     :class "select-none"
-                     :start-icon lucide-icons/Trash2} "Remove from Folder"])])))
+                     :start-icon lucide-icons/ExternalLink} "Open Set"]
+         (when (or show-move-up? show-move-down? on-remove)
+           [menu-divider])
+         (when show-move-up?
+           [menu-item {:on-click #(on-move-up set-id)
+                       :class "select-none"
+                       :start-icon lucide-icons/ArrowUpCircle} "Move Up"])
+         (when show-move-down?
+           [menu-item {:on-click #(on-move-down set-id)
+                       :class "select-none"
+                       :start-icon lucide-icons/ArrowDownCircle} "Move Down"])
+         (when on-remove
+           (when (and (or show-move-up? show-move-down?) on-remove)
+             [menu-divider])
+           [menu-item {:on-click #(on-remove set-id) :danger true
+                       :class "select-none"
+                       :start-icon lucide-icons/Trash2} "Remove from Folder"])]))))
 
 (defn set-card [{:keys [set-data on-remove can-remove? on-move-up on-move-down is-first? is-last? folder-id]}]
   (let [{:keys [set-id title description total-questions progress]} set-data]
@@ -83,9 +88,13 @@
        (if (str/blank? description)
          [:span {:class "italic"} "No description provided."]
          description)]
-      [set-card-progress {:progress progress}]]]))
+      [set-card-progress {:progress progress}]]
+     [card-footer {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] pt-3 pb-3 px-4 flex justify-end"}
+      [button {:variant :text :size :sm :start-icon lucide-icons/ArrowRight 
+               :class "text-[var(--color-primary)] dark:text-[var(--color-primary-400)]" 
+               } "View Set"]]]))
 
-;; --- Modal Components (Defined with def and r/create-class for state and lifecycle) ---
+; --- Modal Components (Defined with def and r/create-class for state and lifecycle) ---
 
 (def edit-folder-modal-internal
   (r/create-class
@@ -199,7 +208,7 @@
         (reset! (:local-folder-set-ids state-atoms) (or initial-folder-set-ids #{}))
         (fetch-modal-sets-data state-atoms props 1 "")))
 
-    ;; Correctly handle updates to current-folder-set-ids from props
+    ; Correctly handle updates to current-folder-set-ids from props
     :component-did-update
     (fn [this old-argv]
       (let [old-props (second old-argv)
@@ -216,7 +225,7 @@
     (fn [props]
       (let [component (r/current-component)
             state-atoms (r/state component)
-            {:keys [available-sets-list local-folder-set-ids selected-set-ids pagination-state loading-available-sets submitting-add search-query]} state-atoms
+            {:keys [available-sets-list selected-set-ids pagination-state loading-available-sets submitting-add search-query]} state-atoms
             current-on-close (:on-close props)
             current-folder-id (:folder-id props)
 
@@ -224,9 +233,9 @@
                               (reset! submitting-add true)
                               (let [selected-ids @selected-set-ids
                                     sets-payload {:sets (map-indexed
-                                                       (fn [idx set-id]
-                                                         {:set-id set-id :order-in-folder idx})
-                                                       (vec selected-ids))}]
+                                                         (fn [idx set-id]
+                                                           {:set-id set-id :order-in-folder idx})
+                                                         (vec selected-ids))}]
                                 (http/add-multiple-sets-to-folder!
                                  current-folder-id
                                  sets-payload
@@ -241,11 +250,11 @@
                                    (state/flash-error (str "Error adding sets: " error))))))
 
             handle-search-input-change (fn [event]
-                                         ;; Just update the reactive atom for the input value
+                                         ; Just update the reactive atom for the input value
                                          (reset! search-query (.. event -target -value)))
 
             handle-debounced-search (fn [event]
-                                      ;; This will be called after debounce period
+                                      ; This will be called after debounce period
                                       (let [current-query (.. event -target -value)]
                                         (fetch-modal-sets-data state-atoms props 1 current-query)))
 
@@ -278,8 +287,8 @@
           [text-input {:placeholder "Search your sets by title or description..."
                        :start-icon lucide-icons/Search
                        :value @search-query
-                       :on-change handle-search-input-change ;; Updates search-query atom immediately
-                       :on-change-debounced {:time 300 :callback handle-debounced-search} ;; Triggers fetch after debounce
+                       :on-change handle-search-input-change ; Updates search-query atom immediately
+                       :on-change-debounced {:time 300 :callback handle-debounced-search} ; Triggers fetch after debounce
                        }]
 
           [:div {:class "border dark:border-[var(--color-dark-divider)] rounded-md min-h-[200px] max-h-[400px] overflow-y-auto divide-y dark:divide-[var(--color-dark-divider)]"}
@@ -343,7 +352,7 @@
 
 (defn add-sets-modal [props] [add-sets-modal-internal props])
 
-;; --- Main Page Component ---
+; --- Main Page Component ---
 
 (def folder-details-component
   (r/create-class
@@ -360,11 +369,11 @@
     (fn [this]
       (let [match (r/props this)
             folder-id (get-in match [:parameters :path :folder-id])]
-        ;; First, clear any existing data to ensure proper loading state
+        ; First, clear any existing data to ensure proper loading state
         (state/clear-current-folder-details)
-        ;; Then set loading state explicitly to true before making the request
+        ; Then set loading state explicitly to true before making the request
         (state/set-current-folder-details-loading true)
-        ;; Now fetch the folder details
+        ; Now fetch the folder details
         (http/get-folder-details folder-id nil)))
 
     :component-will-unmount
@@ -378,7 +387,7 @@
             old-folder-id (get-in old-match [:parameters :path :folder-id])
             new-folder-id (get-in new-match [:parameters :path :folder-id])]
         (when (not= old-folder-id new-folder-id)
-          ;; Clear state and set loading to true before changing folders
+          ; Clear state and set loading to true before changing folders
           (state/clear-current-folder-details)
           (state/set-current-folder-details-loading true)
           (http/get-folder-details new-folder-id nil))))
@@ -428,27 +437,32 @@
                                       (state/flash-error (str "Error removing set: " err))))))
 
             handle-reorder-set! (fn [set-id-to-move direction]
-                                  (let [current-sets question-sets]
-                                    (when (seq current-sets)
-                                      (let [set-index (.findIndex current-sets #(= (:set-id %) set-id-to-move))]
-                                        (when (and (>= set-index 0) (< set-index (count current-sets)))
-                                          (let [new-index (if (= direction :up)
-                                                            (max 0 (dec set-index))
-                                                            (min (dec (count current-sets)) (inc set-index)))]
-                                            (when (not= set-index new-index)
-                                              (let [moved-set (nth current-sets set-index)
-                                                    sets-without-moved (vec (concat (subvec current-sets 0 set-index)
-                                                                                    (subvec current-sets (inc set-index))))
-                                                    new-ordered-sets (vec (concat (subvec sets-without-moved 0 new-index)
-                                                                                  [moved-set]
-                                                                                  (subvec sets-without-moved new-index)))
-                                                    sets-for-api (map-indexed (fn [idx s] {:set-id (:set-id s) :order-in-folder idx}) new-ordered-sets)]
-                                                (state/reorder-sets-in-current-folder-details new-ordered-sets)
-                                                (http/reorder-sets-in-folder folder-id sets-for-api
-                                                                             (fn [_] (state/flash-success "Sets reordered."))
-                                                                             (fn [err _]
-                                                                               (state/flash-error (str "Error reordering sets: " err))
-                                                                               (refresh-folder-details!)))))))))))
+                                  (let [cljs-vector-current-sets (vec question-sets) ; Ensure cljs vector
+                                        set-index (first (keep-indexed
+                                                          (fn [idx item]
+                                                            (when (= (:set-id item) set-id-to-move) idx))
+                                                          cljs-vector-current-sets))]
+                                    (when (some? set-index) ; Check if index was found (not nil)
+                                      (when (and (>= set-index 0) (< set-index (count cljs-vector-current-sets)))
+                                        (let [new-index (if (= direction :up)
+                                                          (max 0 (dec set-index))
+                                                          (min (dec (count cljs-vector-current-sets)) (inc set-index)))]
+                                          (when (not= set-index new-index)
+                                            (let [moved-set (nth cljs-vector-current-sets set-index)
+                                                  sets-without-moved (vec (concat (subvec cljs-vector-current-sets 0 set-index)
+                                                                                  (subvec cljs-vector-current-sets (inc set-index))))
+                                                  new-ordered-sets (vec (concat (subvec sets-without-moved 0 new-index)
+                                                                                [moved-set]
+                                                                                (subvec sets-without-moved new-index)))
+                                                  sets-for-api (map-indexed (fn [idx s] {:set-id (:set-id s) :order-in-folder idx}) new-ordered-sets)]
+                                              (state/reorder-sets-in-current-folder-details new-ordered-sets)
+                                              (http/reorder-sets-in-folder folder-id sets-for-api
+                                                                           (fn [_]
+                                                                             (state/flash-success "Sets reordered.")
+                                                                             (refresh-folder-details!))
+                                                                           (fn [err _]
+                                                                             (state/flash-error (str "Error reordering sets: " err))
+                                                                             (refresh-folder-details!))))))))))
 
             render-header (fn []
                             [:div {:class "mb-8 pb-6 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
@@ -486,7 +500,7 @@
                                    [:p {:class "italic text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} "No description provided."]
                                    [:p {:class "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] whitespace-pre-wrap"} (:description details)])]]
 
-                               ;; Skeleton for header
+                               ; Skeleton for header
                                [:div {:class "space-y-3 animate-pulse"}
                                 [:div {:class "h-8 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded w-1/2"}]
                                 [:div {:class "h-4 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded w-1/3 mb-2"}]
