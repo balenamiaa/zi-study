@@ -7,7 +7,7 @@
    [zi-study.frontend.utilities.auth-core :as auth-core]
    [zi-study.frontend.components.theme-switcher :refer [theme-switcher]]
    [zi-study.frontend.components.button :refer [button]]
-   [zi-study.frontend.components.badge :refer [avatar]]
+   [zi-study.frontend.components.avatar :refer [avatar]]
    [zi-study.frontend.components.dropdown :refer [dropdown menu-item menu-divider]]
    [zi-study.frontend.components.tooltip :refer [tooltip]]
    [zi-study.frontend.utilities :refer [cx]]

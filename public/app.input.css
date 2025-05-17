@@ -756,30 +756,6 @@
         @apply border-light-divider dark:border-dark-divider;
         @apply min-w-[180px] z-50;
     }
-
-    .dropdown-item {
-        @apply flex items-center w-full px-4 py-2 text-sm;
-        @apply transition-colors duration-150;
-        @apply text-light-text-primary dark:text-dark-text-primary;
-        @apply hover:bg-light-bg-paper dark:hover:bg-dark-bg-paper;
-    }
-
-    .dropdown-item.selected {
-        @apply bg-primary-50 text-primary-700;
-        @apply dark:bg-[#331A2A] dark:text-primary-300;
-        @apply font-medium;
-    }
-
-    .dropdown-item.disabled {
-        @apply opacity-50 cursor-not-allowed;
-        @apply text-light-text-secondary dark:text-dark-text-secondary;
-    }
-
-    .dropdown-item.danger {
-        @apply text-error;
-        @apply hover:bg-error-50;
-        @apply dark:text-error-300 dark:hover:bg-[#3C1818];
-    }
 }
 
 /* Utility Classes */

@@ -100,11 +100,14 @@
    Options:
    - no-padding: true/false (default false) - removes default padding
    - class: additional CSS classes"
-  [{:keys [no-padding class] :or {no-padding false}} & children]
-
-  (let [padding-class (if no-padding "" "px-6 py-5")
+  [& args]
+  (let [[opts children-args] (if (and (seq args) (map? (first args)))
+                               [(first args) (rest args)]
+                               [{} args])
+        {:keys [no-padding class] :or {no-padding false}} opts
+        padding-class (if no-padding "" "px-6 py-5")
         class-name (cx padding-class class)]
-    (into [:div {:class class-name}] children)))
+    (into [:div {:class class-name}] children-args)))
 
 (defn card-footer
   "Footer component for cards, typically used for actions.
@@ -113,11 +116,13 @@
    - align: :start, :center, :end, :between (default :end) - horizontal alignment
    - no-border: true/false (default false) - removes top border
    - class: additional CSS classes"
-  [{:keys [align no-border class] :or {align :end
-                                       no-border false}}
-   & children]
-
-  (let [base-classes "px-6 py-4"
+  [& args]
+  (let [[opts children-args] (if (and (seq args) (map? (first args)))
+                               [(first args) (rest args)]
+                               [{} args])
+        {:keys [align no-border class] :or {align :end
+                                             no-border false}} opts
+        base-classes "px-6 py-4"
 
         border-class
         (if no-border
@@ -134,7 +139,7 @@
 
         all-classes (cx base-classes border-class align-class class)]
 
-    (into [:div {:class all-classes}] children)))
+    (into [:div {:class all-classes}] children-args)))
 
 (defn card-media
   "Media component for cards to display images.

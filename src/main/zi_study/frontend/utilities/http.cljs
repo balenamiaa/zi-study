@@ -138,7 +138,7 @@
                 (if (:success result)
                   (let [data (:data result)]
                     (state/set-sets-list (:sets data) (:pagination data))
-                    (callback {:success true}))
+                    (callback {:success true :data (:data result)}))
                   (do
                     (state/set-sets-error (:error result))
                     (callback {:success false :error (:error result)})))))))
@@ -182,7 +182,7 @@
                                           (= question-type "written") nil
 
                                           (= question-type "mcq-single")
-                                          (if (= (:correct_index question-data) (:answer answer-data)) 1 0)
+                                          (if (= (:correct-index question-data) (:answer answer-data)) 1 0)
 
                                           :else
                                           (let [is-correct-from-backend (:correct data)]
@@ -203,7 +203,7 @@
 (defn self-evaluate [question-id is-correct callback]
   (state/set-self-evaluating question-id true)
   (post-auth (str "/api/questions/" question-id "/self-evaluate")
-             {:is_correct is-correct}
+             {:is-correct is-correct}
              (fn [result]
                (if (:success result)
                  (do
@@ -233,7 +233,7 @@
                      (state/update-question-in-registry question-id {:user-answer nil})
                      (state/set-answer-submitting question-id false nil)
                      (callback {:success true
-                                :deleted_count (get-in result [:data :deleted_count])}))
+                                :deleted-count (get-in result [:data :deleted-count])}))
                    (do
                      (state/set-answer-submitting question-id false (:error result))
                      (callback {:success false :error (:error result)}))))))
@@ -246,7 +246,7 @@
                (fn [result]
                  (if (:success result)
                    (do
-                     (js/console.log "Successfully deleted" (or (:deleted_count (:data result)) 0) "answers")
+                     (js/console.log "Successfully deleted" (or (:deleted-count (:data result)) 0) "answers")
                      ;; After deletion, reload the questions with current filters
                      (let [filters @(state/get-current-set-filters)]
                        (get-set-questions
@@ -254,9 +254,7 @@
                         filters
                         (fn [result]
                           (if (:success result)
-                            (do
-                              ;; The questions are already stored in the registry by get-set-questions
-                              (callback {:success true :deleted_count (:deleted_count (:data result))}))
+                            (callback {:success true :deleted-count (:deleted-count (:data result))})
                             (do
                               (state/set-current-set-questions-loading false)
                               (state/set-current-set-questions-error (:error result))
@@ -315,3 +313,123 @@
                   (do
                     (state/set-advanced-search-error (:error result))
                     (callback {:success false :error (:error result)})))))))
+
+; --- Folder API Calls ---
+
+(defn create-folder
+  "Creates a new folder and adds it to the user's folder list"
+  [folder-data success-callback error-callback]
+  (post-auth "/api/folders"
+             folder-data
+             (fn [result]
+               (if (:success result)
+                 (let [created-folder (:data result)]
+                   (state/add-folder-to-user-list created-folder)
+                   (when success-callback (success-callback created-folder)))
+                 (let [error-msg (get-in result [:data :error] (:error result "Failed to create folder."))]
+                   (when error-callback (error-callback error-msg (:data result))))))))
+
+(defn get-user-folders [callback]
+  (state/set-user-folders-loading true)
+  (get-auth "/api/folders"
+            (fn [result]
+              (if (:success result)
+                (do
+                  (state/set-user-folders-list (:folders (:data result)))
+                  (when callback (callback {:success true :data (:data result)})))
+                (let [error-msg (get-in result [:data :error] (:error result "Failed to load your folders."))]
+                  (state/set-user-folders-error error-msg)
+                  (when callback (callback {:success false :error error-msg :data (:data result)})))))))
+
+(defn get-public-folders [params callback]
+  (state/set-public-folders-loading true)
+  (let [query-string (build-query-params params)
+        url (str "/api/folders/public" (when query-string (str "?" query-string)))]
+    (get-auth url
+              (fn [result]
+                (if (:success result)
+                  (let [data (:data result)]
+                    (state/set-public-folders-list (:folders data) (:pagination data))
+                    (when callback (callback {:success true :data data})))
+                  (let [error-msg (get-in result [:data :error] (:error result "Failed to load public folders."))]
+                    (state/set-public-folders-error error-msg)
+                    (when callback (callback {:success false :error error-msg :data (:data result)}))))))))
+
+(defn get-folder-details [folder-id callback]
+  (state/set-current-folder-details-loading true)
+  (get-auth (str "/api/folders/folder/" folder-id)
+            (fn [result]
+              (if (:success result)
+                (do
+                  (state/set-current-folder-details (:data result))
+                  (when callback (callback {:success true :data (:data result)})))
+                (let [error-msg (get-in result [:data :error] (:error result "Failed to load folder."))]
+                  (state/set-current-folder-details-error error-msg)
+                  (when callback (callback {:success false :error error-msg :data (:data result)})))))))
+
+(defn update-folder [folder-id update-data success-callback error-callback]
+  (put-auth (str "/api/folders/folder/" folder-id)
+            update-data
+            (fn [result]
+              (if (:success result)
+                (let [response-data (:data result)]
+                  (state/update-folder-in-user-list response-data)
+                  (when (= (or (:folder-id (:details @(state/get-current-folder-details-state)))
+                               (:folder_id (:details @(state/get-current-folder-details-state))))
+                           folder-id)
+                    (state/set-current-folder-details response-data))
+                  (when success-callback (success-callback response-data)))
+                (let [error-msg (get-in result [:data :error] (:error result "Failed to update folder."))]
+                  (when error-callback (error-callback error-msg (:data result))))))))
+
+(defn delete-folder [folder-id success-callback error-callback]
+  (delete-auth (str "/api/folders/folder/" folder-id)
+               (fn [result]
+                 (if (:success result)
+                   (let [response-data (:data result)]
+                     (state/remove-folder-from-user-list folder-id)
+                     (when (= (or (:folder-id (:details @(state/get-current-folder-details-state)))
+                                  (:folder_id (:details @(state/get-current-folder-details-state))))
+                              folder-id)
+                       (state/clear-current-folder-details))
+                     (when success-callback (success-callback response-data)))
+                   (let [error-msg (get-in result [:data :error] (:error result "Failed to delete folder."))]
+                     (when error-callback (error-callback error-msg (:data result))))))))
+
+(defn add-set-to-folder [folder-id set-id order success-callback error-callback]
+  (state/set-folder-managing-sets-state folder-id true nil)
+  (post-auth (str "/api/folders/folder/" folder-id "/sets")
+             {:set-id set-id :order-in-folder order}
+             (fn [result]
+               (state/set-folder-managing-sets-state folder-id false (when-not (:success result) (:error result)))
+               (if (:success result)
+                 (let [response-data (:data result)]
+                   (state/add-set-to-current-folder-details response-data) ; Assuming backend returns the added set or full folder
+                   (when success-callback (success-callback response-data)))
+                 (let [error-msg (get-in result [:data :error] (:error result "Failed to add set to folder."))]
+                   (when error-callback (error-callback error-msg (:data result))))))))
+
+(defn remove-set-from-folder [folder-id set-id success-callback error-callback]
+  (state/set-folder-managing-sets-state folder-id true nil)
+  (delete-auth (str "/api/folders/folder/" folder-id "/sets/" set-id)
+               (fn [result]
+                 (state/set-folder-managing-sets-state folder-id false (when-not (:success result) (:error result)))
+                 (if (:success result)
+                   (let [response-data (:data result)]
+                     (state/remove-set-from-current-folder-details set-id)
+                     (when success-callback (success-callback response-data)))
+                   (let [error-msg (get-in result [:data :error] (:error result "Failed to remove set from folder."))]
+                     (when error-callback (error-callback error-msg (:data result))))))))
+
+(defn reorder-sets-in-folder [folder-id ordered-sets-data success-callback error-callback]
+  (state/set-folder-managing-sets-state folder-id true nil)
+  (put-auth (str "/api/folders/folder/" folder-id "/sets")
+            {:sets ordered-sets-data}
+            (fn [result]
+              (state/set-folder-managing-sets-state folder-id false (when-not (:success result) (:error result)))
+              (if (:success result)
+                (let [response-data (:data result)]
+                  (when success-callback (success-callback response-data)))
+                (let [error-msg (get-in result [:data :error] (:error result "Failed to reorder sets."))]
+                  (when error-callback (error-callback error-msg (:data result))))))))
+

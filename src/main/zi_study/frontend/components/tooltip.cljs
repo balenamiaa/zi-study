@@ -90,7 +90,7 @@
                                                            :top (+ top scroll-y (/ trigger-height 2) (- (/ tooltip-height 2)))}
                                                    :bottom {:left (+ left scroll-x (/ trigger-width 2) (- (/ tooltip-width 2)))
                                                             :top (+ bottom scroll-y 8)}
-                                                   :left {:left (+ left scroll-x (- tooltip-width 8))
+                                                   :left {:left (- (+ left scroll-x) tooltip-width 8)
                                                           :top (+ top scroll-y (/ trigger-height 2) (- (/ tooltip-height 2)))}}
 
                                      ;; Get the position for the current direction

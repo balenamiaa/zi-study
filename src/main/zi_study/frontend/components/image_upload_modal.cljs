@@ -125,7 +125,7 @@
 
       :reagent-render
       (fn [{:keys [is-open]}]
-        [modal {:is-open is-open
+        [modal {:show? is-open
                 :on-close on-close
                 :title "Upload Profile Image"
                 :size :md

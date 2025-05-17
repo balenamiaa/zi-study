@@ -10,7 +10,7 @@
    
    Options:
    - open?: atom containing boolean state (default: new atom with false)
-   - placement: :bottom-left, :bottom-right, :top-left, :top-right (default :bottom-left)
+   - placement: :bottom-left, :bottom-right, :bottom-center, :top-left, :top-right, :top-center (default :bottom-left)
    - width: Tailwind CSS width class (e.g., \"w-48\", \"w-64\"), or :match-trigger to match trigger width (default \"w-48\")
    - min-width: Minimum width for the dropdown (Tailwind class or CSS value) (optional)
    - offset: Pixel offset from the trigger, primarily affecting the top position (default 4)
@@ -42,45 +42,64 @@
 
         update-position (fn []
                           (when (and @trigger-ref @dropdown-ref @open?)
-                            (let [dropdown-el @dropdown-ref
-                                  rect (.getBoundingClientRect @trigger-ref)]
+                            (let [dropdown-el @dropdown-ref]
+                              ;; Ensure basic styles for reliable measurement:
+                              (set! (.. dropdown-el -style -position) "absolute")
+                              (set! (.. dropdown-el -style -width) "auto")
 
-                              (when (= width :match-trigger)
-                                (let [current-trigger-width (.-offsetWidth @trigger-ref)]
-                                  (reset! trigger-width-cache current-trigger-width)
-                                  (set! (.. dropdown-el -style -width) (str current-trigger-width "px"))))
-
-                              (.-offsetHeight dropdown-el)
-
-                              (let [dropdown-width (.-offsetWidth dropdown-el)
-                                    dropdown-height (.-offsetHeight dropdown-el)
+                              (let [trigger-element-rect (.getBoundingClientRect @trigger-ref)
                                     scroll-x (.-scrollX js/window)
                                     scroll-y (.-scrollY js/window)
-                                    left (.-left rect)
-                                    right (.-right rect)
-                                    top (.-top rect)
-                                    bottom (.-bottom rect)
+                                    trigger-width (.-width trigger-element-rect)
+                                    trigger-height (.-height trigger-element-rect)
+                                    window-width (.-innerWidth js/window)
+                                    window-height (.-innerHeight js/window)]
 
-                                    base-position (case placement
-                                                    :bottom-left  {:left (+ left scroll-x)                          :top (+ bottom scroll-y)}
-                                                    :bottom-right {:left (+ (- right dropdown-width) scroll-x)     :top (+ bottom scroll-y)}
-                                                    :top-left     {:left (+ left scroll-x)                          :top (+ (- top dropdown-height) scroll-y)}
-                                                    :top-right    {:left (+ (- right dropdown-width) scroll-x)     :top (+ (- top dropdown-height) scroll-y)}
-                                                    {:left (+ left scroll-x) :top (+ bottom scroll-y)})
+                                (when (= width :match-trigger)
+                                  (let [current-trigger-offset-width (.-offsetWidth @trigger-ref)]
+                                    (reset! trigger-width-cache current-trigger-offset-width)
+                                    (set! (.. dropdown-el -style -width) (str current-trigger-offset-width "px"))))
 
-                                    final-top (cond
-                                                (or (= placement :bottom-left) (= placement :bottom-right)) (+ (:top base-position) offset)
-                                                (or (= placement :top-left) (= placement :top-right))    (- (:top base-position) offset)
-                                                :else (:top base-position))
-                                    final-left (:left base-position)]
 
-                                (set! (.. dropdown-el -style -position) "absolute")
-                                (set! (.. dropdown-el -style -zIndex) "9999")
-                                (set! (.. dropdown-el -style -left) (str final-left "px"))
-                                (set! (.. dropdown-el -style -top) (str final-top "px"))
 
-                                (when min-width
-                                  (set! (.. dropdown-el -style -minWidth) min-width))))))
+                                (let [dropdown-measurement-rect (.getBoundingClientRect dropdown-el)
+                                      dropdown-width (.-width dropdown-measurement-rect)
+                                      dropdown-height (.-height dropdown-measurement-rect)
+                                      left (.-left trigger-element-rect)
+                                      right (.-right trigger-element-rect)
+                                      top (.-top trigger-element-rect)
+                                      bottom (.-bottom trigger-element-rect)
+                                      center-x (+ left (/ trigger-width 2))
+                                      base-coords (case placement
+                                                    :bottom-left {:left (+ left scroll-x)
+                                                                  :top (+ bottom scroll-y offset)}
+                                                    :bottom-center {:left (+ center-x scroll-x (- (/ dropdown-width 2)))
+                                                                    :top (+ bottom scroll-y offset)}
+                                                    :bottom-right {:left (+ right scroll-x (- dropdown-width))
+                                                                   :top (+ bottom scroll-y offset)}
+                                                    :top-left {:left (+ left scroll-x)
+                                                               :top (+ top scroll-y (- offset) (- dropdown-height))}
+                                                    :top-center {:left (+ center-x scroll-x (- (/ dropdown-width 2)))
+                                                                 :top (+ top scroll-y (- offset) (- dropdown-height))}
+                                                    :top-right {:left (+ right scroll-x (- dropdown-width))
+                                                                :top (+ top scroll-y (- offset) (- dropdown-height))}
+                                                    ;; Default case
+                                                    {:left (+ left scroll-x)
+                                                     :top (+ bottom scroll-y offset)})
+                                      final-left (-> (:left base-coords)
+                                                     (max scroll-x)
+                                                     (min (- (+ scroll-x window-width) dropdown-width)))
+                                      final-top (-> (:top base-coords)
+                                                    (max scroll-y)
+                                                    (min (- (+ scroll-y window-height) dropdown-height)))]
+
+                                  (set! (.. dropdown-el -style -position) "absolute")
+                                  (set! (.. dropdown-el -style -zIndex) "9999")
+                                  (set! (.. dropdown-el -style -left) (str final-left "px"))
+                                  (set! (.. dropdown-el -style -top) (str final-top "px"))
+
+                                  (when min-width
+                                    (set! (.. dropdown-el -style -minWidth) min-width)))))))
 
         create-handle-outside-click (fn [current-on-close current-open-atom current-selected-values-prop]
                                       (fn [e]
@@ -242,18 +261,21 @@
    - end-icon: icon component to show at end
    - class: additional CSS classes"
   [{:keys [selected? multi-select? disabled? danger? on-click start-icon end-icon class]} & children]
-  (let [base-classes "dropdown-item"
+  (let [base-classes "flex items-center w-full px-4 py-2.5 text-sm transition-all duration-200 relative group"
 
         selected-classes (when selected?
-                           "dropdown-item-selected")
+                           "bg-[var(--color-primary-50)] text-[var(--color-primary-700)] dark:bg-[#331A2A] dark:text-[var(--color-primary-300)] font-medium")
 
         disabled-classes (when disabled?
-                           "dropdown-item-disabled")
+                           "opacity-50 cursor-not-allowed text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]")
 
         danger-classes (when danger?
                          "text-[var(--color-error)] hover:bg-[var(--color-error-50)] dark:text-[var(--color-error-300)] dark:hover:bg-[rgba(var(--color-error-rgb),0.1)]")
 
-        all-classes (cx base-classes selected-classes disabled-classes danger-classes class)
+        hover-classes (when-not disabled?
+                        "hover:bg-[var(--color-light-bg-hover)] dark:hover:bg-[var(--color-dark-bg-hover)]")
+
+        all-classes (cx base-classes selected-classes disabled-classes danger-classes hover-classes class)
 
         handle-click (fn [e]
                        (when (and on-click (not disabled?))
@@ -264,32 +286,41 @@
            :on-click handle-click
            :role "menuitem"
            :tabIndex (if disabled? -1 0)}
-     (when start-icon
-       [:div {:class (cx "mr-2 flex-shrink-0"
-                         (when danger? "text-[var(--color-error)] dark:text-[var(--color-error-300)]"))}
-        [:> start-icon {:size 16}]])
 
-     [:div {:class "flex-grow truncate"}
+     ;; Start icon with proper alignment
+     (when start-icon
+       [:div {:class (cx "mr-3 flex items-center flex-shrink-0 transition-colors"
+                         (cond
+                           danger? "text-[var(--color-error)] dark:text-[var(--color-error-300)] group-hover:text-[var(--color-error-700)] dark:group-hover:text-[var(--color-error-200)]"
+                           selected? "text-[var(--color-primary-700)] dark:text-[var(--color-primary-300)]"
+                           :else "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] group-hover:text-[var(--color-primary-600)] dark:group-hover:text-[var(--color-primary-400)]"))}
+        [:> start-icon {:size 18}]])
+
+     ;; Main content with proper vertical alignment
+     [:div {:class "flex-grow truncate flex items-center"}
       (into [:span] children)]
 
+     ;; End elements (checkbox, checkmark, or custom icon)
      (cond
        multi-select?
-       [:div {:class "ml-2 flex-shrink-0"}
-        [:div {:class (cx "w-4 h-4 rounded border flex items-center justify-center"
+       [:div {:class "ml-3 flex items-center flex-shrink-0"}
+        [:div {:class (cx "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all"
                           (if selected?
-                            "bg-primary-500 border-primary-500"
-                            "border-gray-300 dark:border-gray-600"))}
+                            "bg-[var(--color-primary-500)] border-[var(--color-primary-500)] dark:bg-[var(--color-primary-400)] dark:border-[var(--color-primary-400)]"
+                            "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] bg-transparent"))}
          (when selected?
-           [:> lucide-icons/Check {:size 12 :className "text-white"}])]]
+           [:> lucide-icons/Check {:size 14 :className "text-white" :strokeWidth 3}])]]
 
        selected?
-       [:div {:class "ml-2 flex-shrink-0 text-primary-500"}
-        [:> lucide-icons/Check {:size 16}]]
+       [:div {:class "ml-3 flex items-center flex-shrink-0 text-[var(--color-primary-500)] dark:text-[var(--color-primary-300)]"}
+        [:> lucide-icons/Check {:size 18 :strokeWidth 2.5}]]
 
        end-icon
-       [:div {:class (cx "ml-2 flex-shrink-0"
-                         (when danger? "text-[var(--color-error)] dark:text-[var(--color-error-300)]"))}
-        [:> end-icon {:size 16}]])]))
+       [:div {:class (cx "ml-3 flex items-center flex-shrink-0 transition-colors"
+                         (cond
+                           danger? "text-[var(--color-error)] dark:text-[var(--color-error-300)] group-hover:text-[var(--color-error-700)] dark:group-hover:text-[var(--color-error-200)]"
+                           :else "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] group-hover:text-[var(--color-primary-600)] dark:group-hover:text-[var(--color-primary-400)]"))}
+        [:> end-icon {:size 18}]])]))
 
 (defn menu-label
   "A label component for grouping menu items in a dropdown.
@@ -297,7 +328,7 @@
    Options:
    - class: additional CSS classes"
   [{:keys [class]} & children]
-  [:div {:class (cx "px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400" class)}
+  [:div {:class (cx "px-4 py-1.5 text-xs font-medium text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]" class)}
    (into [:span] children)])
 
 (defn menu-divider
@@ -306,4 +337,4 @@
    Options:
    - class: additional CSS classes"
   [{:keys [class]}]
-  [:div {:class (cx "h-px my-1 bg-gray-200 dark:bg-gray-700" class)}])
+  [:div {:class (cx "h-px my-1.5 bg-[var(--color-light-divider)] dark:bg-[var(--color-dark-divider)]" class)}])

@@ -88,8 +88,7 @@
      {:name ::public-folders
       :view public-folders-page
       :layout active-learning-layout
-      :active-learning-page :public-folders
-      }]]
+      :active-learning-page :public-folders}]]
 
    ["/question-sets/:set-id"
     {:name ::set-page

@@ -103,7 +103,7 @@
 
               text (:text question-data)
               options (:options question-data)
-              actual-correct-idx (:correct_index question-data)
+              actual-correct-idx (:correct-index question-data)
               explanation (:explanation question-data)
 
               handle-option-click (fn [clicked-idx]

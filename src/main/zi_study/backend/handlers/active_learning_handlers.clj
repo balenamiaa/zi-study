@@ -24,9 +24,12 @@
 
 (defn- server-error [message e]
   (println "Server Error:" message)
-  (println (ex-message e))
-  (println (ex-data e))
-  (.printStackTrace e)
+  (if e
+    (do
+      (println (ex-message e))
+      (println (ex-data e))
+      (.printStackTrace e))
+    (println "No exception object provided to server-error function."))
   (-> (resp/response {:error (or message "Internal Server Error")})
       (resp/status 500)))
 
@@ -63,24 +66,34 @@
         (assoc data field-key {:error "Failed to parse EDN data"})))
     data))
 
-(defn list-tags-handler [_request]
+(defn list-tags-handler
+  "Returns a list of all available tags"
+  [_request]
   (try
     (let [tags (map :tag-name (query ["SELECT DISTINCT tag_name FROM tags ORDER BY tag_name"]))]
       (resp/response {:tags tags}))
     (catch Exception e
       (server-error "Failed to retrieve tags" e))))
 
-(defn list-sets-handler [request]
+(defn list-sets-handler
+  "Returns a paginated list of question sets with filtering options"
+  [request]
   (if-let [user-id (get-user-id request)]
     (try
       (let [params (:query-params request)
             page (max 1 (or (parse-query-param params "page" :int) 1))
             limit (max 1 (or (parse-query-param params "limit" :int) 10))
             offset (* (dec page) limit)
-            sort-by (keyword (get params "sort_by" "created_at"))
+            raw-sort-by (get params "sort_by" "updated_at")
+            sort-by (cond
+                      (= "updated_at" raw-sort-by) :qs.updated_at
+                      (= "created_at" raw-sort-by) :qs.created_at
+                      :else (keyword raw-sort-by))
             sort-order (keyword (get params "sort_order" "desc"))
             filter-tags (parse-query-param params "tags" :csv)
             search-term (get params "search")
+            user-owned? (parse-query-param params "user_owned" :bool)
+
             search-where (when (not (str/blank? search-term))
                            [:or
                             [:like :qs.title (str "%" search-term "%")]
@@ -124,13 +137,13 @@
                                                 (hh/group-by :qs.set_id)
                                                 (cond-> tag-having (hh/having tag-having)))
                                             :sub]))
-                              (if (not (str/blank? search-term))
+                              (if (or (not (str/blank? search-term)) user-owned?)
                                 (-> (hh/select [[:count :*] :total])
                                     (hh/from [(-> (hh/select :qs.set_id)
                                                   (hh/from [:question_sets :qs])
                                                   (hh/left-join [:question_set_tags :qst] [:= :qs.set_id :qst.set_id])
                                                   (hh/left-join [:tags :t] [:= :qst.tag_id :t.tag_id])
-                                                  (hh/where search-where)
+                                                  (cond-> search-where (hh/where search-where))
                                                   (hh/group-by :qs.set_id))
                                               :sub]))
                                 (-> (hh/select [[:count [:distinct :qs.set_id]] :total])
@@ -168,8 +181,9 @@
         (server-error "Failed to retrieve question sets" e)))
     (unauthorized "Authentication required to list sets.")))
 
-
-(defn get-set-details-handler [request]
+(defn get-set-details-handler
+  "Returns detailed information about a specific question set"
+  [request]
   (if-let [_user-id (get-user-id request)]
     (try
       (let [set-id (parse-query-param (:path-params request) :set-id :int)]
@@ -250,9 +264,9 @@
           user-answer (:answer user-answer-data)]
       (case (keyword question-type)
         :written nil
-        :true-false (let [expected-correct (:is_correct_true q-data)] (= expected-correct user-answer))
-        :mcq-single (= (:correct_index q-data) user-answer)
-        :mcq-multi (= (set (:correct_indices q-data)) (set user-answer))
+        :true-false (let [expected-correct (:is-correct-true q-data)] (= expected-correct user-answer))
+        :mcq-single (= (:correct-index q-data) user-answer)
+        :mcq-multi (= (set (:correct-indices q-data)) (set user-answer))
         :cloze (let [correct-answers (:answers q-data)]
                  (and (= (count correct-answers) (count user-answer))
                       (every? true? (map = (map str/trim correct-answers) (map str/trim user-answer)))))
@@ -318,26 +332,25 @@
                                                     answer-data-str))]
 
                   (resp/response {:correct (when (some? is-correct-int) (= 1 is-correct-int))
-                                  :correct_answer (:question-data (parse-edn-field question :question-data))}))))
+                                  :correct-answer (:question-data (parse-edn-field question :question-data))}))))
             (catch Exception e
               (server-error (str "Failed to submit answer for question ID: " question-id) e))))))
     (unauthorized "Authentication required to submit answers.")))
-
 
 (defn self-evaluate-handler [request]
   (if-let [user-id (get-user-id request)]
     (let [question-id (parse-query-param (:path-params request) :question-id :int)
           body-params (:body-params request)
-          is-correct (when (contains? body-params :is_correct) (:is_correct body-params))]
+          is-correct (when (contains? body-params :is-correct) (:is-correct body-params))]
       (cond
         (not question-id)
         (bad-request "Invalid or missing Question ID." nil)
 
-        (not (contains? body-params :is_correct))
-        (bad-request "Missing 'is_correct' in request body." {:body body-params})
+        (not (contains? body-params :is-correct))
+        (bad-request "Missing 'is-correct' in request body." {:body body-params})
 
         (not (boolean? is-correct))
-        (bad-request "Field 'is_correct' must be a boolean." {:body body-params})
+        (bad-request "Field 'is-correct' must be a boolean." {:body body-params})
 
         :else
         (jdbc/with-transaction [tx @db-pool {:builder-fn rs/as-unqualified-kebab-maps}]
@@ -440,7 +453,7 @@
                                             {:user_id user-id
                                              :question_id question-id}))]
             (resp/response {:success true
-                            :deleted_count rows-affected}))
+                            :deleted-count rows-affected}))
           (catch Exception e
             (server-error (str "Failed to delete answer for question ID: " question-id) e)))
         (bad-request "Invalid or missing Question ID in path." nil)))
@@ -463,7 +476,7 @@
                                     (:next.jdbc/update-count result)
                                     (count result))]
                 (resp/response {:success true
-                                :deleted_count rows-affected}))
+                                :deleted-count rows-affected}))
               (not-found "Question set not found.")))
           (catch Exception e
             (server-error (str "Failed to delete answers for set ID: " set-id) e)))
@@ -532,30 +545,40 @@
         (server-error (str "Failed to perform advanced search for keywords: " (get-in request [:query-params "keywords"])) e)))
     (unauthorized "Authentication required for advanced search.")))
 
-(defn create-folder-handler [request]
+(defn create-folder-handler
+  "Creates a new folder for the authenticated user"
+  [request]
   (if-let [user-id (get-user-id request)]
-    (let [body (:body-params request)
-          name (:name body)
-          description (:description body)
-          is-public (boolean (:is_public body false))] ; Default to false if not provided
+    (let [{:keys [name description is-public] :or {is-public false}} (:body-params request)
+          is-public-bool (boolean is-public)]
       (if (str/blank? name)
         (bad-request "Folder name cannot be empty." nil)
         (try
-          (let [new-folder-id (:folder_id (execute-one!
+          (let [new-folder-id (:folder-id (execute-one!
                                            (-> (hh/insert-into :folders)
                                                (hh/values [{:user_id user-id
                                                             :name name
                                                             :description description
-                                                            :is_public is-public}])
+                                                            :is_public is-public-bool
+                                                            :created_at [:raw "CURRENT_TIMESTAMP"]
+                                                            :updated_at [:raw "CURRENT_TIMESTAMP"]}])
                                                (hh/returning :folder_id))))]
             (if new-folder-id
-              (resp/response {:folder_id new-folder-id :name name :description description :is_public is-public})
+              (let [complete-folder (execute-one!
+                                     (-> (hh/select :f.folder_id :f.name :f.description :f.is_public
+                                                    :f.created_at :f.updated_at
+                                                    [[:raw "0"] :set_count])
+                                         (hh/from [:folders :f])
+                                         (hh/where [:= :f.folder_id new-folder-id])))]
+                (resp/response complete-folder))
               (server-error "Failed to create folder, no ID returned." nil)))
           (catch Exception e
             (server-error (str "Failed to create folder: " (.getMessage e)) e)))))
     (unauthorized "Authentication required to create a folder.")))
 
-(defn list-user-folders-handler [request]
+(defn list-user-folders-handler
+  "Lists all folders owned by the authenticated user"
+  [request]
   (if-let [user-id (get-user-id request)]
     (try
       (let [folders (execute!
@@ -577,7 +600,12 @@
           page (max 1 (or (parse-query-param params "page" :int) 1))
           limit (max 1 (or (parse-query-param params "limit" :int) 10))
           offset (* (dec page) limit)
-          sort-by (keyword (get params "sort_by" "updated_at"))
+          raw-sort-by (get params "sort_by" "f.updated_at") ; Default to f.updated_at and expect qualified
+          sort-by (cond
+                    (= "updated_at" raw-sort-by) :f.updated_at ; ensure qualified if ambiguous default was passed
+                    (= "created_at" raw-sort-by) :f.created_at
+                    ; Add other allowed sort fields here, qualified if necessary
+                    :else (keyword raw-sort-by))
           sort-order (keyword (get params "sort_order" "desc"))
           search-term (get params "search")
 
@@ -585,17 +613,17 @@
                          [:or
                           [:like :f.name (str "%" search-term "%")]
                           [:like :f.description (str "%" search-term "%")]
-                          [:like :u.username (str "%" search-term "%")]])
+                          [:like :u.email (str "%" search-term "%")]])
 
           base-query (-> (hh/select :f.folder_id :f.name :f.description :f.created_at :f.updated_at
-                                    :u.username :u.profile_picture_url
+                                    :u.email :u.profile_picture_url
                                     [[:count :fqs.set_id] :set_count])
                          (hh/from [:folders :f])
-                         (hh/join [:users :u] [:= :f.user_id :u.user_id])
+                         (hh/join [:users :u] [:= :f.user_id :u.id])
                          (hh/left-join [:folder_question_sets :fqs] [:= :f.folder_id :fqs.folder_id])
                          (hh/where [:= :f.is_public true])
                          (cond-> search-where (hh/where search-where))
-                         (hh/group-by :f.folder_id :f.name :f.description :f.created_at :f.updated_at :u.username :u.profile_picture_url))
+                         (hh/group-by :f.folder_id :f.name :f.description :f.created_at :f.updated_at :u.email :u.profile_picture_url))
 
           folders-query (-> base-query
                             (hh/order-by [sort-by sort-order])
@@ -625,12 +653,12 @@
         (try
           (let [folder-details (execute-one!
                                 (-> (hh/select :f.folder_id :f.name :f.description :f.is_public :f.user_id :f.created_at :f.updated_at
-                                               :u.username :u.profile_picture_url)
+                                               :u.email :u.profile_picture_url) ; Select email instead of username
                                     (hh/from [:folders :f])
-                                    (hh/join [:users :u] [:= :f.user_id :u.user_id])
+                                    (hh/join [:users :u] [:= :f.user_id :u.id]) ; Join on u.id
                                     (hh/where [:= :f.folder_id folder-id])))]
             (if folder-details
-              (if (or (:is_public folder-details) (= (:user_id folder-details) user-id))
+              (if (or (:is-public folder-details) (= (:user-id folder-details) user-id))
                 (let [question-sets (execute!
                                      (-> (hh/select :qs.* :fqs.order_in_folder :fqs.added_at
                                                     [[:coalesce [:count [:distinct [:case [:<> :ua.answer_id nil] :q.question_id]]] 0] :answered_count]
@@ -642,11 +670,11 @@
                                          (hh/left-join [:user_answers :ua] [:and [:= :q.question_id :ua.question_id] [:= :ua.user_id user-id]])
                                          (hh/where [:= :fqs.folder_id folder-id])
                                          (hh/group-by :qs.set_id :fqs.order_in_folder :fqs.added_at)
-                                         (hh/order-by :fqs.order_in_folder :asc :qs.title :asc)))]
-                  (resp/response (assoc folder-details :question_sets (mapv (fn [s]
-                                                                              (let [total (:total_questions s 0)
-                                                                                    answered (:answered_count s 0)
-                                                                                    correct (:correct_count s 0)]
+                                         (hh/order-by [:fqs.order_in_folder :asc] [:qs.title :asc])))]
+                  (resp/response (assoc folder-details :question-sets (mapv (fn [s]
+                                                                              (let [total (:total-questions s 0)
+                                                                                    answered (:answered-count s 0)
+                                                                                    correct (:correct-count s 0)]
                                                                                 (assoc s :progress {:total total
                                                                                                     :answered answered
                                                                                                     :correct correct
@@ -660,9 +688,9 @@
         (try
           (let [folder-details (execute-one!
                                 (-> (hh/select :f.folder_id :f.name :f.description :f.is_public :f.user_id :f.created_at :f.updated_at
-                                               :u.username :u.profile_picture_url)
+                                               :u.email :u.profile_picture_url) ; Select email instead of username
                                     (hh/from [:folders :f])
-                                    (hh/join [:users :u] [:= :f.user_id :u.user_id])
+                                    (hh/join [:users :u] [:= :f.user_id :u.id]) ; Join on u.id
                                     (hh/where [:and [:= :f.folder_id folder-id] [:= :f.is_public true]])))]
             (if folder-details
               (let [question-sets (execute!
@@ -673,9 +701,9 @@
                                        (hh/left-join [:questions :q] [:= :qs.set_id :q.set_id])
                                        (hh/where [:= :fqs.folder_id folder-id])
                                        (hh/group-by :qs.set_id :fqs.order_in_folder :fqs.added_at)
-                                       (hh/order-by :fqs.order_in_folder :asc :qs.title :asc)))]
-                (resp/response (assoc folder-details :question_sets (mapv (fn [s]
-                                                                            (assoc s :progress {:total (:total_questions s 0)
+                                       (hh/order-by [:fqs.order_in_folder :asc] [:qs.title :asc])))]
+                (resp/response (assoc folder-details :question-sets (mapv (fn [s]
+                                                                            (assoc s :progress {:total (:total-questions s 0)
                                                                                                 :answered 0
                                                                                                 :correct 0
                                                                                                 :answered_percent 0.0
@@ -687,21 +715,21 @@
 (defn update-folder-handler [request]
   (if-let [user-id (get-user-id request)]
     (let [folder-id (parse-query-param (:path-params request) :folder-id :int)
-          {:keys [name description is_public] :as body-params} (:body-params request)]
+          {:keys [name description is-public] :as body-params} (:body-params request)]
       (cond
         (not folder-id) (bad-request "Invalid Folder ID." nil)
-        (empty? (select-keys body-params [:name :description :is_public])) (bad-request "No update data provided." nil)
+        (empty? (select-keys body-params [:name :description :is-public])) (bad-request "No update data provided." nil)
         (and (contains? body-params :name) (str/blank? name)) (bad-request "Folder name cannot be empty." nil)
-        (and (contains? body-params :is_public) (not (boolean? is_public))) (bad-request "is_public must be a boolean." nil)
+        (and (contains? body-params :is-public) (not (boolean? is-public))) (bad-request "is-public must be a boolean." nil)
         :else
         (try
           (let [folder (execute-one! (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id])))]
             (if folder
-              (if (= (:user_id folder) user-id)
+              (if (= (:user-id folder) user-id)
                 (let [update-payload (cond-> {}
                                        (contains? body-params :name) (assoc :name name)
                                        (contains? body-params :description) (assoc :description description)
-                                       (contains? body-params :is_public) (assoc :is_public is_public))
+                                       (contains? body-params :is-public) (assoc :is-public is-public))
                       _ (execute-one! (-> (hh/update :folders)
                                           (hh/set update-payload)
                                           (hh/where [:= :folder_id folder-id])))
@@ -722,11 +750,11 @@
           (try
             (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
               (if folder
-                (if (= (:user_id folder) user-id)
+                (if (= (:user-id folder) user-id)
                   (do
                     (jdbc/execute! tx (h/format (-> (hh/delete-from :folder_question_sets) (hh/where [:= :folder_id folder-id]))) jdbc-opts) ; Delete associations first
                     (let [deleted-count (:next.jdbc/update-count (jdbc/execute! tx (h/format (-> (hh/delete-from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts))]
-                      (resp/response {:success true :deleted_count deleted-count})))
+                      (resp/response {:success true :deleted-count deleted-count})))
                   (unauthorized "You do not have permission to delete this folder."))
                 (not-found "Folder not found.")))
             (catch Exception e
@@ -737,34 +765,34 @@
 (defn add-set-to-folder-handler [request]
   (if-let [user-id (get-user-id request)]
     (let [folder-id (parse-query-param (:path-params request) :folder-id :int)
-          {:keys [set_id order_in_folder]} (:body-params request)]
+          {:keys [set-id order-in-folder] :as body} (:body-params request)]
       (cond
         (not folder-id) (bad-request "Invalid Folder ID." nil)
-        (not set_id) (bad-request "Missing set_id in request body." nil)
+        (not set-id) (bad-request "Missing set-id in request body." nil)
         :else
         (jdbc/with-transaction [tx @db-pool jdbc-opts]
           (try
             (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
               (if folder
-                (if (= (:user_id folder) user-id)
-                  (let [question-set (jdbc/execute-one! tx (h/format (-> (hh/select :set_id) (hh/from :question_sets) (hh/where [:= :set_id set_id]))) jdbc-opts)]
+                (if (= (:user-id folder) user-id)
+                  (let [question-set (jdbc/execute-one! tx (h/format (-> (hh/select :set_id) (hh/from :question_sets) (hh/where [:= :set_id set-id]))) jdbc-opts)]
                     (if question-set
-                      (let [final-order (if (integer? order_in_folder)
-                                          order_in_folder
+                      (let [final-order (if (integer? order-in-folder)
+                                          order-in-folder
                                           (or (:max_order (jdbc/execute-one! tx (h/format (-> (hh/select [[:max :order_in_folder] :max_order])
                                                                                               (hh/from :folder_question_sets)
                                                                                               (hh/where [:= :folder_id folder-id]))) jdbc-opts)) -1))]
                         (jdbc/execute! tx (h/format (-> (hh/insert-into :folder_question_sets)
-                                                        (hh/values [{:folder_id folder-id :set_id set_id :order_in_folder final-order}]))) jdbc-opts)
-                        (resp/response {:success true :folder_id folder-id :set_id set_id :order_in_folder final-order}))
+                                                        (hh/values [{:folder_id folder-id :set_id set-id :order_in_folder final-order}]))) jdbc-opts)
+                        (resp/response {:success true :folder-id folder-id :set-id set-id :order-in-folder final-order}))
                       (not-found "Question set not found.")))
                   (unauthorized "You do not have permission to modify this folder."))
                 (not-found "Folder not found.")))
             (catch Exception e ; Could be unique constraint violation if set already in folder
               (.rollback tx)
               (if (str/includes? (or (.getMessage e) "") "UNIQUE constraint failed: folder_question_sets.folder_id, folder_question_sets.set_id")
-                (bad-request "Question set already exists in this folder." {:folder_id folder-id :set_id set_id})
-                (server-error (str "Failed to add set to folder. F_ID: " folder-id " S_ID: " set_id) e)))))))
+                (bad-request "Question set already exists in this folder." {:folder-id folder-id :set-id set-id})
+                (server-error (str "Failed to add set to folder. F_ID: " folder-id " S_ID: " set-id) e)))))))
     (unauthorized "Authentication required to add set to folder.")))
 
 (defn remove-set-from-folder-handler [request]
@@ -779,10 +807,10 @@
           (try
             (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
               (if folder
-                (if (= (:user_id folder) user-id)
+                (if (= (:user-id folder) user-id)
                   (let [deleted-count (:next.jdbc/update-count (jdbc/execute! tx (h/format (-> (hh/delete-from :folder_question_sets)
                                                                                                (hh/where [:and [:= :folder_id folder-id] [:= :set_id set-id]]))) jdbc-opts))]
-                    (resp/response {:success true :deleted_count deleted-count}))
+                    (resp/response {:success true :deleted-count deleted-count}))
                   (unauthorized "You do not have permission to modify this folder."))
                 (not-found "Folder not found.")))
             (catch Exception e
@@ -797,19 +825,19 @@
       (cond
         (not folder-id) (bad-request "Invalid Folder ID." nil)
         (not (seq ordered-sets)) (bad-request "Missing or empty 'sets' array in request body." nil)
-        (not (every? (fn [s] (and (integer? (:set_id s)) (integer? (:order_in_folder s)))) ordered-sets))
-        (bad-request "Each item in 'sets' array must have integer 'set_id' and 'order_in_folder'." nil)
+        (not (every? (fn [s] (and (integer? (:set-id s)) (integer? (:order-in-folder s)))) ordered-sets))
+        (bad-request "Each item in 'sets' array must have integer 'set-id' and 'order-in-folder'." nil)
         :else
         (jdbc/with-transaction [tx @db-pool jdbc-opts]
           (try
             (let [folder (jdbc/execute-one! tx (h/format (-> (hh/select :user_id) (hh/from :folders) (hh/where [:= :folder_id folder-id]))) jdbc-opts)]
               (if folder
-                (if (= (:user_id folder) user-id)
+                (if (= (:user-id folder) user-id)
                   (do
                     (doseq [s ordered-sets]
                       (jdbc/execute! tx (h/format (-> (hh/update :folder_question_sets)
-                                                      (hh/set {:order_in_folder (:order_in_folder s)})
-                                                      (hh/where [:and [:= :folder_id folder-id] [:= :set_id (:set_id s)]]))) jdbc-opts))
+                                                      (hh/set {:order_in_folder (:order-in-folder s)})
+                                                      (hh/where [:and [:= :folder_id folder-id] [:= :set_id (:set-id s)]]))) jdbc-opts))
                     (resp/response {:success true}))
                   (unauthorized "You do not have permission to reorder sets in this folder."))
                 (not-found "Folder not found.")))
@@ -818,10 +846,55 @@
               (server-error (str "Failed to reorder sets in folder ID: " folder-id) e))))))
     (unauthorized "Authentication required to reorder sets.")))
 
-
-
 (comment
-  ; Update FTS for existing questions
+  (sql/query @db-pool ["SELECT * FROM folders"])
+
+  ;; --- Migration script to convert existing question_data keys to kebab-case ---
+  (require '[clojure.walk :as walk])
+  (require '[clojure.string :as str])
+
+  (defn- transform-keys-to-kebab [data]
+    (letfn [(kebab-key [k]
+              (if (keyword? k)
+                (keyword (str/replace (name k) "_" "-"))
+                k))]
+      (walk/postwalk
+       (fn [x]
+         (if (map? x)
+           (into {} (map (fn [[k v]] [(kebab-key k) v]) x))
+           x))
+       data)))
+
+  (defn- migrate-question-data-to-kebab-case [db-connection]
+    (println "Starting migration of question_data to kebab-case keys...")
+    (let [questions (jdbc/execute! db-connection
+                                   ["SELECT question_id, question_data FROM questions"]
+                                   {:builder-fn rs/as-unqualified-kebab-maps})]
+      (println (str "Found " (count questions) " questions to process."))
+      (doseq [question questions]
+        (let [question-id (:question-id question)
+              old-data-str (:question-data question)]
+          (when-not (str/blank? old-data-str)
+            (try
+              (let [parsed-data (edn/read-string old-data-str)
+                    kebab-cased-data (transform-keys-to-kebab parsed-data)
+                    new-data-str (pr-str kebab-cased-data)]
+                (if (= old-data-str new-data-str)
+                  (println (str "Question ID: " question-id " - data already kebab-case or no underscore keys found."))
+                  (do
+                    (println (str "Migrating Question ID: " question-id))
+                    (jdbc/execute-one! db-connection
+                                       ["UPDATE questions SET question_data = ? WHERE question_id = ?"
+                                        new-data-str question-id]))))
+              (catch Exception e
+                (println (str "ERROR processing Question ID: " question-id ". Error: " (ex-message e)))
+                (println (str "Problematic data string: " old-data-str)))))))
+      (println "Migration completed.")))
+
+  (jdbc/with-transaction [tx @db-pool]
+    (migrate-question-data-to-kebab-case tx))
+
+  ; Update FTS for existing questions (this might be useful after migration or separately)
   (jdbc/with-transaction [tx @db-pool {:builder-fn rs/as-unqualified-kebab-maps}]
     (let [questions (jdbc/execute! tx ["SELECT question_id, set_id, question_type, question_data, retention_aid FROM questions"] jdbc-opts)]
       (doseq [q questions]

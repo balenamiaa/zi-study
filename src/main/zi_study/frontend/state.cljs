@@ -103,8 +103,126 @@
                  [:total_pages :int]
                  [:total_items :int]]]])
 
-(def questions-registry-schema
-  [:map-of :string :map]) ;; Map of question-id -> question data
+;; Detailed Question Schemas (for question-data content and user answers)
+;; These reflect the kebab-case structures now produced by the backend importer
+;; and expected in frontend state.
+
+(def McqQuestionContentSchema ; Covers mcq-single and mcq-multi
+  [:map
+   [:text :string]
+   [:options [:vector :string]]
+   [:correct-index {:optional true} :int] ; For mcq-single
+   [:correct-indices {:optional true} [:vector :int]] ; For mcq-multi
+   [:explanation {:optional true} [:maybe :string]]])
+
+(def WrittenQuestionContentSchema
+  [:map
+   [:text :string]
+   [:correct-answer {:optional true} [:maybe :string]] ; Correct answer might not always be part of question data initially
+   [:explanation {:optional true} [:maybe :string]]])
+
+(def TrueFalseQuestionContentSchema
+  [:map
+   [:text :string]
+   [:is-correct-true :boolean]
+   [:explanation {:optional true} [:maybe :string]]])
+
+(def ClozeQuestionContentSchema
+  [:map
+   [:cloze-text :string]
+   [:answers [:vector :string]]
+   [:explanation {:optional true} [:maybe :string]]])
+
+(def EmqPremiseSchema [:map [:temp-id {:optional true} :string] [:text :string]])
+(def EmqOptionSchema [:map [:temp-id {:optional true} :string] [:text :string]])
+(def EmqMatchSchema [:tuple :string :string]) ; temp-id to temp-id before processing, index to index after
+
+(def EmqQuestionContentSchema
+  [:map
+   [:instructions {:optional true} [:maybe :string]]
+   [:premises [:vector :string]] ; Stored as text only
+   [:options [:vector :string]]  ; Stored as text only
+   [:matches [:vector [:tuple :int :int]]] ; Stored as index to index
+   [:explanation {:optional true} [:maybe :string]]])
+
+(def QuestionDataSchema
+  [:multi {:dispatch (fn [val _] (-> val :question-type keyword))} ; Dispatch on parent's :question-type
+   [:mcq-single McqQuestionContentSchema]
+   [:mcq-multi McqQuestionContentSchema]
+   [:written WrittenQuestionContentSchema]
+   [:true-false TrueFalseQuestionContentSchema]
+   [:cloze ClozeQuestionContentSchema]
+   [:emq EmqQuestionContentSchema]])
+
+(def UserAnswerDataSchema ; Structure of :answer-data in :user-answer
+  [:map ; This is generic, specific types might have more structure
+   ;; For single/TF: {:answer boolean/int}
+   ;; For multi: {:answer [int]}
+   ;; For cloze: {:answer [string]}
+   ;; For EMQ: {:answer [[int int]]} or {:answer {int int}}
+   ;; For written: {:answer string}
+   [:answer :any]])
+
+(def UserAnswerSchema
+  [:map
+   [:answer-data UserAnswerDataSchema] ; Contains the user's actual input
+   [:is-correct [:maybe :boolean]] ; Backend sends 0/1, http.cljs converts this to boolean
+   [:submitted-at inst?]]) ; Or string if not parsed to inst? yet
+
+(def QuestionSchema
+  [:map
+   [:question-id :int]
+   [:set-id :int]
+   [:question-set-title {:optional true} :string] ; Added in search results
+   [:question-type :string] ; e.g., "mcq-single", "written"
+   [:difficulty {:optional true} [:maybe :int]]
+   [:question-data QuestionDataSchema] ; Parsed EDN content, now with kebab-case keys
+   [:retention-aid {:optional true} [:maybe :string]]
+   [:order-in-set {:optional true} [:maybe :int]]
+   [:bookmarked :boolean]
+   [:user-answer {:optional true} UserAnswerSchema]])
+
+(def questions-registry-schema [:map-of :string QuestionSchema]) ;; Map of question-id (as string) -> question data
+
+;; Folder Schemas
+(def folder-item-schema
+  [:map {:closed true}
+   [:folder-id :int]
+   [:user-id {:optional true} :int]
+   [:name :string]
+   [:description {:optional true} [:maybe :string]]
+   [:is-public :boolean]
+   [:created-at :string]
+   [:updated-at :string]
+   [:set-count {:optional true} :int]
+   [:username {:optional true} :string]
+   [:profile-picture-url {:optional true} [:maybe :string]]
+   [:question-sets {:optional true} [:vector :map]]])
+
+(def user-folders-list-schema
+  [:map
+   [:list [:vector folder-item-schema]]
+   [:loading? :boolean]
+   [:error {:optional true} [:maybe :string]]])
+
+(def public-folders-list-schema
+  [:map
+   [:list [:vector folder-item-schema]]
+   [:loading? :boolean]
+   [:error {:optional true} [:maybe :string]]
+   [:pagination [:map
+                 [:page :int]
+                 [:limit :int]
+                 [:total_pages :int]
+                 [:total_items :int]]]])
+
+(def current-folder-details-schema
+  [:map
+   [:details {:optional true} [:maybe folder-item-schema]]
+   [:loading? :boolean]
+   [:error {:optional true} [:maybe :string]]
+   [:managing-sets? :boolean] ; For operations like add/remove/reorder sets
+   [:manage-sets-error {:optional true} [:maybe :string]]])
 
 (def app-state-schema
   [:map
@@ -116,7 +234,12 @@
     [:map ; Schema for the advanced search state itself
      [:results advanced-search-results-schema]
      [:filters advanced-search-filters-schema]]]
-   [:questions-registry questions-registry-schema]])
+   [:questions-registry questions-registry-schema]
+   ;; Folders State
+   [:folders [:map
+              [:user-list user-folders-list-schema]
+              [:public-list public-folders-list-schema]
+              [:current-details current-folder-details-schema]]]])
 
 ;; Core application state
 (defonce app-state
@@ -172,7 +295,23 @@
                              :filters {:keywords ""
                                        ; Initialize future filters if added
                                        }}
-           :questions-registry {}}))
+           :questions-registry {}
+           ;; Initial Folders State
+           :folders {:user-list {:list []
+                                 :loading? false
+                                 :error nil}
+                     :public-list {:list []
+                                   :loading? false
+                                   :error nil
+                                   :pagination {:page 1
+                                                :limit 10
+                                                :total_items 0
+                                                :total_pages 0}}
+                     :current-details {:details nil
+                                       :loading? false
+                                       :error nil
+                                       :managing-sets? false
+                                       :manage-sets-error nil}}}))
 
 ;; Track the last applied filters to avoid redundant API calls
 (defonce last-applied-filters (r/atom nil))
@@ -201,7 +340,7 @@
   (r/reaction
    (let [question-ids (get-in @app-state [:question-bank :current-set :questions])
          registry (:questions-registry @app-state)]
-     (mapv #(get registry %) question-ids))))
+     (mapv #(get registry (str %)) question-ids))))
 
 (defn get-current-set-filters []
   (r/reaction (get-in @app-state [:question-bank :current-set :filters])))
@@ -226,7 +365,7 @@
    (let [results (get-in @app-state [:advanced-search :results])
          question-ids (:list results)
          registry (:questions-registry @app-state)
-         questions (mapv #(get registry %) question-ids)]
+         questions (mapv #(get registry (str %)) question-ids)]
      (assoc results :list questions))))
 
 (defn get-advanced-search-results-pagination-state []
@@ -244,16 +383,16 @@
   last-applied-advanced-search-filters)
 
 (defn get-question-from-registry [question-id]
-  (r/reaction (get-in @app-state [:questions-registry question-id])))
+  (r/reaction (get-in @app-state [:questions-registry (str question-id)])))
 
 (defn get-questions-from-registry [question-ids]
-  (r/reaction (vals (select-keys (:questions-registry @app-state) question-ids))))
+  (r/reaction (vals (select-keys (:questions-registry @app-state) (map str question-ids)))))
 
 ;; Registry updaters
 (defn register-question
   "Add or update a question in the registry"
   [question]
-  (let [question-id (:question-id question)]
+  (let [question-id (str (:question-id question))]
     (swap! app-state assoc-in [:questions-registry question-id] question)))
 
 (defn register-questions
@@ -263,14 +402,14 @@
     (swap! app-state update :questions-registry
            (fn [registry]
              (reduce (fn [reg q]
-                       (assoc reg (:question-id q) q))
+                       (assoc reg (str (:question-id q)) q))
                      registry
                      questions)))))
 
 (defn update-question-in-registry
   "Update specific fields in a question in the registry"
   [question-id updated-question-data]
-  (swap! app-state update-in [:questions-registry question-id]
+  (swap! app-state update-in [:questions-registry (str question-id)]
          (fn [question]
            (if question
              (merge question updated-question-data)
@@ -279,7 +418,7 @@
 (defn remove-question-from-registry
   "Remove a question from the registry"
   [question-id]
-  (swap! app-state update :questions-registry dissoc question-id))
+  (swap! app-state update :questions-registry dissoc (str question-id)))
 
 (defn clear-registry
   "Clear all questions from the registry"
@@ -392,12 +531,12 @@
                      :search ""}]
     ;; Reset last-applied-filters when loading a new set
     (reset! last-applied-filters new-filters)
-    
+
     ;; Register the questions in the registry
     (register-questions questions)
-    
+
     ;; Store only question IDs in the current-set
-    (let [question-ids (mapv :question-id questions)]
+    (let [question-ids (mapv (comp str :question-id) questions)]
       (swap! app-state update :question-bank
              #(assoc % :current-set {:details set-details
                                      :questions question-ids
@@ -411,9 +550,9 @@
 (defn set-current-set-questions [questions]
   ;; Register the questions in the registry
   (register-questions questions)
-  
+
   ;; Store only question IDs in the current-set
-  (let [question-ids (mapv :question-id questions)]
+  (let [question-ids (mapv (comp str :question-id) questions)]
     (swap! app-state update-in [:question-bank :current-set]
            #(assoc % :questions question-ids
                    :questions-loading? false
@@ -483,7 +622,7 @@
   [{:keys [message color variant auto-hide position]
     :or {color :info
          variant :soft
-         auto-hide 5000
+         auto-hide 2000
          position :top-right}
     :as opts}]
   (let [id (swap! app-state update-in [:ui :flash :counter] inc)]
@@ -606,7 +745,7 @@
 (defn set-advanced-search-question-ids
   "Set question IDs for advanced search results and register the questions"
   [questions pagination]
-  (let [question-ids (mapv :question-id questions)]
+  (let [question-ids (mapv (comp str :question-id) questions)]
     (register-questions questions)
     (swap! app-state update :advanced-search
            #(assoc % :results
@@ -614,3 +753,106 @@
                     :pagination pagination
                     :loading? false
                     :error nil}))))
+
+;; Folder Selectors
+(defn get-user-folders-list-state []
+  (r/reaction (get-in @app-state [:folders :user-list])))
+
+(defn get-public-folders-list-state []
+  (r/reaction (get-in @app-state [:folders :public-list])))
+
+(defn get-current-folder-details-state []
+  (r/reaction (get-in @app-state [:folders :current-details])))
+
+;; Folder Updaters
+;; User Folders
+(defn set-user-folders-loading [loading?]
+  (swap! app-state assoc-in [:folders :user-list :loading?] loading?))
+
+(defn set-user-folders-error [error]
+  (swap! app-state assoc-in [:folders :user-list :error] error)
+  (set-user-folders-loading false))
+
+(defn set-user-folders-list [folders]
+  (swap! app-state update-in [:folders :user-list]
+         assoc :list folders :loading? false :error nil))
+
+;; Public Folders
+(defn set-public-folders-loading [loading?]
+  (swap! app-state assoc-in [:folders :public-list :loading?] loading?))
+
+(defn set-public-folders-error [error]
+  (swap! app-state assoc-in [:folders :public-list :error] error)
+  (set-public-folders-loading false))
+
+(defn set-public-folders-list [folders pagination]
+  (swap! app-state update-in [:folders :public-list]
+         assoc :list folders :pagination pagination :loading? false :error nil))
+
+(defn set-public-folders-page [page-num]
+  (swap! app-state assoc-in [:folders :public-list :pagination :page] page-num))
+
+;; Current Folder Details
+(defn set-current-folder-details-loading [loading?]
+  (swap! app-state assoc-in [:folders :current-details :loading?] loading?))
+
+(defn set-current-folder-details-error [error]
+  (swap! app-state assoc-in [:folders :current-details :error] error)
+  (set-current-folder-details-loading false))
+
+(defn set-current-folder-details [folder-details]
+  (swap! app-state update-in [:folders :current-details]
+         assoc :details folder-details :loading? false :error nil))
+
+(defn clear-current-folder-details []
+  (swap! app-state assoc-in [:folders :current-details]
+         {:details nil :loading? false :error nil :managing-sets? false :manage-sets-error nil}))
+
+(defn set-folder-managing-sets-state [folder-id loading? error]
+  (when folder-id ;; Ensure we are talking about the current folder, or adjust if needed
+    (swap! app-state update-in [:folders :current-details]
+           assoc :managing-sets? loading? :manage-sets-error error)))
+
+(defn add-folder-to-user-list
+  "Adds a newly created folder to the beginning of the user's folder list"
+  [folder]
+  (swap! app-state update-in [:folders :user-list :list]
+         (fn [current-list]
+           (vec (concat [folder] (or current-list []))))))
+
+(defn update-folder-in-user-list [updated-folder]
+  (swap! app-state update-in [:folders :user-list :list]
+         (fn [folders]
+           (mapv #(if (= (:folder-id %) (:folder-id updated-folder))
+                    updated-folder %)
+                 folders))))
+
+(defn remove-folder-from-user-list [folder-id]
+  (swap! app-state update-in [:folders :user-list :list]
+         (fn [folders]
+           (vec (remove #(= (:folder-id %) folder-id) folders)))))
+
+;; When a set is added to the current folder, update its question_sets and set_count
+(defn add-set-to-current-folder-details [set-data]
+  (swap! app-state update-in [:folders :current-details :details]
+         (fn [details]
+           (when details
+             (-> details
+                 (update :question_sets (fnil conj []) set-data) ; Add the new set
+                 (update :set_count (fnil inc 0))))))) ; Increment set_count
+
+;; When a set is removed from the current folder
+(defn remove-set-from-current-folder-details [set-id]
+  (swap! app-state update-in [:folders :current-details :details]
+         (fn [details]
+           (when details
+             (-> details
+                 (update :question_sets (fn [sets] (vec (remove #(= (:set_id %) set-id) sets))))
+                 (update :set_count (fnil dec 0)))))))
+
+;; When sets are reordered in the current folder
+(defn reorder-sets-in-current-folder-details [ordered-sets]
+  (swap! app-state update-in [:folders :current-details :details]
+         (fn [details]
+           (when details
+             (assoc details :question_sets ordered-sets)))))
