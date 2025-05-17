@@ -9,7 +9,7 @@ nixFile = "./environment.nix"
 [phases.build]
 cmds = [
   "echo 'Downloading Clojure dependencies...'",
-  "clojure -P", # Prepares and downloads all dependencies specified in deps.edn.
+  "nix-shell environment.nix --run \"clojure -P\"", # Run clojure -P within the Nix shell
   "echo 'Clojure dependencies ready.'",
   "echo 'Installing npm dependencies...'",
   "npm ci",
