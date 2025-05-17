@@ -130,7 +130,8 @@
         (if (verify-password password (:password_hash user))
           (let [token (create-token user)
                 response-body {:token token
-                               :user (dissoc user :password_hash)}]
+                               :user (-> (dissoc user :password_hash)
+                                         (update :profile_picture_url uploads/get-pfp-full-path))}]
             (resp/response response-body))
           (-> (resp/response {:error "Invalid credentials."})
               (resp/status 401))) ; Unauthorized
