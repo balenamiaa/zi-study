@@ -84,10 +84,10 @@
               (reset! selected-indices-atom (cond
                                               (and (not= new-submitted-answer ::not-found) (vector? new-submitted-answer))
                                               new-submitted-answer
-                                              
+
                                               (and (not= new-submitted-answer ::not-found) (set? new-submitted-answer))
                                               (vec new-submitted-answer)
-                                              
+
                                               :else []))))))
       :reagent-render
       (fn [props]
@@ -97,8 +97,8 @@
               is-globally-answered? (boolean user-answer)
               globally-submitted-indices (get-in user-answer [:answer-data :answer] [])
               globally-submitted-indices-set (if (set? globally-submitted-indices)
-                                              globally-submitted-indices
-                                              (set globally-submitted-indices))
+                                               globally-submitted-indices
+                                               (set globally-submitted-indices))
               is-globally-correct? (when is-globally-answered? (= 1 (:is-correct user-answer)))
 
               is-submission-pending-globally? (or (:loading? submission-state-from-global) @submitting-via-local-flag?)
@@ -171,7 +171,9 @@
                 "Submit Answer"]])
 
             (when (and is-globally-answered? explanation)
-              [q-common/explanation-section {:explanation explanation
-                                             :rx-show-explanation? show-explanation?
-                                             :on-toggle #(swap! show-explanation? not)
-                                             :question-id question-id}])]]))})))
+              [q-common/explanation-section
+               {:explanation-id (str "explanation-" question-id)
+                :explanation explanation
+                :rx-show-explanation? show-explanation?
+                :on-toggle #(swap! show-explanation? not)
+                :question-id question-id}])]]))})))

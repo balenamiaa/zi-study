@@ -161,7 +161,9 @@
                                      :on-click #(handle-option-click idx)}])))]
 
            (when (and is-globally-answered? explanation)
-             [q-common/explanation-section {:explanation explanation
-                                            :rx-show-explanation? show-explanation?
-                                            :on-toggle #(swap! show-explanation? not)
-                                            :question-id question-id}])]))})))
+             [q-common/explanation-section
+              {:explanation-id (str "explanation-" question-id)
+               :explanation explanation
+               :rx-show-explanation? show-explanation?
+               :on-toggle #(swap! show-explanation? not)
+               :question-id question-id}])]))})))

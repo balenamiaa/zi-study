@@ -30,7 +30,7 @@ Our primary color scheme is based on Material Design's Pink palette:
 | Primary 400 | `#EC407A` | Lesser emphasis elements |
 | Primary 500 | `#E91E63` | **Main brand color**, primary buttons |
 | Primary 600 | `#D81B60` | Hover states for primary buttons |
-| Primary 700 | `#C2185B` | Active states, focus rings |
+| Primary 700 | `#C2185B` | Active states, focus rings, primary button border bottom |
 | Primary 800 | `#AD1457` | Deep accents, specialized UI |
 | Primary 900 | `#880E4F` | Very dark accents, specialized UI |
 
@@ -40,9 +40,9 @@ Our secondary palette is based on Material Design's Deep Purple:
 
 | Name | Hex | Usage |
 |------|-----|-------|
-| Secondary Light | `#B388FF` | Light accents, focus states |
+| Secondary Light | `#B388FF` | Light accents, focus states for secondary elements |
 | Secondary | `#7C4DFF` | Secondary actions, complementary elements |
-| Secondary Dark | `#651FFF` | Hover states for secondary actions |
+| Secondary Dark | `#651FFF` | Hover states for secondary actions, secondary button border bottom |
 
 ### Theme Colors
 
@@ -51,7 +51,9 @@ Our secondary palette is based on Material Design's Deep Purple:
 | Name | Hex | Usage |
 |------|-----|-------|
 | Light Background | `#FDF7F9` | Main background with subtle pink tint |
-| Light Background Paper | `#F8EEF2` | Cards, elevated surfaces with light pink tint |
+| Light Background Paper | `#F8EEF2` | Cards, elevated surfaces, filled inputs |
+| Light Background Hover | `#F1E6EB` | Hover states for light theme elements |
+| Light Background Selected | `#E8DCE3` | Selected states for light theme elements |
 | Light Card | `#FFFFFF` | Card backgrounds, dialogs (remained white for contrast) |
 | Light Text Primary | `#212121` | Primary text |
 | Light Text Secondary | `#757575` | Secondary, less important text |
@@ -62,11 +64,26 @@ Our secondary palette is based on Material Design's Deep Purple:
 | Name | Hex | Usage |
 |------|-----|-------|
 | Dark Background | `#1E151D` | Main background with subtle pink tint |
-| Dark Background Paper | `#261A25` | Cards, elevated surfaces with pink tint |
+| Dark Background Paper | `#261A25` | Cards, elevated surfaces, filled inputs |
+| Dark Background Hover | `#2E222D` | Hover states for dark theme elements |
+| Dark Background Selected | `#372A36` | Selected states for dark theme elements |
 | Dark Card | `#2E1F2D` | Card backgrounds, dialogs with pink tint |
 | Dark Text Primary | `#FFFFFF` | Primary text |
 | Dark Text Secondary | `#B0B0B0` | Secondary, less important text |
 | Dark Divider | `#42353F` | Borders, dividers with pink tint |
+
+### Back Button Specific Colors
+
+These colors are defined for specific use with back buttons to ensure consistent styling.
+
+| Name                                 | CSS Variable                           | Usage                                    |
+|--------------------------------------|----------------------------------------|------------------------------------------|
+| Light Theme Back Button Text         | `--color-light-back-button-text`       | Default text color in light mode         |
+| Light Theme Back Button Text Hover   | `--color-light-back-button-text-hover` | Text color on hover in light mode        |
+| Light Theme Back Button Bg Hover     | `--color-light-back-button-bg-hover`   | Background color on hover in light mode  |
+| Dark Theme Back Button Text          | `--color-dark-back-button-text`        | Default text color in dark mode          |
+| Dark Theme Back Button Text Hover    | `--color-dark-back-button-text-hover`  | Text color on hover in dark mode         |
+| Dark Theme Back Button Bg Hover      | `--color-dark-back-button-bg-hover`    | Background color on hover in dark mode   |
 
 ### State Colors
 
@@ -79,10 +96,10 @@ Our secondary palette is based on Material Design's Deep Purple:
 | Success 200 | `#A5D6A7` | Success accents |
 | Success 300 | `#81C784` | Success highlights in dark mode |
 | Success 400 | `#66BB6A` | Lesser emphasis success elements |
-| Success 500 | `#4CAF50` | **Main success color** |
+| Success 500 | `#4CAF50` | Main success color (as per Material palette) |
 | Success 600 | `#43A047` | Hover states for success elements |
 | Success 700 | `#388E3C` | Active states for success elements |
-| Success 800 | `#2E7D32` | Deep success accents |
+| Success 800 | `#2E7D32` | **Main success color (application default)**, Deep success accents |
 | Success 900 | `#1B5E20` | Very dark success accents |
 
 #### Warning (Orange)
@@ -94,9 +111,9 @@ Our secondary palette is based on Material Design's Deep Purple:
 | Warning 200 | `#FFCC80` | Warning accents |
 | Warning 300 | `#FFB74D` | Warning highlights in dark mode |
 | Warning 400 | `#FFA726` | Lesser emphasis warning elements |
-| Warning 500 | `#FF9800` | **Main warning color** |
+| Warning 500 | `#FF9800` | Main warning color (as per Material palette) |
 | Warning 600 | `#FB8C00` | Hover states for warning elements |
-| Warning 700 | `#F57C00` | Active states for warning elements |
+| Warning 700 | `#F57C00` | **Main warning color (application default)**, Active states for warning elements |
 | Warning 800 | `#EF6C00` | Deep warning accents |
 | Warning 900 | `#E65100` | Very dark warning accents |
 
@@ -109,9 +126,9 @@ Our secondary palette is based on Material Design's Deep Purple:
 | Error 200 | `#EF9A9A` | Error accents |
 | Error 300 | `#E57373` | Error highlights in dark mode |
 | Error 400 | `#EF5350` | Lesser emphasis error elements |
-| Error 500 | `#F44336` | **Main error color** |
+| Error 500 | `#F44336` | Main error color (as per Material palette) |
 | Error 600 | `#E53935` | Hover states for error elements |
-| Error 700 | `#D32F2F` | Active states for error elements |
+| Error 700 | `#D32F2F` | **Main error color (application default)**, Active states for error elements |
 | Error 800 | `#C62828` | Deep error accents |
 | Error 900 | `#B71C1C` | Very dark error accents |
 
@@ -124,11 +141,40 @@ Our secondary palette is based on Material Design's Deep Purple:
 | Info 200 | `#90CAF9` | Info accents |
 | Info 300 | `#64B5F6` | Info highlights in dark mode |
 | Info 400 | `#42A5F5` | Lesser emphasis info elements |
-| Info 500 | `#2196F3` | **Main info color** |
+| Info 500 | `#2196F3` | Main info color (as per Material palette) |
 | Info 600 | `#1E88E5` | Hover states for info elements |
-| Info 700 | `#1976D2` | Active states for info elements |
+| Info 700 | `#1976D2` | **Main info color (application default)**, Active states for info elements |
 | Info 800 | `#1565C0` | Deep info accents |
 | Info 900 | `#0D47A1` | Very dark info accents |
+
+### Alpha Colors
+
+Colors with alpha transparency for overlays and subtle backgrounds.
+
+| Name | RGBA | Usage |
+|------|------|-------|
+| Primary Alpha 10 | `rgba(233, 30, 99, 0.1)` | Subtle primary-tinted backgrounds, nav link hover |
+| Primary Alpha 15 | `rgba(233, 30, 99, 0.15)` | Light primary-tinted backgrounds, nav link active |
+| Primary Alpha 20 | `rgba(233, 30, 99, 0.2)` | Slightly more prominent primary-tinted backgrounds |
+| Success Alpha 10 | `rgba(76, 175, 80, 0.1)` | Subtle success-tinted backgrounds |
+| Success Alpha 15 | `rgba(76, 175, 80, 0.15)` | Light success-tinted backgrounds |
+| Error Alpha 10 | `rgba(244, 67, 54, 0.1)` | Subtle error-tinted backgrounds |
+| Error Alpha 15 | `rgba(244, 67, 54, 0.15)` | Light error-tinted backgrounds |
+| Warning Alpha 10 | `rgba(255, 152, 0, 0.1)` | Subtle warning-tinted backgrounds |
+| Warning Alpha 15 | `rgba(255, 152, 0, 0.15)` | Light warning-tinted backgrounds |
+| Info Alpha 10 | `rgba(33, 150, 243, 0.1)` | Subtle info-tinted backgrounds |
+| Info Alpha 15 | `rgba(33, 150, 243, 0.15)` | Light info-tinted backgrounds |
+
+### Alert Background Colors
+
+Specific background colors for alert components, ensuring good contrast and thematic consistency.
+
+| Name | RGBA (Light) | RGBA (Dark) | Usage |
+|------|--------------|-------------|-------|
+| Alert Info Background | `rgba(25, 118, 210, 0.08)` | `rgba(25, 118, 210, 0.15)` | Background for info alerts |
+| Alert Error Background | `rgba(211, 47, 47, 0.08)` | `rgba(211, 47, 47, 0.15)` | Background for error alerts |
+| Alert Success Background | `rgba(46, 125, 50, 0.08)` | `rgba(46, 125, 50, 0.15)` | Background for success alerts |
+| Alert Warning Background | `rgba(245, 124, 0, 0.08)` | `rgba(245, 124, 0, 0.15)` | Background for warning alerts |
 
 ## Typography
 
@@ -152,7 +198,7 @@ ZiStudy uses a combination of fonts to create hierarchy and visual interest:
 | Body text | 1rem (16px) | 400 | 1.5 |
 | Small text | 0.875rem (14px) | 400 | 1.5 |
 | Caption | 0.75rem (12px) | 400 | 1.5 |
-| Button text | 0.875rem (14px) | 500 | 1.5 |
+| Button text | 1rem (16px) | 500 | Normal |
 
 ## Spacing and Layout
 
@@ -193,102 +239,88 @@ Buttons have been redesigned for better visual impact and interaction feedback:
 
 #### Button Variants
 
-- **Primary**:
-  - Beautiful gradient background
-  - Enhanced shadow with color tint
-  - Scale transform on press
-  - Smooth hover transition
+- **Primary**: (`btn-primary`)
+  - Background: Gradient from `Primary-500` to `Primary-600`.
+  - Text: White.
+  - Shadow: `shadow-lg`, dark mode: `dark:shadow-primary-500/20`.
+  - Border: `border-bottom: 4px solid var(--color-primary-700)`.
+  - Hover: Gradient from `Primary-600` to `Primary-700`.
+  - Active: Gradient from `Primary-700` to `Primary-800`, `border-bottom-width: 2px`, `transform: translateY(2px)`.
+  - Focus: `focus:ring-primary-300`.
 
-- **Secondary**:
-  - Deep purple gradient
-  - Consistent interaction patterns
-  - Complementary to primary actions
+- **Secondary**: (`btn-secondary`)
+  - Background: Gradient from `Secondary` to `Secondary Dark`.
+  - Text: White.
+  - Shadow: `shadow-lg`, dark mode: `dark:shadow-secondary/20`.
+  - Border: `border-bottom: 4px solid var(--color-secondary-dark)`.
+  - Hover: Gradient from `Secondary Dark` to `Secondary Dark`.
+  - Active: Gradient from `Secondary Dark` to `Secondary Dark`, `border-bottom-width: 2px`, `transform: translateY(2px)`.
+  - Focus: `focus:ring-secondary-light`.
 
-- **Outlined**:
-  - 2px borders for better visibility
-  - Subtle hover background
-  - Maintains consistent height with other variants
-  - Color-matched focus rings
+- **Outlined**: (`btn-outlined`)
+  - Background: Transparent.
+  - Text: `Primary` color. Dark: `Primary-300`.
+  - Border: `2px solid var(--color-primary)`, `border-bottom-width: 4px`. Dark: `border-primary-300`.
+  - Hover: Background `Primary-50`, border `Primary-600`, text `Primary-700`. Dark: `bg-[#331A2A]`, border `Primary-200`, text `Primary-200`.
+  - Active: `border-bottom-width: 2px`, `transform: translateY(2px)`.
+  - Focus: `focus:ring-primary-300`.
 
-- **Text**:
-  - Clean, minimal design
-  - Hover background effect
-  - Maintains consistent padding
-  - Clear active state
+- **Text**: (`btn-text`)
+  - Background: Transparent.
+  - Text: `Primary` color. Dark: `Primary-300`.
+  - Hover: Background `Primary-50`. Dark: `bg-[#331A2A]`.
+  - Focus: `focus:ring-primary-300`.
 
 #### Button Properties
 
-- **Size**: Larger default size for better touch targets
-- **Padding**: Horizontal: 1.5rem (24px), Vertical: 0.75rem (12px)
-- **Border Radius**: 0.5rem (8px)
-- **Font**: Inter Medium, 1rem (16px)
-- **Transitions**: 300ms with spring easing
-- **Icons**: Optional start and end icons with proper spacing
-- **ARIA Support**: Built-in accessibility attributes
+- **Base Styling**: `.btn` class: `inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium`.
+- **Font**: Inter, 500 weight, 1rem (16px), letter-spacing `0.01em`.
+- **Padding**: Default: `px-6` (24px horizontal), `py-3` (12px vertical).
+- **Border Radius**: `rounded-lg` (0.5rem / 8px).
+- **Transitions**: `transition-all duration-300 ease-in-out`.
+- **Focus**: `focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent`.
+- **Active State**: Base active transform `translateY(1px) scale(0.99)`. Specific variants have further active state changes.
+- **Icons**: Optional start and end icons with proper spacing (handled by component logic).
+- **ARIA Support**: Built-in accessibility attributes (handled by component logic).
+- **Ripple Effect**: Applied via JS, visual style `ripple-effect` class.
 
 #### Button States
 
-- **Hover**:
-  - Gradient shift
-  - Scale transform (1.02)
-  - Shadow enhancement
-
-- **Active**:
-  - Scale down (0.99)
-  - Darker gradient
-  - Maintains shadow
-
-- **Focus**:
-  - Visible ring with offset
-  - Color-matched to variant
-  - High contrast in dark mode
-
-- **Disabled**:
-  - Reduced opacity
-  - Removed hover effects
-  - Maintained visual structure
-  - Cursor indication
-
-- **Loading**:
-  - Spinner animation
-  - Reduced opacity
-  - Disabled interaction
-  - Preserved layout
+- **Hover**: Detailed in variant descriptions. Generally involves background/gradient shifts.
+- **Active**: Detailed in variant descriptions. Often involves `transform: translateY(2px)` and reduced border-bottom.
+- **Focus**: Uses `focus:ring-*` utilities, color-matched to variant.
+- **Disabled**: `opacity-50 cursor-not-allowed` (applied by component logic).
+- **Loading**: Spinner animation, opacity reduction, disabled interaction (handled by component logic).
 
 ### Cards
 
-Cards are used to group related content and actions. They feature beautiful gradients, smooth transitions, and thoughtful spacing:
+Cards are used to group related content and actions. They feature consistent styling and thoughtful spacing:
 
 #### Card Design
 
-- **Standard Card**: 
-  - Combines both border and elevation styling by default
-  - Default elevation level 3 (medium shadow)
-  - 2px border with color matching the theme's divider color
-  - Rounded corners (0.5rem/8px)
-  - Smooth hover transition with enhanced elevation
-  - Increased font size (1.05rem) for better readability
-  - Generous padding for content breathing room
-  - Available elevation levels (1-5) for different emphasis needs
+- **Standard Card**: (`.card`)
+  - Background: `var(--color-light-card)` or `var(--color-dark-card)`.
+  - Shadow: `var(--shadow-3)` by default.
+  - Border: `2px solid var(--color-light-divider)` or `var(--color-dark-divider)`.
+  - Rounded corners: `rounded-lg` (0.5rem/8px).
+  - Font size: `1.05rem`, line height `1.6`.
+  - Hover: `box-shadow: var(--shadow-4)`, `border-color: var(--color-primary-300)` (light) / `var(--color-primary-400)` (dark).
+  - Transitions: `transition-all duration-300 ease-in-out`.
 
-- **Card Header**:
-  - Gradient background from white to soft pink (dark mode: dark gradient with pink tint)
-  - Left accent border option for visual hierarchy and status indication
-  - Optional icon with soft background
-  - Enhanced padding for better content spacing
-  - Support for title and subtitle with proper typography
+- **Card Header**: (`.card-header`)
+  - Background: Gradient from `var(--color-light-card)` to `#F9E4EC` (light), or `var(--color-dark-card)/90` to `#3A1F38` (dark).
+  - Padding: `px-6 py-4`.
+  - Border: Bottom border `var(--color-light-divider)` or `var(--color-dark-divider)`.
+  - Title (`h3`): `text-xl font-medium tracking-tight`.
 
-- **Card Content**:
-  - Clean, well-spaced layout
-  - Optimized line height (1.6) for readability
-  - Consistent padding across all sections
-  - Option to remove padding when needed
+- **Card Content**: (`.card-body`)
+  - Padding: `px-6 py-5`.
+  - Clean, well-spaced layout.
 
-- **Card Footer**:
-  - Clear separation with refined border
-  - Flexible alignment options for actions (:start, :center, :end, :between)
-  - Proper spacing for button groups
-  - Option to remove border when needed
+- **Card Footer**: (`.card-footer`)
+  - Padding: `px-6 py-4`.
+  - Border: Top border `var(--color-light-divider)` or `var(--color-dark-divider)`.
+  - Flexible alignment options for actions (:start, :center, :end, :between) handled by component logic using flex utilities.
 
 #### Card Interactions
 
@@ -316,13 +348,20 @@ Cards are used to group related content and actions. They feature beautiful grad
 
 #### Text Input
 
-- **Standard**: With label, optional helper text
-- **With icons**: Leading or trailing icons
-- **States**: Normal, focus, disabled, error, autofill
-- **Variants**: Outlined, filled
-- **Enhanced Validation**: Clear visual feedback for validation states
-- **Transitions**: Smooth border transitions
-- **Focus State**: Clear visual indication with subtle shadow
+- **Base Style**: (`.input`)
+  - Dimensions: `w-full px-4 py-2 rounded-md`.
+  - Border: `2px solid var(--color-light-divider)`, `border-bottom-width: 3px`.
+  - Background: `var(--color-light-bg)`. Dark: `var(--color-dark-bg)`.
+  - Text Color: `var(--color-light-text-primary)`. Dark: `var(--color-dark-text-primary)`.
+  - Font size: `1rem`.
+  - Transitions: `transition-all duration-200`.
+- **Focus State**:
+  - Border: `2px solid var(--color-primary-400)`, `border-bottom: 3px solid var(--color-primary-500)`. Dark: `var(--color-primary-600)` and `var(--color-primary-500)` respectively.
+  - Background: Remains `var(--color-light-bg)` or `var(--color-dark-bg)`.
+  - Shadow: `box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.15)`. Dark: `box-shadow: 0 0 0 2px var(--color-primary-50)`.
+- **States**: Normal, focus, disabled, error, autofill are handled by component logic and utility classes.
+- **Variants**: Outlined, filled (as described in `input.cljs`, CSS mainly shows one base style with variations for focus/error).
+- **Enhanced Validation**: Clear visual feedback for validation states, typically changing border colors to `var(--color-error)`.
 
 ##### Autofill Handling
 
@@ -339,31 +378,21 @@ Form inputs have special styling to handle browser autofill functionality using 
 
 #### Selection Controls
 
-- **Checkbox**: For multi-select options
-  - Clean, accessible design
-  - Clear visual states (checked, unchecked, disabled)
-  - Custom check mark animation
-  - Focus state with matching ring color
+- **Checkbox**: (`.checkbox-base`)
+  - `appearance-none rounded border-2 bg-light-card dark:bg-dark-card border-light-divider dark:border-dark-divider`.
+  - Checked: `bg-primary-600 border-primary-600 dark:bg-primary-500 dark:border-primary-500`, with SVG background image for checkmark.
+  - Focus: `ring-1 ring-offset-1 ring-primary-300 dark:ring-primary-700`.
+  - Custom check mark animation (implied by SVG and transition).
 
-- **Radio button**: For single-select options
-  - Consistent sizing with checkboxes
-  - Clear visual indication of selection
-  - Appropriate spacing in groups
-  - Custom selection animation
+- **Radio button**: (`.radio-base`)
+  - `appearance-none rounded-full border-2 bg-light-card dark:bg-dark-card border-light-divider dark:border-dark-divider`.
+  - Dimensions: `w-1.25rem h-1.25rem`.
+  - Checked: `border-primary-600 dark:border-primary-400`, with an `::after` pseudo-element for the inner dot (`bg-white`, `w-0.5rem h-0.5rem`).
+  - Focus: `ring-2 ring-offset-2 ring-primary-300 dark:ring-primary-700`.
 
-- **Switch**: For binary on/off states
-  - Pill-shaped toggle track
-  - Circular thumb with shadow
-  - Smooth sliding animation
-  - Color gradient when active
-  - Scale animation on hover
+- **Switch**: See [Toggle Switch](#toggle-switch) section below for detailed redesign.
 
 - **Dropdown**: For selecting from a list
-  - Enhanced with proper backdrop handling
-  - Smooth open/close animations
-  - Support for item grouping
-  - Keyboard navigation support
-  - Multiple selection mode
 
 #### Dropdown Menu
 
@@ -371,14 +400,12 @@ Dropdowns have been redesigned for a consistent and elegant experience:
 
 ##### Visual Design
 
-- **Menu Container**:
-  - Clean white background (dark: themed dark card background)
-  - Subtle border with rounded corners (8px)
-  - Elegant shadow for elevation
-  - Minimum width of 180px for readable content
-  - z-index priority to appear above other content
-  - Optional backdrop blur effect
-  - Multiple transition animations (fade, scale, slide)
+- **Menu Container**: (`.dropdown-menu`)
+  - Background: `bg-white dark:bg-dark-card`.
+  - Border: `rounded-md border border-solid border-light-divider dark:border-dark-divider`.
+  - Shadow: `shadow-lg`.
+  - Minimum width: `min-w-[180px]`.
+  - Z-index: `z-50`.
 
 - **Menu Items**:
   - Consistent padding (16px horizontal, 8px vertical)
@@ -488,11 +515,11 @@ Tooltips provide additional information on hover:
 
 Material-style ripple effect provides tactile feedback for interactive elements:
 
-- Applied to buttons, cards, and other clickable elements
-- Created using the `.ripple` class
-- Works for nested elements (propagates to parent)
-- Subtle but effective visual cue for user interactions
-- Customizable color to match component theme
+- Applied to buttons, cards, and other clickable elements using JavaScript (`add-ripple-effect`).
+- Visual style: `.ripple-effect` class for the animated span.
+  - `position: absolute`, `border-radius: 50%`, `background-color: rgba(255, 255, 255, 0.5)` (dark: `bg-primary-50`).
+  - Animation: `ripple 0.6s var(--animation-standard)` (scales up and fades out).
+- Works for nested elements (propagates to parent via JS).
 
 ### Micro-interactions
 
@@ -507,12 +534,11 @@ Subtle animations that provide feedback and enhance the user experience:
 
 ### Transitions
 
-Standard timing functions for smooth UI transitions:
+Standard timing functions for smooth UI transitions, defined as CSS custom properties:
 
-- **Standard**: cubic-bezier(0.4, 0, 0.2, 1) - for most transitions (300ms)
-- **Enter**: cubic-bezier(0, 0, 0.2, 1) - for elements entering the screen (225ms)
-- **Exit**: cubic-bezier(0.4, 0, 1, 1) - for elements leaving the screen (195ms)
-- **Emphasis**: cubic-bezier(0.4, 0, 0.6, 1) - for attention-grabbing elements (500ms)
+- **Standard**: `var(--animation-standard)` which is `cubic-bezier(0.4, 0, 0.2, 1)` - for most transitions (300ms default in components).
+- **Enter**: `var(--animation-enter)` which is `cubic-bezier(0, 0, 0.2, 1)` - for elements entering the screen (225ms).
+- **Exit**: `var(--animation-exit)` which is `cubic-bezier(0.4, 0, 1, 1)` - for elements leaving the screen (195ms).
 
 ### Theme Switching
 
@@ -528,13 +554,18 @@ Smooth transition between light and dark themes:
 
 The following animation utility classes are available:
 
-- `.animate-in`: Base class for animations (200ms duration, cubic-bezier)
-- `.fade-in`: Simple opacity transition from 0 to 1
-- `.zoom-in-90`: Scale and opacity transition starting at 90%
-- `.animate-slide-down`: Elements sliding down into view
-- `.animate-slide-in`: Elements sliding in from left
-- `.animate-pulse-slow`: Slow pulsing effect for highlighting
-- `.scale-95`, `.scale-100`: Transform scale utilities
+- `.animate-in`: Base class for animations (default 200ms duration, `cubic-bezier(0.4, 0, 0.2, 1)` timing).
+- `.fade-in`: Simple opacity transition from 0 to 1.
+- `.zoom-in-90`: Scale and opacity transition starting at 90% scale and 0 opacity.
+- `.animate-slide-down`: Elements sliding down into view (`@keyframes slideDown`).
+- `.animate-slide-in`: Elements sliding in from left (`@keyframes slideIn`, typically for width transitions).
+- `.animate-pulse-slow`: Slow pulsing effect (`@keyframes pulse`, 3s duration).
+- `.scale-95`, `.scale-100`: Transform scale utilities.
+- `.cloze-blank-animated`: Pop animation for cloze question blanks (`@keyframes pop`).
+- **Flash Message Animations** (from `flash-animations.css`):
+  - `slide-in-right`, `slide-in-left`, `slide-in-top`, `slide-in-bottom`
+  - `slide-out-right`, `slide-out-left`, `slide-out-top`
+  - `.animate-enter`: Base class for flash message entry.
 
 ## Best Practices
 
@@ -591,170 +622,4 @@ ZiStudy uses **Lucide Icons** for all iconography. Lucide provides a comprehensi
 
 ### Usage Guidelines
 - All icons should use the appropriate icon from the Lucide library
-- Standard size classes should be used (e.g., `text-sm`, `text-2xl`, etc.)
-- Color classes should follow our color system (e.g., `text-primary dark:text-primary-300`)
-- Icons should have appropriate aria-labels for accessibility
-- Use consistent stroke width (preferably 1.5 or 2px)
-
-### Icon Styling
-- Use consistent sizing within context (navigation, buttons, etc.)
-- Apply subtle animations for interactive icons (hover, active states)
-- Maintain adequate spacing around icons (minimum 4px)
-- Use the same weight/style throughout the application
-
-#### Common Icons (Lucide)
-| Usage | Icon Component |
-|-------|----------|
-| User | lucide-icons/User |
-| Home | lucide-icons/Home |
-| Study | lucide-icons/Book |
-| Notes | lucide-icons/FileText |
-| Security | lucide-icons/Shield |
-| Settings | lucide-icons/Settings |
-| Logout | lucide-icons/LogOut |
-| Login | lucide-icons/LogIn |
-| Register | lucide-icons/UserPlus |
-| Check | lucide-icons/Check |
-| Menu | lucide-icons/Menu |
-| Close | lucide-icons/X |
-| Dropdown | lucide-icons/ChevronDown |
-| Email | lucide-icons/Mail |
-| Lightning | lucide-icons/Zap |
-| Book | lucide-icons/BookOpen |
-| Message | lucide-icons/MessageSquare |
-| Sparkle | lucide-icons/Sparkles |
-| Loading | lucide-icons/Loader2 |
-
-## Component Encapsulation
-
-All basic UI elements (such as **inputs**, **buttons**, **selects**, etc.) must be encapsulated as reusable components. This ensures consistency, maintainability, and adherence to the design system. Each component should:
-- Encapsulate all styling, icon usage, and state logic
-- Accept parameters for customization (e.g., label, icon, error state, etc.)
-- Use Lucide for any iconography
-- Use the `cx` utility for class name handling
-- Follow established naming patterns
-- Be placed in the appropriate components directory
-
-This approach applies to:
-- Buttons (primary, secondary, outlined, text, etc.)
-- Inputs (text, password, email, etc.)
-- Selects and dropdowns
-- Cards
-- Modals and dialogs
-- Tooltips
-- Any other reusable UI element
-
-## Utilities
-
-### Class Name Handling with `cx`
-
-ZiStudy uses a utility function called `cx` for handling class names in components. This function provides intelligent class name management:
-
-- Merges multiple classes intelligently
-- Handles conditional classes based on props/state
-- Resolves Tailwind class conflicts automatically
-- Supports arrays, objects, and strings as inputs
-- Creates more readable component code
-- Works seamlessly with dark/light mode theming
-- Ensures consistent styling across the application
-
-Example usage:
-```clojure
-(cx "base-class"
-    {"conditional-class" condition?
-     "another-class" (= value :expected)}
-    (when active? "active-class"))
-```
-
-### Additional CSS Utilities
-
-- **Theme Variables**: Access to theme colors and properties via CSS variables
-- **Responsive Classes**: Mobile-first utilities with responsive breakpoints
-- **Animation Classes**: Pre-defined animations and transitions
-- **Proper Dark Mode**: Automatic handling of dark/light themes
-- **Focus States**: Consistent focus styles across components
-- **Custom Scrollbars**: Themed scrollbars that match the design system
-- **Elevation**: Shadow utilities for different elevations
-
-## Design Principles
-
-### Clarity
-- Content is presented clearly and efficiently
-- Visual elements support rather than distract from content
-- Information hierarchy guides users through the interface
-- Typography enhances readability across all screen sizes
-
-### Consistency
-- UI elements behave predictably throughout the application
-- Visual language remains consistent across all screens
-- Spacing, sizing, and positioning follow established patterns
-- Color usage adheres to the defined palette and meanings
-
-### Feedback
-- Interactive elements provide clear visual feedback
-- System status is always visible and understandable
-- Errors are presented constructively with solutions
-- Animations and transitions provide context for state changes
-
-### Efficiency
-- Common tasks can be completed with minimal steps
-- UI is optimized for both novice and expert users
-- Layout adapts intelligently to different screen sizes
-- Performance is prioritized for a smooth experience
-
-### Delight
-- Micro-interactions add moments of delight
-- Animations are purposeful and enhance usability
-- Visual design is polished and professional
-- The overall experience feels cohesive and thoughtful
-
-This design system is a living document and will evolve as ZiStudy grows and develops.
-
-### Toggle Switch
-
-The toggle switch has been completely redesigned for a more modern and engaging experience:
-
-#### Visual Design
-
-- **Track**:
-  - Width: 3.5rem (56px)
-  - Height: 1.75rem (28px)
-  - Rounded pill shape
-  - Beautiful gradient when active
-  - Subtle background when inactive
-
-- **Thumb**:
-  - Size: 1.25rem (20px)
-  - Pure white circle
-  - Elevated with shadow
-  - Glow effect when active
-  - Spring animation on toggle
-
-#### Interactions
-
-- **Toggle Animation**:
-  - Smooth slide transition (300ms)
-  - Spring effect on the thumb
-  - Scale animation on hover
-  - Glow effect when active
-
-- **States**:
-  - Unchecked: Subtle gray track
-  - Checked: Gradient from primary colors
-  - Hover: Thumb scale (1.05)
-  - Active: Enhanced glow effect
-  - Disabled: Reduced opacity
-
-#### Accessibility
-
-- **Keyboard Navigation**:
-  - Clear focus indicators
-  - Spacebar toggle support
-  - ARIA attributes
-  - Role="switch"
-
-- **Labels**:
-  - Optional left or right position
-  - Clear connection to toggle
-  - Proper spacing and alignment
-  - Clickable area includes label
+- Standard size classes should be used (e.g., `text-sm`, `

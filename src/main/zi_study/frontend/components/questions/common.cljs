@@ -78,9 +78,9 @@
     :smartypants true
     :xhtml true}))
 
-(defn explanation-section [{:keys [explanation]}]
+(defn explanation-section [{:keys [_explanation explanation-id]}]
   (let [container-ref (r/atom nil)
-        container-id-str (str "explanation-" (or explanation (random-uuid)))]
+        container-id-str (or explanation-id (str "explanation-" (random-uuid)))]
 
     (r/create-class
      {:display-name "explanation-section"
@@ -102,7 +102,9 @@
                     :ref (fn [el] (reset! container-ref el))
                     :class "mt-3 p-4 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"}
               [:div {:class "prose prose-sm dark:prose-invert prose-p:text-[var(--color-light-text-secondary)] dark:prose-p:text-[var(--color-dark-text-secondary)] prose-a:text-[var(--color-primary)] prose-headings:text-[var(--color-light-text)] dark:prose-headings:text-[var(--color-dark-text)] prose-headings:font-medium prose-img:rounded-md prose-pre:bg-[var(--color-light-bg)] dark:prose-pre:bg-[var(--color-dark-bg)] prose-pre:text-sm prose-code:text-[var(--color-primary-700)] dark:prose-code:text-[var(--color-primary-300)] prose-code:bg-[var(--color-primary-50)] dark:prose-code:bg-[rgba(var(--color-primary-rgb),0.1)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-strong:text-[var(--color-light-text)] dark:prose-strong:text-[var(--color-dark-text)] prose-li:marker:text-[var(--color-light-text-secondary)] dark:prose-li:marker:text-[var(--color-dark-text-secondary)] max-w-none"}
-               [:div {:dangerouslySetInnerHTML (r/unsafe-html (marked/parse (str explanation) marked-options))}]]])]))})))
+               (prn (str explanation))
+               (let [cleaned-explanation (str/replace (str explanation) #"(?m)^ {14}" "")]
+                 [:div {:dangerouslySetInnerHTML (r/unsafe-html (marked/parse cleaned-explanation marked-options))}])]])]))})))
 
 (defn question-header
   "Common header component for questions"
