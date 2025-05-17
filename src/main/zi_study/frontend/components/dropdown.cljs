@@ -59,8 +59,6 @@
                                     (reset! trigger-width-cache current-trigger-offset-width)
                                     (set! (.. dropdown-el -style -width) (str current-trigger-offset-width "px"))))
 
-
-
                                 (let [dropdown-measurement-rect (.getBoundingClientRect dropdown-el)
                                       dropdown-width (.-width dropdown-measurement-rect)
                                       dropdown-height (.-height dropdown-measurement-rect)
