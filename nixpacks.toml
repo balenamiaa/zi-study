@@ -1,7 +1,7 @@
 # nixpacks.toml
 # Configuration for deploying your Clojure application on Railway with Nixpacks.
 
-providers = ["node"]
+providers = []
 
 [phases.setup]
 nixFile = "./environment.nix"
@@ -11,6 +11,9 @@ cmds = [
   "echo 'Downloading Clojure dependencies...'",
   "nix-shell environment.nix --run \"clojure -P\"", # Run clojure -P within the Nix shell
   "echo 'Clojure dependencies ready.'",
+  "echo 'Cleaning up Clojure/Maven caches...'",
+  "rm -rf /root/.m2 /root/.clojure /app/.cpcache", # Attempt to remove common cache locations
+  "echo 'Caches cleaned.'",
   "echo 'Installing npm dependencies...'",
   "npm install --prefer-offline --no-audit --progress=false",
   "echo 'npm dependencies ready.'"
