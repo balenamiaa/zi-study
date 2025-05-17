@@ -12,7 +12,7 @@ cmds = [
   "nix-shell environment.nix --run \"clojure -P\"", # Run clojure -P within the Nix shell
   "echo 'Clojure dependencies ready.'",
   "echo 'Installing npm dependencies...'",
-  "npm ci",
+  "npm install --prefer-offline --no-audit --progress=false",
   "echo 'npm dependencies ready.'"
 ]
 
