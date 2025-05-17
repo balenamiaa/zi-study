@@ -1,7 +1,7 @@
 # nixpacks.toml
 # Configuration for deploying your Clojure application on Railway with Nixpacks.
 
-providers = ["java", "node"]
+providers = ["node"]
 
 [phases.setup]
 nixFile = "./environment.nix"
