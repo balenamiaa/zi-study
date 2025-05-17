@@ -130,7 +130,7 @@
   (r/with-let [open? (r/atom false)
                force-update (r/atom 0)
                user-trigger [:div {:class "flex items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"}
-                             [avatar {:src (str "/" (:profile_picture_url user-info))
+                             [avatar {:src (when (:profile_picture_url user-info) (str "/" (:profile_picture_url user-info)))
                                       :alt "User profile"
                                       :size :sm
                                       :initials (when (:email user-info)

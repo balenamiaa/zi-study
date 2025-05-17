@@ -173,7 +173,7 @@
         (let [props (r/props this)
               ;; Ensure we have keyword keys
               initial-answers (ensure-keyword-keys (get-in props [:user-answer :answer-data :answers] {}))
-              cloze-text (get-in props [:question-data :cloze_text])
+              cloze-text (get-in props [:question-data :cloze-text])
               segments (parse-cloze-text cloze-text)
               blanks (->> segments
                           (filter map?)

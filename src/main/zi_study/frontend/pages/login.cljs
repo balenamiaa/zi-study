@@ -132,6 +132,6 @@
                    :on-click #(rfe/push-state routes/sym-register-route)}
            "Create account"]]]]
 
-       ;; Optional: Additional help links
+
        [:div {:class "mt-6 text-center text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-        [:a {:class "hover:underline" :href "#" :on-click #(js/alert "Maybe you shouldn't be this dumb.")} "Forgot password?"]]])))
+        [:a {:class "hover:underline" :href "#" :on-click #(js/alert "Nah.")} "Forgot password?"]]])))

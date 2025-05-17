@@ -90,9 +90,8 @@
          description)]
       [set-card-progress {:progress progress}]]
      [card-footer {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] pt-3 pb-3 px-4 flex justify-end"}
-      [button {:variant :text :size :sm :start-icon lucide-icons/ArrowRight 
-               :class "text-[var(--color-primary)] dark:text-[var(--color-primary-400)]" 
-               } "View Set"]]]))
+      [button {:variant :text :size :sm :start-icon lucide-icons/ArrowRight
+               :class "text-[var(--color-primary)] dark:text-[var(--color-primary-400)]"} "View Set"]]]))
 
 ; --- Modal Components (Defined with def and r/create-class for state and lifecycle) ---
 
@@ -426,15 +425,14 @@
                                                            (reset! show-delete-modal false))))
 
             handle-remove-set! (fn [set-id-to-remove]
-                                 (when (js/confirm "Are you sure you want to remove this set from the folder?")
-                                   (http/remove-set-from-folder
-                                    folder-id
-                                    set-id-to-remove
-                                    (fn [_]
-                                      (state/flash-success "Set removed from folder.")
-                                      (refresh-folder-details!))
-                                    (fn [err _]
-                                      (state/flash-error (str "Error removing set: " err))))))
+                                 (http/remove-set-from-folder
+                                  folder-id
+                                  set-id-to-remove
+                                  (fn [_]
+                                    (state/flash-success "Set removed from folder.")
+                                    (refresh-folder-details!))
+                                  (fn [err _]
+                                    (state/flash-error (str "Error removing set: " err)))))
 
             handle-reorder-set! (fn [set-id-to-move direction]
                                   (let [cljs-vector-current-sets (vec question-sets) ; Ensure cljs vector

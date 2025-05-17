@@ -1,6 +1,7 @@
 (ns zi-study.backend.uploads
   (:require [clojure.java.io :as io]
-            [clojure.data.json :as json])
+            [clojure.data.json :as json]
+            [clojure.string :as str])
   (:import [java.util UUID]))
 
 (defonce ^:private uploads-dir "public/uploads/profiles/")
@@ -12,7 +13,8 @@
 
 
 (defn get-pfp-full-path [filename]
-  (str uploads-dir filename))
+  (when (and filename (not (str/blank? filename)))
+    (str uploads-dir filename)))
 
 (defn save-profile-picture!
   "Saves an uploaded profile picture file and returns its public URL path.

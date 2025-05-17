@@ -20,12 +20,16 @@
 
 (defn- get-flexible
   "Attempts to get a value from a map using a kebab-case key first.
-   If not found, tries with the snake_case version of the key."
+   If not found, tries with the snake_case version of the key.
+   Correctly handles boolean false values."
   ([m k not-found]
    (let [kebab-k k
          snake-k (keyword (str/replace (name k) "-" "_"))]
-     (or (get m kebab-k not-found)
-         (get m snake-k not-found))))
+     (if-let [entry (find m kebab-k)] ; Check if kebab-key exists
+       (val entry) ; Return its value (could be false, nil, etc.)
+       (if-let [entry (find m snake-k)] ; Check if snake-key exists
+         (val entry)
+         not-found)))) ; Key not found in either form
 
   ([m k]
    (get-flexible m k nil)))
@@ -41,9 +45,10 @@
 
 (defn- validate-data [data schema]
   (when-not (m/validate schema data)
-    (throw (ex-info "Import data validation failed."
-                    {:error :validation-failed
-                     :explanation (me/humanize (m/explain schema data))}))))
+    (let [explanation (m/explain schema data)]
+      (throw (ex-info "Import data validation failed."
+                      {:error :validation-failed
+                       :explanation (me/humanize explanation)})))))
 
 (defn- get-or-create-tag [tx tag-name]
   (let [clean-tag-name (-> tag-name str .trim)]
@@ -83,7 +88,7 @@
         correct-temp-id (get-flexible question :correct-option-temp-id) ; Single MCQ
         correct-temp-ids (set (get-flexible question :correct-option-temp-ids)) ; Multi MCQ
         temp-to-index (into {} (map-indexed (fn [idx opt] [(get-flexible opt :temp-id) idx]) options))]
-    (cond-> {:text (get-flexible question :question-text)
+    (cond-> {:question-text (get-flexible question :question-text)
              :options (mapv #(get-flexible % :text) options) ; Store only text
              :explanation (get-flexible question :explanation)} ; Optional explanation
       correct-temp-id (assoc :correct-index (get temp-to-index correct-temp-id)) ; Single
@@ -94,13 +99,13 @@
                                                           (into []))))))
 
 (defn- process-written-data [question]
-  {:text (get-flexible question :question-text)
+  {:question-text (get-flexible question :question-text)
    :correct-answer (get-flexible question :correct-answer-text)
    :explanation (get-flexible question :explanation)})
 
 (defn- process-true-false-data [question]
-  {:text (get-flexible question :question-text)
-   :is-correct-true (get-flexible question :is-correct-answer-true)
+  {:question-text (get-flexible question :question-text)
+   :is-correct-true (get-flexible question :is-correct-true)
    :explanation (get-flexible question :explanation)})
 
 (defn- process-cloze-data [question]
@@ -167,7 +172,7 @@
   [input format]
   (jdbc/with-transaction [tx @db-pool] ; Use the connection pool from db.clj
     (try
-      (let [input-str (if (.exists (io/file input)) (slurp input) input) ; Read file if path exists
+      (let [input-str (if (.exists (io/file input)) (slurp input) input)
             raw-data (parse-input input-str format)
             _ (validate-data raw-data ImportData)
             results (atom [])]
@@ -196,8 +201,7 @@
                 (let [processed-q (process-question question)
                       q-insert-data (assoc processed-q
                                            :set_id set-id
-                                           :order_in_set idx) ; Use index as order
-                      ;; Use lower-case keys for result map
+                                           :order_in_set idx)
                       {:keys [question_id]} (sql/insert! tx :questions q-insert-data {:builder-fn rs/as-unqualified-lower-maps})]
                   (println (str "    Inserted question " idx " (temp: " (get-flexible question :temp-id) ") -> ID: " question_id))
 
@@ -249,31 +253,31 @@
                   {:temp-id "q1-opt4" :text "Remove waste"}]
         :correct-option-temp-id "q1-opt2"
         :explanation "Myelin acts as an electrical insulator..."}
-       {:temp_id "q2-neuro-lobes"
+       {:temp-id "q2-neuro-lobes"
         :type :written
         :difficulty 2
-        :question_text "Name the four lobes of the cerebral cortex."
-        :retention_aid "FPOT: Frontal, Parietal, Occipital, Temporal"
-        :correct_answer_text "Frontal lobe, Parietal lobe, Temporal lobe, Occipital lobe."}
-       {:temp_id "q3-neuro-tf"
+        :question-text "Name the four lobes of the cerebral cortex."
+        :retention-aid "FPOT: Frontal, Parietal, Occipital, Temporal"
+        :correct-answer-text "Frontal lobe, Parietal lobe, Temporal lobe, Occipital lobe."}
+       {:temp-id "q3-neuro-tf"
         :type :true-false
         :difficulty 1
-        :question_text "Neurons communicate using electrical signals only."
-        :is_correct_answer_true false
+        :question-text "Neurons communicate using electrical signals only."
+        :is-correct-true false
         :explanation "Neurons use both electrical and chemical signals."}
-       {:temp_id "q4-neuro-multi"
+       {:temp-id "q4-neuro-multi"
         :type :mcq-multi
         :difficulty 4
-        :question_text "Which of the following are neurotransmitters?"
-        :options [{:temp_id "q4-optA" :text "Dopamine"}
-                  {:temp_id "q4-optB" :text "Myelin"}
-                  {:temp_id "q4-optC" :text "Serotonin"}
-                  {:temp_id "q4-optD" :text "Actin"}]
-        :correct_option_temp_ids ["q4-optA" "q4-optC"]}
-       {:temp_id "q5-neuro-cloze"
+        :question-text "Which of the following are neurotransmitters?"
+        :options [{:temp-id "q4-optA" :text "Dopamine"}
+                  {:temp-id "q4-optB" :text "Myelin"}
+                  {:temp-id "q4-optC" :text "Serotonin"}
+                  {:temp-id "q4-optD" :text "Actin"}]
+        :correct-option-temp-ids ["q4-optA" "q4-optC"]}
+       {:temp-id "q5-neuro-cloze"
         :type :cloze
         :difficulty 2
-        :cloze_text "The gap between two neurons is called the {{c1::Synaptic Cleft}}. Neurotransmitters cross this gap from the {{c2}} terminal."
+        :cloze-text "The gap between two neurons is called the {{c1::Synaptic Cleft}}. Neurotransmitters cross this gap from the {{c2}} terminal."
         :answers ["Synaptic Cleft" "presynaptic"]}
        {:temp-id "q6-neuro-emq"
         :type :emq
@@ -293,6 +297,6 @@
 
   (import-question-set-data! (pr-str edn-example-str) :edn)
 
-  (import-question-set-data! "questionz/OBGYN_st4_13_05_2025.edn" :edn)
+  (import-question-set-data! "questionz/jaundice.edn" :edn)
 
-  (sql/query @zi-study.backend.db/db-pool ["DELETE FROM question_sets WHERE set_id = 12"]))
+  (sql/query @zi-study.backend.db/db-pool ["DELETE FROM question_sets WHERE set_id = 26"]))

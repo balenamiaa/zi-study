@@ -128,12 +128,11 @@
                   :disabled @clearing
                   :start-icon lucide-icons/Trash2
                   :on-click (fn []
-                              (when (js/confirm "Are you sure you want to clear all answers? This cannot be undone.")
-                                (reset! clearing true)
-                                (http/delete-answers set-id (fn [result]
-                                                              (reset! clearing false)
-                                                              (when-not (:success result)
-                                                                (js/console.error "Failed to clear answers:" (:error result)))))))}
+                              (reset! clearing true)
+                              (http/delete-answers set-id (fn [result]
+                                                            (reset! clearing false)
+                                                            (when-not (:success result)
+                                                              (js/console.error "Failed to clear answers:" (:error result))))))}
           (str "Clear All (" answered-count ")")])]]
      [:div {:class "px-4 pb-4"}
       [:div {:class "flex flex-wrap gap-2"}

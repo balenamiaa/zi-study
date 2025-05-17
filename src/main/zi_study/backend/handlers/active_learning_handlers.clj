@@ -873,7 +873,7 @@
     (unauthorized "Authentication required to reorder sets.")))
 
 (comment
-  (sql/query @db-pool ["SELECT * FROM folders"])
+  (sql/query @db-pool ["SELECT * FROM questions"])
 
   ;; --- Migration script to convert existing question_data keys to kebab-case ---
   (require '[clojure.walk :as walk])
