@@ -7,7 +7,7 @@
             [zi-study.frontend.components.input :refer [text-input]]
             [zi-study.frontend.components.alert :refer [alert]]
             [zi-study.frontend.components.card :refer [card]]
-            [zi-study.frontend.components.skeleton :as skeleton]
+            [zi-study.frontend.components.skeleton :refer [skeleton skeleton-text skeleton-card]]
             [zi-study.frontend.components.pagination :refer [pagination]]
             [zi-study.frontend.components.questions.written-question :refer [written-question]]
             [zi-study.frontend.components.questions.mcq-single-question :refer [mcq-single-question]]
@@ -18,14 +18,35 @@
             [clojure.string :as str]
             ["lucide-react" :as lucide-icons]))
 
-(defn- question-card-skeleton [] ; Simplified skeleton for search results
-  [card {:class "mb-6"}
-   [:div {:class "p-5"}
-    [:div {:class "mb-3 pb-3 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] flex items-center gap-2"}
-     [:div {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
-      "From set:"]
-     [skeleton/skeleton {:variant :text :width "50%" :height "1.25rem"}]] ; Set title placeholder
-    [skeleton/skeleton {:variant :rectangular :width "100%" :height "6rem"}]]])
+(defn- question-card-skeleton [_props]
+  (let [options-count 4] ; Match the original debounce value
+    [skeleton-card
+     {:class "mb-6"
+      :animation :pulse}
+     [:div {:class "p-5"}
+      ;; Header with set title
+      [:div {:class "mb-3 pb-3 border-b border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] flex items-center gap-2"}
+       [:span {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"}
+        "From set:"]
+       [skeleton {:variant :text :width "50%" :height "1.25rem" :debounce 0}]]
+
+      ;; Question content area
+      [:div {:class "mb-4"}
+       [skeleton-text {:rows 2
+                       :variant-width true
+                       :debounce 0}]]
+
+      ;; Question options/answers area
+      [:div {:class "mt-4"}
+       (for [i (range options-count)]
+         ^{:key (str "option-" i)}
+         [:div {:class "mb-3 flex items-center gap-2"}
+          [skeleton {:variant :circular :width "1.25rem" :height "1.25rem" :debounce 0}]
+          [skeleton {:variant :text :width (str (- 80 (* i 5)) "%") :height "1.25rem" :debounce 0}]])
+
+       ;; Bottom action area for submit button or other controls
+       [:div {:class "flex justify-end mt-6"}
+        [skeleton {:variant :rectangular :width "6rem" :height "2.25rem" :class "rounded-md" :debounce 0}]]]]]))
 
 (defn- searched-question-card [{:keys [question]}]
   (let [{:keys [question-id set-id question-set-title question-type]} question]

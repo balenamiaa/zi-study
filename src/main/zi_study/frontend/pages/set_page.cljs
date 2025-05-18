@@ -11,7 +11,7 @@
             [zi-study.frontend.components.toggle :refer [toggle]]
             [zi-study.frontend.components.dropdown :refer [dropdown menu-item]]
             [zi-study.frontend.components.card :refer [card]]
-            [zi-study.frontend.components.skeleton :as skeleton]
+            [zi-study.frontend.components.skeleton :refer [skeleton skeleton-text]]
             [zi-study.frontend.utilities :refer [cx]]
 
             [zi-study.frontend.components.questions.written-question :refer [written-question]]
@@ -28,57 +28,57 @@
 (defn- set-progress-header-skeleton []
   [:div {:class "mb-8 rounded-xl overflow-hidden shadow-sm border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] bg-white dark:bg-[var(--color-dark-bg-paper)]"}
    [:div {:class "p-6"}
-    [skeleton/skeleton {:variant :text :width "60%" :height "2rem" :class "mb-3"}] ;; Title
-    [skeleton/skeleton {:variant :text :width "80%" :height "1rem" :class "mb-4"}]  ;; Description
+    [skeleton {:variant :text :width "60%" :height "2rem" :class "mb-3"}] ;; Title
+    [skeleton {:variant :text :width "80%" :height "1rem" :class "mb-4"}]  ;; Description
     [:div {:class "flex flex-wrap gap-2 mb-6"} ;; Tags
-     (for [_ (range 3)] ^{:key (gensym "tag-skel-")} [skeleton/skeleton {:variant :rectangular :width "5rem" :height "1.5rem"}])]
+     (for [_ (range 3)] ^{:key (gensym "tag-skel-")} [skeleton {:variant :rectangular :width "5rem" :height "1.5rem"}])]
     [:div {:class "flex items-center justify-between"}
      [:div {:class "flex gap-6"} ;; Stats
       (for [_ (range 3)]
         ^{:key (gensym "stat-skel-")}
         [:div {:class "text-center"}
-         [skeleton/skeleton {:variant :text :width "3rem" :height "2rem" :class "mb-1 mx-auto"}]
-         [skeleton/skeleton {:variant :text :width "4rem" :height "0.8rem" :class "mx-auto"}]])]
+         [skeleton {:variant :text :width "3rem" :height "2rem" :class "mb-1 mx-auto"}]
+         [skeleton {:variant :text :width "4rem" :height "0.8rem" :class "mx-auto"}]])]
      [:div {:class "w-32 h-32 relative flex items-center justify-center"} ;; Progress circle
-      [skeleton/skeleton {:variant :circular :width "8rem" :height "8rem"}]]]]])
+      [skeleton {:variant :circular :width "8rem" :height "8rem"}]]]]])
 
 (defn- filter-controls-skeleton []
   [card {:class "mb-6"}
    [:div {:class "p-4"}
     [:div {:class "flex gap-4 mb-4"}
      [:div {:class "flex-grow"}
-      [skeleton/skeleton {:variant :rectangular :height "2.5rem"}]] ;; Search input
+      [skeleton {:variant :rectangular :height "2.5rem"}]] ;; Search input
      [:div {:class "flex-shrink-0"}
-      [skeleton/skeleton {:variant :rectangular :width "8rem" :height "2.5rem"}]]] ;; Difficulty dropdown
+      [skeleton {:variant :rectangular :width "8rem" :height "2.5rem"}]]] ;; Difficulty dropdown
     [:div {:class "flex items-center justify-between"}
      [:div {:class "flex items-center gap-4"}
-      [skeleton/skeleton {:variant :rectangular :width "6rem" :height "2.5rem"}] ;; Status dropdown
-      [skeleton/skeleton {:variant :rectangular :width "8rem" :height "2.5rem"}]] ;; Bookmark toggle
-     [skeleton/skeleton {:variant :rectangular :width "7rem" :height "2.25rem"}]]] ;; Reset button
+      [skeleton {:variant :rectangular :width "6rem" :height "2.5rem"}] ;; Status dropdown
+      [skeleton {:variant :rectangular :width "8rem" :height "2.5rem"}]] ;; Bookmark toggle
+     [skeleton {:variant :rectangular :width "7rem" :height "2.25rem"}]]] ;; Reset button
    ])
 
 (defn- question-badge-strip-skeleton []
   [card {:class "mb-6" :variant :outlined}
    [:div {:class "p-4"}
     [:div {:class "flex items-center justify-between mb-3"}
-     [skeleton/skeleton {:variant :text :width "40%" :height "1.25rem"}] ;; Title
-     [skeleton/skeleton {:variant :rectangular :width "7rem" :height "2rem"}]] ;; Clear all button placeholder
+     [skeleton {:variant :text :width "40%" :height "1.25rem"}] ;; Title
+     [skeleton {:variant :rectangular :width "7rem" :height "2rem"}]] ;; Clear all button placeholder
     [:div {:class "px-4 pb-4 mt-3"}
      [:div {:class "flex flex-wrap gap-2"}
-      (for [_ (range 10)] ^{:key (gensym "badge-skel-")} [skeleton/skeleton {:variant :circular :width "2rem" :height "2rem"}])]]]])
+      (for [_ (range 10)] ^{:key (gensym "badge-skel-")} [skeleton {:variant :circular :width "2rem" :height "2rem"}])]]]])
 
 (defn- question-card-skeleton []
   [card {:class "mb-8" :variant :outlined}
    [:div {:class "p-5 flex items-start justify-between gap-4"}
     [:div {:class "flex items-start flex-grow"}
-     [skeleton/skeleton {:variant :circular :width "2rem" :height "2rem" :class "mr-3"}] ;; Number badge
+     [skeleton {:variant :circular :width "2rem" :height "2rem" :class "mr-3"}] ;; Number badge
      [:div {:class "flex-grow"}
-      [skeleton/skeleton {:variant :text :width "70%" :height "1.25rem" :class "mb-2"}] ;; Question text
-      [skeleton/skeleton {:variant :text :width "50%" :height "1rem"}]]] ;; Retention hint placeholder
-    [skeleton/skeleton {:variant :circular :width "2rem" :height "2rem"}]] ;; Bookmark button area
+      [skeleton {:variant :text :width "70%" :height "1.25rem" :class "mb-2"}] ;; Question text
+      [skeleton {:variant :text :width "50%" :height "1rem"}]]] ;; Retention hint placeholder
+    [skeleton {:variant :circular :width "2rem" :height "2rem"}]] ;; Bookmark button area
    [:div {:class "p-5 pt-0"}
-    [skeleton/skeleton-text {:rows 3 :variant-width true :class "mb-4"}] ;; Placeholder for question content (options/textarea)
-    [skeleton/skeleton {:variant :rectangular :width "8rem" :height "2.25rem" :class "ml-auto"}]] ;; Submit button area
+    [skeleton-text {:rows 3 :variant-width true :class "mb-4"}] ;; Placeholder for question content (options/textarea)
+    [skeleton {:variant :rectangular :width "8rem" :height "2.25rem" :class "ml-auto"}]] ;; Submit button area
    ])
 
 (defn apply-filters [set-id]

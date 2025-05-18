@@ -12,7 +12,7 @@
    [zi-study.frontend.components.input :refer [text-input textarea]]
    [zi-study.frontend.components.modal :refer [modal]]
    [zi-study.frontend.components.pagination :refer [pagination]]
-   [zi-study.frontend.components.skeleton :refer [skeleton]]
+   [zi-study.frontend.components.skeleton :refer [skeleton-text skeleton-card]]
    [zi-study.frontend.components.toggle :refer [toggle]]
    [zi-study.frontend.routes :as routes]
    [zi-study.frontend.state :as state]
@@ -499,11 +499,11 @@
                                    [:p {:class "text-[var(--color-light-text-primary)] dark:text-[var(--color-dark-text-primary)] whitespace-pre-wrap"} (:description details)])]]
 
                                ; Skeleton for header
-                               [:div {:class "space-y-3 animate-pulse"}
-                                [:div {:class "h-8 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded w-1/2"}]
-                                [:div {:class "h-4 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded w-1/3 mb-2"}]
-                                [:div {:class "h-4 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded w-3/4"}]
-                                [:div {:class "h-4 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded w-full mt-1"}]])])
+                               [:div {:class "space-y-3"}
+                                [skeleton-text {:rows 4
+                                                :variant-width true
+                                                :animation :pulse
+                                                :class "w-full"}]])])
 
             render-sets-section (fn []
                                   [:section {:aria-labelledby "sets-in-folder-heading" :class "mt-2"}
@@ -524,11 +524,11 @@
                                      [:div {:class "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"}
                                       (for [i (range (max 1 (count question-sets)))]
                                         ^{:key (str "managing-set-skeleton-" i)}
-                                        [card {:class "h-64 animate-pulse rounded-lg"}
-                                         [card-content {}
-                                          [skeleton {:class "h-5 w-3/4 mb-2"}]
-                                          [skeleton {:class "h-3 w-1/2 mb-4"}]
-                                          [skeleton {:class "h-12 w-full"}]]])]
+                                        [skeleton-card {:animation :pulse
+                                                        :header true
+                                                        :media false
+                                                        :content-rows 3
+                                                        :footer true}])]
 
                                      (empty? question-sets)
                                      [:div {:class "flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] rounded-lg mt-4 bg-[var(--color-light-bg-subtle)] dark:bg-[var(--color-dark-bg-subtle)]"}
@@ -553,18 +553,16 @@
                                                    :folder-id folder-id}])])])
 
             render-loading-state (fn []
-                                   [:div {:class "animate-pulse"}
+                                   [:div
                                     [render-header]
                                     [:div {:class "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"}
                                      (for [i (range 3)]
                                        ^{:key (str "skeleton-set-" i)}
-                                       [card {:class "h-64"}
-                                        [card-content {}
-                                         [skeleton {:class "h-6 w-3/4 mb-3"}]
-                                         [skeleton {:class "h-4 w-1/2 mb-5"}]
-                                         [skeleton {:class "h-16 w-full"}]]
-                                        [card-footer {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-                                         [skeleton {:class "h-8 w-full"}]]])]])
+                                       [skeleton-card {:animation :pulse
+                                                       :header true
+                                                       :media false
+                                                       :content-rows 3
+                                                       :footer true}])]])
 
             render-error-state (fn []
                                  [:div {:class "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 text-red-700 dark:text-red-300 rounded-lg p-6 text-center my-8"}

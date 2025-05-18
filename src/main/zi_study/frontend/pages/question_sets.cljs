@@ -9,7 +9,7 @@
             [zi-study.frontend.components.button :refer [button]]
             [zi-study.frontend.components.badge :refer [badge]]
             [zi-study.frontend.components.alert :refer [alert]]
-            [zi-study.frontend.components.skeleton :as skeleton]
+            [zi-study.frontend.components.skeleton :refer [skeleton-card skeleton-text]]
             [zi-study.frontend.components.pagination :refer [pagination]]
             ["lucide-react" :as lucide-icons]))
 
@@ -160,7 +160,7 @@
 
 ;; --- Skeleton for Question Set Card ---
 (defn question-set-card-skeleton []
-  [skeleton/skeleton-card
+  [skeleton-card
    {:header true
     :media false ; No big media image in the actual card, so media skeleton not needed
     :content-rows 2
@@ -247,7 +247,7 @@
            (cond
              tags-loading?
              [:div {:class "mt-4 p-4"}
-              [skeleton/skeleton-text {:rows 2 :variant-width true}]]
+              [skeleton-text {:rows 2 :variant-width true}]]
 
              (seq (:list tags-state))
              [:div {:class "mt-4"}
@@ -283,7 +283,7 @@
                ^{:key (gensym "skeleton-set-")}
                [question-set-card-skeleton])]])
          ;; Content when not loading
-         (when (and (empty? question-sets) (not error)) ; Show empty state only if no error and not loading
+         (when (and (empty? question-sets) (not error) (not sets-loading?)) ; Show empty state only if no error and not loading
            [:div {:class "mt-6"}
             [empty-state
              {:on-reset #(do

@@ -5,7 +5,7 @@
    [zi-study.frontend.state :as state]
    [zi-study.frontend.utilities.http :as http]
    [zi-study.frontend.components.card :refer [card card-content  card-header]]
-   [zi-study.frontend.components.skeleton :refer [skeleton-text]]
+   [zi-study.frontend.components.skeleton :refer [skeleton-text skeleton-card]]
    [zi-study.frontend.components.input :refer [text-input]]
    [zi-study.frontend.components.folder-display-card :refer [folder-display-card]]))
 
@@ -23,14 +23,11 @@
      loading?
      (for [i (range 6)]
        ^{:key (str "skeleton-" i)}
-       [card {:class "h-64"}
-        [card-header {:title [skeleton-text {:width "70%"}]
-                      :subtitle [skeleton-text {:width "30%"}]}]
-        [card-content
-         [:div {:class "space-y-2"}
-          [skeleton-text {:width "100%"}]
-          [skeleton-text {:width "100%"}]
-          [skeleton-text {:width "60%"}]]]])
+       [skeleton-card {:header true
+                       :media false
+                       :content-rows 3
+                       :footer false
+                       :class "h-64"}])
 
      (empty? folders)
      [:div {:class "col-span-full flex flex-col items-center justify-center py-12 text-center"}
