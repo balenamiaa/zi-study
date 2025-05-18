@@ -180,19 +180,9 @@
 
   (println "Backend shutdown complete."))
 
-(defn -main [& args]
-  (let [port (or (some-> (first args) (Integer/parseInt)) 3000)]
-    (try
-      (start-server port)
-      (.addShutdownHook (Runtime/getRuntime) (Thread. #'stop-server))
-      (println "Backend started successfully.")
-      (catch Exception e
-        (println "Failed to start backend:" (ex-message e))
-        (System/exit 1)))))
-
 
 (comment
-  (-main)
+  (start-server 3000)
 
   (stop-server)
 
