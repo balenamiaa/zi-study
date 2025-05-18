@@ -22,13 +22,6 @@
             [clojure.string :as str]
             [clojure.java.shell :as shell]))
 
-(defn index-handler [_]
-  (let [response (resp/file-response "index.html" {:root "public"})]
-    (-> response
-        (resp/content-type "text/html")
-        (assoc-in [:headers "Content-Disposition"] "inline"))))
-
-
 (defn spa-handler [request]
   (if (str/starts-with? (:uri request) "/api")
     (resp/not-found "Not Found")
@@ -37,9 +30,15 @@
           (resp/content-type "text/html")
           (assoc-in [:headers "Content-Disposition"] "inline")))))
 
+(defn not-found-handler [_request]
+  (-> (resp/not-found "Not Found by Ring backend.")
+      (resp/content-type "text/plain")))
+
+(defn dev-mode? []
+  (= "development" (or (System/getProperty "JVM_ENV") "development")))
+
 (def routes
-  [["/" {:get index-handler}]
-   ["/api/auth" {}
+  [["/api/auth" {}
     ["/register" {:post {:handler auth/register-handler
                          :middleware [parameters-middleware
                                       muuntaja/format-request-middleware
@@ -78,9 +77,6 @@
      ["/bookmark" {:post {:handler alh/toggle-bookmark-handler}}]]
     ["/bookmarks" {:get {:handler alh/list-bookmarks-handler}}]]])
 
-(defn dev-mode? []
-  (= "development" (or (System/getProperty "JVM_ENV") "development")))
-
 (def app
   (-> (ring/ring-handler
        (ring/router
@@ -96,9 +92,8 @@
        (if (dev-mode?)
          (ring/routes
           (ring/create-file-handler {:path "/public" :root "public"})
-               ; use spa-handler for all unmatched routes
           spa-handler)
-         spa-handler))
+         not-found-handler))
       (wrap-content-type)
       (wrap-not-modified)))
 
@@ -137,8 +132,6 @@
       (catch Exception e
         (println "Error starting shadow-cljs:" (ex-message e)))))
 
-  (println "Starting server on port" port)
-  (println "Serving static files from public directory")
   (println (str "Hosted on http://localhost:" port))
 
   (println "Starting http-kit server...")
