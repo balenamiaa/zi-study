@@ -233,6 +233,42 @@ All components use the `cx` utility function for managing class names, which pro
 - Support for conditional dynamic class application
 - Better dark/light mode theme transitions
 
+### Question Components
+
+Question components follow consistent design patterns to ensure a cohesive experience across different question types.
+
+#### Question Header
+
+- **Structure**: Flexible layout with question number badge, text, and action buttons
+- **Badge**: Circular or slanted design based on question content
+- **Action Buttons**: Vertical arrangement of bookmark and clear buttons
+- **Clear Button**: Trash icon with consistent placement, disabled (opacity 40%) when not answered
+- **Bookmark Button**: Toggle with appropriate states for bookmarked/not bookmarked
+
+#### Explanation Section
+
+- **Toggle Button**: Central positioning with eye/eye-off icon
+- **Content**: 
+  - When visible: Smooth transition to full size with subtle blue background
+  - When hidden: Zero height and padding with absolute positioning to avoid layout shifts
+- **Transitions**: 
+  - Smooth opacity and max-height transitions (300ms)
+  - Zero height/margin/padding when hidden to avoid taking space
+  - `pointer-events-none` when hidden to prevent interaction
+  
+#### Answer Status Indicators
+
+- **Correct Answers**: Green styling (#2E7D32) with subtle background tint
+- **Incorrect Answers**: Red styling (#D32F2F) with subtle background tint
+- **Neutral State**: Light gray or theme-appropriate neutral styling
+- **Icons**: Checkmarks and X marks properly aligned with text
+
+#### Retention Hints
+
+- **Styling**: Light secondary color background with icon
+- **Layout**: Full width with proper spacing and text alignment
+- **Visibility**: Only displayed after question is answered
+
 ### Buttons
 
 Buttons have been redesigned for better visual impact and interaction feedback:
@@ -520,6 +556,35 @@ Material-style ripple effect provides tactile feedback for interactive elements:
   - `position: absolute`, `border-radius: 50%`, `background-color: rgba(255, 255, 255, 0.5)` (dark: `bg-primary-50`).
   - Animation: `ripple 0.6s var(--animation-standard)` (scales up and fades out).
 - Works for nested elements (propagates to parent via JS).
+
+### Component Transitions
+
+#### Explanation Section
+
+Explanation sections use carefully crafted transitions to ensure smooth visibility changes without layout shifts:
+
+- **Visible State**: 
+  - `opacity-100 max-h-[2000px]`
+  - Normal padding and spacing
+  - Visible content with proper background
+
+- **Hidden State**:
+  - `opacity-0 max-h-0 h-0 m-0 p-0 overflow-hidden pointer-events-none absolute`
+  - Zero height ensures no space is taken up when hidden
+  - Absolute positioning removes from normal document flow
+  - `pointer-events-none` prevents any interaction
+  - All properties transition smoothly for a clean effect
+
+- **Animation Timing**: Uses the standard animation curve with 300ms duration for a natural feel
+
+#### Question State Changes
+
+Question components utilize smooth transitions between states:
+
+- Answered/unanswered state changes use color transitions
+- Badge colors transition smoothly when status changes
+- Button states (disabled, enabled) use opacity transitions
+- All transitions use consistent timing functions from the design system
 
 ### Micro-interactions
 

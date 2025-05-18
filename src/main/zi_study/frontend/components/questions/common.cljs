@@ -100,7 +100,7 @@
 
            [:div {:id container-id-str
                   :ref (fn [el] (reset! container-ref el))
-                  :class (str "mt-1 p-2.5 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"
+                  :class (str "mt-1 p-2.5 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md "
                               (if show-explanation?
                                 "opacity-100 max-h-[2000px]"
                                 "opacity-0 max-h-0 h-0 m-0 p-0 overflow-hidden pointer-events-none absolute"))}
@@ -134,15 +134,15 @@
        ;; Bookmark button
        [bookmark-button {:question-id question-id
                          :bookmarked bookmarked}]
-
+       
        ;; Clear button - always visible but disabled unless submitted
        [:div {:class (str "inline-flex items-center justify-center w-8 h-8 rounded-full transition-all flex-shrink-0 "
-                          (if @clearing
-                            "bg-[var(--color-error-100)] dark:bg-[rgba(var(--color-error-rgb),0.2)]"
-                            (if submitted?
-                              "cursor-pointer hover:bg-[var(--color-error-50)] dark:hover:bg-[rgba(var(--color-error-rgb),0.1)]"
-                              "opacity-40 cursor-default")))}
-        [:div {:on-click (fn []
+                        (if @clearing
+                          "bg-[var(--color-error-100)] dark:bg-[rgba(var(--color-error-rgb),0.2)]"
+                          (if submitted?
+                            "cursor-pointer hover:bg-[var(--color-error-50)] dark:hover:bg-[rgba(var(--color-error-rgb),0.1)]"
+                            "opacity-40 cursor-default")))}
+        [:div {:on-click (fn [] 
                            (when (and submitted? (not @clearing))
                              (reset! clearing true)
                              (clear-fn (fn [_] (reset! clearing false)))))}
