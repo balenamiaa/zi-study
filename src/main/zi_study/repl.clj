@@ -68,10 +68,3 @@
   ;; Keep the main thread alive
   @(promise))
 
-(comment
-  ;; To start the servers manually from a REPL (example for web port)
-  ;; (start-servers 3000)
-
-  ;; To stop them
-  ;; (stop-servers)
-  )

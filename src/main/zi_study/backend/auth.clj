@@ -16,7 +16,7 @@
 (def ^:private jwt-secret "replace-this-with-a-very-strong-secret-key-preferably-from-env")
 (def ^:private jwt-algorithm (Algorithm/HMAC256 jwt-secret))
 (def ^:private jwt-issuer "zi-study-app")
-(def ^:private token-expiry-millis (* 1000 60 60 24)) ; 24 hours
+(def ^:private token-expiry-millis (* 1000 60 60 24 30)) ; 30 days
 
 ;; --- Password Hashing --- 
 (defn hash-password [raw-password]

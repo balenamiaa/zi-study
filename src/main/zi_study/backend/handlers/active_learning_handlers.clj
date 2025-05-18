@@ -873,7 +873,8 @@
     (unauthorized "Authentication required to reorder sets.")))
 
 (comment
-  (sql/query @db-pool ["SELECT * FROM questions"])
+  (sql/query @db-pool ["SELECT * FROM users"])
+  (sql/query @db-pool ["DELETE FROM users WHERE id = 2"])
 
   ;; --- Migration script to convert existing question_data keys to kebab-case ---
   (require '[clojure.walk :as walk])
