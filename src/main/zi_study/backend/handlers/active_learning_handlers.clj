@@ -300,7 +300,7 @@
 
 (defn submit-answer-handler [request]
   (if-let [user-id (get-user-id request)]
-    (let [question-id (parse-query-param (:path-params request) :question-id :int)
+    (let [question-id (parse-query-param (:path-params request) :question-id :string)
           raw-answer-data (:body-params request)]
       (cond
         (not question-id)
@@ -352,7 +352,7 @@
 
 (defn self-evaluate-handler [request]
   (if-let [user-id (get-user-id request)]
-    (let [question-id (parse-query-param (:path-params request) :question-id :int)
+    (let [question-id (parse-query-param (:path-params request) :question-id :string)
           body-params (:body-params request)
           is-correct (when (contains? body-params :is-correct) (:is-correct body-params))]
       (cond
@@ -405,7 +405,7 @@
 
 (defn toggle-bookmark-handler [request]
   (if-let [user-id (get-user-id request)]
-    (let [question-id (parse-query-param (:path-params request) :question-id :int)
+    (let [question-id (parse-query-param (:path-params request) :question-id :string)
           body-params (:body-params request)
           new-bookmarked (:bookmarked body-params)]
       (if (and question-id (some? new-bookmarked))
@@ -457,7 +457,7 @@
 
 (defn delete-answer-handler [request]
   (if-let [user-id (get-user-id request)]
-    (let [question-id (parse-query-param (:path-params request) :question-id :int)]
+    (let [question-id (parse-query-param (:path-params request) :question-id :string)]
       (if question-id
         (try
           (let [rows-affected (:next.jdbc/update-count

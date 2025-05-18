@@ -221,8 +221,7 @@
              (fn [result]
                (if (:success result)
                  (do
-                   (let [;; Get the question directly from the registry
-                         question (get-in @state/app-state [:questions-registry question-id])
+                   (let [question @(state/get-question-from-registry question-id)
                          updated-user-answer (assoc (:user-answer question) :is-correct (if is-correct 1 0))]
 
                      ;; Update in the registry only

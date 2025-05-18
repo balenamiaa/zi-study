@@ -105,7 +105,7 @@
 
               text (:text question-data)
               options (:options question-data)
-              actual-correct-indices-set (set (:correct_indices question-data))
+              actual-correct-indices-set (set (:correct-indices question-data))
               explanation (:explanation question-data)
 
               current-selection @selected-indices-atom

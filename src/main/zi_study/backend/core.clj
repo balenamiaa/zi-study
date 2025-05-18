@@ -139,7 +139,7 @@
 
   (println "Starting server on port" port)
   (println "Serving static files from public directory")
-  (println "Visit http://localhost:" port " to access the application")
+  (println (str "Hosted on http://localhost:" port))
 
   (println "Starting http-kit server...")
   (try
