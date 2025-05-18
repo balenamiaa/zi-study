@@ -89,7 +89,6 @@
       :reagent-render
       (fn [props]
         (let [{:keys [question-id question-data user-answer retention-aid bookmarked index]} props
-              _ (prn question-data)
               ;; State from global app-state (reagent reactions)
               submission-state-from-global (q-common/get-deref-answer-submission-state question-id)
 
