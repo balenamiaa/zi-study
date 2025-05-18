@@ -8,7 +8,7 @@
 (defn mcq-single-option
   "A single MCQ option component"
   [{:keys [option is-selected is-correct is-actually-correct answered-globally pending-globally on-click]}]
-  [:div {:class (str "mb-3 p-3 rounded-md border-2 transition-all flex items-center "
+  [:div {:class (str "mb-2 p-2.5 rounded-md border-2 transition-all duration-300 flex items-center "
                      (if pending-globally "cursor-wait" "cursor-pointer ")
                      (cond
                        ;; Pending state for the selected item (this specific option is being submitted)
@@ -32,7 +32,7 @@
                        "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] hover:border-[var(--color-primary-300)] dark:hover:border-[var(--color-primary-400)]"))
          :on-click (when (not pending-globally) on-click)}
 
-   [:div {:class (str "w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center mr-3 "
+   [:div {:class (str "w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center mr-2.5 transition-all duration-300 "
                       (cond
                         (and is-selected pending-globally) "border-2 border-[var(--color-primary)]"
                         (and answered-globally is-selected is-correct) "border-2 border-[var(--color-success)]"
@@ -41,27 +41,36 @@
                         :else "border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"))}
     (cond
       (and is-selected pending-globally) ; Spinner if this option is selected and a submission is globally pending
-      [:> lucide-icons/Loader2 {:size 16 :className "text-[var(--color-primary)] animate-spin"}]
+      [:> lucide-icons/Loader2 {:size 16 :className "flex-shrink-0 text-[var(--color-primary)] animate-spin"}]
 
       (and answered-globally is-selected is-correct)
-      [:> lucide-icons/Check {:size 16 :className "text-[var(--color-success)]"}]
+      [:> lucide-icons/Check {:size 16 :className "flex-shrink-0 text-[var(--color-success)] transition-opacity duration-300"}]
 
       (and answered-globally is-selected (not is-correct))
-      [:> lucide-icons/X {:size 16 :className "text-[var(--color-error)]"}]
+      [:> lucide-icons/X {:size 16 :className "flex-shrink-0 text-[var(--color-error)] transition-opacity duration-300"}]
 
       is-selected ; Selected but not yet answered-globally and not pending
-      [:div {:class "w-3 h-3 rounded-full bg-[var(--color-primary)]"}]
+      [:div {:class "w-3 h-3 rounded-full bg-[var(--color-primary)] transition-all duration-300"}]
 
       :else nil)]
 
-   [:div {:class (str "flex-grow " (when (and is-selected pending-globally) "text-[var(--color-primary)]"))} option]
+   [:div {:class (str "flex-grow transition-colors duration-300 " (when (and is-selected pending-globally) "text-[var(--color-primary)]"))} option]
 
-   ;; Show check mark on the *actually correct* option if the question has been answered globally and not pending
-   (when (and answered-globally (not pending-globally) is-actually-correct)
-     [:> lucide-icons/Check {:size 20 :className "ml-auto text-[var(--color-success)]"}])
-   ;; Show X mark on a submitted incorrect option if question answered globally and not pending
-   (when (and answered-globally (not pending-globally) is-selected (not is-correct))
-     [:> lucide-icons/X {:size 20 :className "ml-auto text-[var(--color-error)]"}])])
+   ;; Status icons on the right side
+   [:div {:class "ml-auto flex-shrink-0"}
+    ;; Check mark for correct answer (visible when answered and this is actually correct)
+    [:div {:class "transition-all duration-300 transform"
+           :style {:opacity (if (and answered-globally (not pending-globally) is-actually-correct) "1" "0"),
+                   :transform (if (and answered-globally (not pending-globally) is-actually-correct) "scale(1)" "scale(0.8)"),
+                   :display (if (and answered-globally (not pending-globally) is-actually-correct) "block" "none")}}
+     [:> lucide-icons/Check {:size 18 :className "text-[var(--color-success)]"}]]
+    
+    ;; X mark (visible when answered, selected, and incorrect)
+    [:div {:class "transition-all duration-300 transform"
+           :style {:opacity (if (and answered-globally (not pending-globally) is-selected (not is-correct)) "1" "0"),
+                   :transform (if (and answered-globally (not pending-globally) is-selected (not is-correct)) "scale(1)" "scale(0.8)"),
+                   :display (if (and answered-globally (not pending-globally) is-selected (not is-correct)) "block" "none")}}
+     [:> lucide-icons/X {:size 18 :className "text-[var(--color-error)]"}]]]])
 
 (defn mcq-single-question []
   (let [current-selected-idx-atom (r/atom nil) ; User's current visual selection, before/during submission
@@ -119,7 +128,7 @@
                          (http/delete-answer question-id callback)
                          (reset! current-selected-idx-atom nil))]
 
-          [card {:class "mb-8" :variant :outlined}
+          [card {:class "mb-6" :variant :outlined}
            [q-common/question-header {:index (inc index)
                                       :question-id question-id
                                       :text text
@@ -129,7 +138,7 @@
                                       :bookmarked bookmarked
                                       :clear-fn clear-fn}]
 
-           [:div {:class "px-3 pb-3"}
+           [:div {:class "p-2"}
             (doall
              (for [[idx option-text] (map-indexed vector options)]
                (let [;; Determine if this option is the one currently visually selected by the user OR the one pending submission
@@ -159,10 +168,11 @@
                                      :pending-globally is-submission-pending-globally?
                                      :on-click #(handle-option-click idx)}])))]
 
-           (when (and is-globally-answered? explanation)
+           (when explanation
              [q-common/explanation-section
               {:explanation-id (str "explanation-" question-id)
                :explanation explanation
                :rx-show-explanation? show-explanation?
                :on-toggle #(swap! show-explanation? not)
+               :disabled? (not is-globally-answered?)
                :question-id question-id}])]))})))

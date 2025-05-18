@@ -918,9 +918,14 @@
       (println "Migration completed.")))
 
   (jdbc/with-transaction [tx @db-pool]
-    (migrate-question-data-to-kebab-case tx))
+    (migrate-question-data-to-kebab-case tx)))
 
-  ; Update FTS for existing questions (this might be useful after migration or separately)
+
+(comment
+  (->> (sql/query @db-pool ["SELECT * FROM questions_fts"])
+      (reverse)
+      (take 50))
+
   (jdbc/with-transaction [tx @db-pool {:builder-fn rs/as-unqualified-kebab-maps}]
     (let [questions (jdbc/execute! tx ["SELECT question_id, set_id, question_type, question_data, retention_aid FROM questions"] jdbc-opts)]
       (doseq [q questions]

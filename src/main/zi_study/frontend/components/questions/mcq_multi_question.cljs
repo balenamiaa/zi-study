@@ -8,7 +8,7 @@
 
 (defn- mcq-multi-option
   [{:keys [option-text option-idx selected? actual-correct? globally-answered? pending-globally? on-click]}]
-  [:div {:class (str "mb-3 p-3 rounded-md border-2 transition-all flex items-center "
+  [:div {:class (str "mb-2 p-2.5 rounded-md border-2 transition-all duration-300 flex items-center "
                      (if pending-globally? "cursor-wait" "cursor-pointer ")
                      (cond
                        ;; This option is part of a pending submission and is selected
@@ -32,7 +32,7 @@
                        "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] hover:border-[var(--color-primary-300)] dark:hover:border-[var(--color-primary-400)]"))
          :on-click (when (not pending-globally?) #(on-click option-idx))}
 
-   [:div {:class (str "w-6 h-6 rounded flex-shrink-0 flex items-center justify-center mr-3 border "
+   [:div {:class (str "w-6 h-6 rounded flex-shrink-0 flex items-center justify-center mr-2.5 border transition-all duration-300 "
                       (cond
                         (and selected? pending-globally?) "border-[var(--color-primary)]"
                         (and globally-answered? selected? actual-correct?) "border-[var(--color-success)] bg-[var(--color-success-100)] dark:bg-[rgba(var(--color-success-rgb),0.2)]"
@@ -44,21 +44,26 @@
       [:> lucide-icons/Loader2 {:size 16 :className "text-[var(--color-primary)] animate-spin"}]
 
       selected? ; Show check if selected (covers submitted correct/incorrect, and pre-submission selection)
-      [:> lucide-icons/Check {:size 16 :className (cond
-                                                    (and globally-answered? actual-correct?) "text-[var(--color-success)]"
-                                                    (and globally-answered? (not actual-correct?)) "text-[var(--color-error)]"
-                                                    :else "text-[var(--color-primary)]")}]
+      [:> lucide-icons/Check {:size 16 :className (str "transition-colors duration-300 " (cond
+                                                      (and globally-answered? actual-correct?) "text-[var(--color-success)]"
+                                                      (and globally-answered? (not actual-correct?)) "text-[var(--color-error)]"
+                                                      :else "text-[var(--color-primary)]"))}]
       :else nil)]
 
-   [:div {:class (str "flex-grow "
+   [:div {:class (str "flex-grow transition-colors duration-300 "
                       (when (and selected? pending-globally?) "text-[var(--color-primary)]")
                       (when (and globally-answered? selected? actual-correct?) "text-[var(--color-success-700)] dark:text-[var(--color-success-300)]")
                       (when (and globally-answered? selected? (not actual-correct?)) "text-[var(--color-error-700)] dark:text-[var(--color-error-300)]"))}
     option-text]
 
-   ;; For MCQ-Multi, after submission, we want to indicate all actual correct answers, even if not selected by user.
-   (when (and globally-answered? (not pending-globally?) actual-correct? (not selected?))
-     [:> lucide-icons/CheckSquare {:size 20 :className "ml-auto text-[var(--color-success)] opacity-70" :title "This was a correct option"}])])
+   ;; Status icons on the right side
+   [:div {:class "ml-auto flex-shrink-0"}
+    ;; Checkmark icon for correct answers that weren't selected
+    [:div {:class "transition-all duration-300 transform"
+           :style {:opacity (if (and globally-answered? (not pending-globally?) actual-correct? (not selected?)) "1" "0"),
+                   :transform (if (and globally-answered? (not pending-globally?) actual-correct? (not selected?)) "scale(1)" "scale(0.8)"),
+                   :display (if (and globally-answered? (not pending-globally?) actual-correct? (not selected?)) "block" "none")}}
+     [:> lucide-icons/CheckSquare {:size 18 :className "text-[var(--color-success)] opacity-70" :title "This was a correct option"}]]]])
 
 (defn mcq-multi-question []
   (let [selected-indices-atom (r/atom []) ; Store as vector instead of set
@@ -131,7 +136,7 @@
                          (http/delete-answer question-id callback)
                          (reset! selected-indices-atom []))]
 
-          [card {:class "mb-8" :variant :outlined}
+          [card {:class "mb-6" :variant :outlined}
            [q-common/question-header {:index (inc index)
                                       :question-id question-id
                                       :text text
@@ -141,7 +146,7 @@
                                       :bookmarked bookmarked
                                       :clear-fn clear-fn}]
 
-           [:div {:class "p-3"}
+           [:div {:class "p-2"}
             (doall
              (for [[idx option-text] (map-indexed vector options)]
                ^{:key idx}
@@ -155,25 +160,37 @@
                                   :pending-globally? is-submission-pending-globally?
                                   :on-click handle-option-toggle}]))
 
-            (when (and is-globally-answered? is-globally-correct? (not is-submission-pending-globally?))
-              [:div {:class "mt-4 p-3 rounded-md bg-[var(--color-success-50)] dark:bg-[rgba(var(--color-success-rgb),0.1)] text-center font-medium text-[var(--color-success)]"}
-               [:> lucide-icons/CheckCircle {:size 18 :className "inline mr-2"}] "Correct!"])
-            (when (and is-globally-answered? (not is-globally-correct?) (not is-submission-pending-globally?))
-              [:div {:class "mt-4 p-3 rounded-md bg-[var(--color-error-50)] dark:bg-[rgba(var(--color-error-rgb),0.1)] text-center font-medium text-[var(--color-error)]"}
-               [:> lucide-icons/XCircle {:size 18 :className "inline mr-2"}] "Incorrect."])
+            [:div {:class (str "mt-3 p-2.5 rounded-md transition-all duration-300 "
+                              (cond
+                                (and is-globally-answered? is-globally-correct? (not is-submission-pending-globally?))
+                                "bg-[var(--color-success-50)] dark:bg-[rgba(var(--color-success-rgb),0.1)] text-center font-medium text-[var(--color-success)] opacity-100 max-h-16"
+                                
+                                (and is-globally-answered? (not is-globally-correct?) (not is-submission-pending-globally?))
+                                "bg-[var(--color-error-50)] dark:bg-[rgba(var(--color-error-rgb),0.1)] text-center font-medium text-[var(--color-error)] opacity-100 max-h-16"
+                                
+                                :else
+                                "opacity-0 max-h-0 overflow-hidden"))}
+             (cond
+               (and is-globally-answered? is-globally-correct? (not is-submission-pending-globally?))
+               [:div [:> lucide-icons/CheckCircle {:size 18 :className "inline mr-2"}] "Correct!"]
+               
+               (and is-globally-answered? (not is-globally-correct?) (not is-submission-pending-globally?))
+               [:div [:> lucide-icons/XCircle {:size 18 :className "inline mr-2"}] "Incorrect."])]
 
             (when (not is-globally-answered?)
-              [:div {:class "mt-6 flex justify-end"}
+              [:div {:class "mt-3 flex justify-end"}
                [button {:variant :primary
                         :disabled (or is-submission-pending-globally? (empty? current-selection))
                         :loading is-submission-pending-globally?
+                        :size :sm
                         :on-click handle-submit}
                 "Submit Answer"]])
 
-            (when (and is-globally-answered? explanation)
+            (when explanation
               [q-common/explanation-section
                {:explanation-id (str "explanation-" question-id)
                 :explanation explanation
                 :rx-show-explanation? show-explanation?
                 :on-toggle #(swap! show-explanation? not)
+                :disabled? (not is-globally-answered?)
                 :question-id question-id}])]]))})))

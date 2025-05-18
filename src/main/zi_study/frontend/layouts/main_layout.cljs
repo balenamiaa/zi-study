@@ -14,7 +14,7 @@
      [flashgroup {:default-position :top-right}]
 
      ;; Main content with animation - adjust top margin to accommodate floating pill navbar
-     [:main {:class "mt-20 pt-8 animate-fade-in scrollable-content"}
+     [:main {:class "mt-[calc(theme(spacing.2)+3rem)] pt-12 animate-fade-in scrollable-content"}
       [:div {:class "container mx-auto p-2"}
        children]]
 

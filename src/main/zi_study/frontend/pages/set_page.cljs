@@ -356,8 +356,8 @@
           progress-percent (if (pos? total-questions) (Math/round (* 100 (/ answered-count total-questions))) 0)]
       [:div {:class "mb-8 rounded-xl overflow-hidden shadow-sm border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] bg-white dark:bg-[var(--color-dark-bg-paper)]"}
        [:div {:class "p-6"}
-        [:h1 {:class "text-2xl font-bold mb-2"} title]
-        [:p {:class "mb-4 text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} description]
+        [:h1 {:class "text-xl sm:text-2xl font-bold mb-2"} title]
+        [:p {:class "mb-4 text-sm sm:text-base text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} description]
 
         (when (seq tags)
           [:div {:class "flex flex-wrap gap-2 mb-6"}
@@ -366,34 +366,40 @@
                           [badge {:variant :soft :color :secondary} tag])
                         tags)])
 
-        [:div {:class "flex items-center justify-between"}
-         [:div {:class "flex gap-6"}
+        ;; Two-row responsive layout - stacks on mobile, flex on larger screens
+        [:div {:class "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"}
+         ;; Stats Row - Centered on mobile
+         [:div {:class "flex justify-center gap-6 md:gap-8"}
           [:div {:class "text-center"}
-           [:div {:class "text-3xl font-bold text-[var(--color-primary)]"}
+           [:div {:class "text-xl sm:text-2xl font-bold text-[var(--color-primary)]"}
             (str correct-count "/" total-questions)]
-           [:div {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} "Correct"]]
+           [:div {:class "text-xs sm:text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} "Correct"]]
 
           [:div {:class "text-center"}
-           [:div {:class "text-3xl font-bold text-[var(--color-secondary)]"}
+           [:div {:class "text-xl sm:text-2xl font-bold text-[var(--color-secondary)]"}
             (str (- answered-count correct-count) "/" total-questions)]
-           [:div {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} "Incorrect"]]
+           [:div {:class "text-xs sm:text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} "Incorrect"]]
 
           [:div {:class "text-center"}
-           [:div {:class "text-3xl font-bold text-[var(--color-info)]"}
+           [:div {:class "text-xl sm:text-2xl font-bold text-[var(--color-info)]"}
             (str (- total-questions answered-count) "/" total-questions)]
-           [:div {:class "text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} "Remaining"]]]
+           [:div {:class "text-xs sm:text-sm text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} "Remaining"]]]
 
-         [:div {:class "w-32 h-32 relative flex items-center justify-center"}
-          [:svg {:viewBox "0 0 100 100" :class "w-full h-full transform -rotate-90"}
-           [:circle {:cx 50 :cy 50 :r 45 :fill "transparent"
-                     :stroke "var(--color-light-divider)" :stroke-width 8}]]
-          [:svg {:viewBox "0 0 100 100" :class "w-full h-full absolute top-0 left-0 transform -rotate-90"}
-           [:circle {:cx 50 :cy 50 :r 45 :fill "transparent"
-                     :stroke "var(--color-primary)" :stroke-width 8
-                     :stroke-dasharray 283
-                     :stroke-dashoffset (- 283 (* 283 (/ answered-count (if (pos? total-questions) total-questions 1))))}]]
-          [:div {:class "absolute"}
-           [:div {:class "text-2xl font-bold"} (str progress-percent "%")]]]]]])))
+         ;; Progress Circle Row - Centered on mobile
+         [:div {:class "mx-auto sm:mx-0 flex justify-center items-center"}
+          [:div {:class "w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 relative flex items-center justify-center transition-all duration-300 hover:scale-105"}
+           [:svg {:viewBox "0 0 100 100" :class "w-full h-full transform -rotate-90"}
+            [:circle {:cx 50 :cy 50 :r 45 :fill "transparent"
+                      :stroke "var(--color-light-divider)" :stroke-width 8}]]
+           [:svg {:viewBox "0 0 100 100" :class "w-full h-full absolute top-0 left-0 transform -rotate-90"}
+            [:circle {:cx 50 :cy 50 :r 45 :fill "transparent"
+                      :stroke "var(--color-primary)" :stroke-width 8
+                      :stroke-dasharray 283
+                      :stroke-dashoffset (- 283 (* 283 (/ answered-count (if (pos? total-questions) total-questions 1))))
+                      :class "transition-all duration-500"}]]
+           [:div {:class "absolute flex flex-col items-center justify-center"}
+            [:div {:class "text-base sm:text-lg md:text-xl font-bold"} (str progress-percent "%")]
+            [:div {:class "text-[8px] sm:text-[10px] md:text-xs text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)]"} "Complete"]]]]]]])))
 
 
 (defn set-page [match]

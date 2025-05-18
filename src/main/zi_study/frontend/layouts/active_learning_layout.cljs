@@ -37,7 +37,7 @@
 
      [flashgroup {:default-position :top-right}]
 
-     [:div {:class "flex flex-1 mt-[calc(theme(spacing.2)+60px)]"}
+     [:div {:class "flex flex-1 mt-[calc(theme(spacing.2)+3rem)]"}
       [active-learning-sidebar {:current-page active-learning-page
                                 :links sidebar-links
                                 :mobile-open? mobile-sidebar-open?

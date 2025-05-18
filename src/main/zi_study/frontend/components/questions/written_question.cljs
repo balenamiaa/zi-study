@@ -51,89 +51,88 @@
                                       :clear-fn (fn [callback]
                                                   (http/delete-answer question-id callback))}]
 
-           [:div {:class "p-3 pt-0"}
-            (if (and submitted? (not self-evaluated?))
+           [:div {:class "px-4 pb-4"}
+            [:div {:class (str "transition-all duration-300 "
+                               (if (and submitted? (not self-evaluated?))
+                                 "opacity-100 max-h-[1000px]"
+                                 "opacity-0 max-h-0 overflow-hidden pointer-events-none"))}
+             [:div {:class "mb-4 p-3 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-md"}
+              [:div {:class "font-medium mb-2"} "Your answer:"]
+              [:p (get-in user-answer [:answer-data :answer])]]
+
+             [:div {:class "mb-4 p-4 bg-[var(--color-primary-50)] dark:bg-[rgba(var(--color-primary-rgb),0.1)] rounded-md"}
+              [:div {:class "font-medium mb-2 text-[var(--color-primary)]"} "Correct answer:"]
+              [:p correct-answer]]
+
+             [:div {:class "flex justify-center gap-4 mt-6"}
+              [button {:variant :outlined
+                       :color :error
+                       :start-icon lucide-icons/X
+                       :disabled eval-loading?
+                       :loading eval-loading?
+                       :class "flex-1 max-w-40"
+                       :on-click #(http/self-evaluate question-id false (fn [_] nil))}
+               "I was wrong"]
+              [button {:variant :primary
+                       :start-icon lucide-icons/Check
+                       :disabled eval-loading?
+                       :loading eval-loading?
+                       :class "flex-1 max-w-40"
+                       :on-click #(http/self-evaluate question-id true (fn [_] nil))}
+               "I was right"]]]
+
+            [:div {:class (str "transition-all duration-300 "
+                               (if self-evaluated?
+                                 "opacity-100 max-h-[1000px]"
+                                 "opacity-0 max-h-0 overflow-hidden pointer-events-none"))}
+             [:div {:class (str "mb-6 p-4 rounded-md transition-colors duration-300 "
+                                (if is-correct?
+                                  "bg-[var(--color-success-50)] dark:bg-[rgba(var(--color-success-rgb),0.1)]"
+                                  "bg-[var(--color-error-50)] dark:bg-[rgba(var(--color-error-rgb),0.1)]"))}
+              [:div {:class (str "font-medium mb-3 flex items-center transition-colors duration-300 "
+                                 (if is-correct?
+                                   "text-[var(--color-success)]"
+                                   "text-[var(--color-error)]"))}
+               [:> (if is-correct? lucide-icons/CheckCircle lucide-icons/XCircle) {:size 20 :className "mr-2"}]
+               (if is-correct?
+                 "You marked this as correct"
+                 "You marked this as incorrect")]
+
+              [:div {:class "mb-4"}
+               [:div {:class "font-medium text-sm mb-1"} "Your answer:"]
+               [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] p-2 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-md"}
+                (get-in user-answer [:answer-data :answer])]]
+
               [:div
-               [:div {:class "mb-4 p-3 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-md"}
-                [:div {:class "font-medium mb-2"} "Your answer:"]
-                [:p (get-in user-answer [:answer-data :answer])]]
+               [:div {:class "font-medium text-sm mb-1"} "Correct answer:"]
+               [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] p-2 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-md"}
+                correct-answer]]]]
 
-               [:div {:class "mb-4 p-4 bg-[var(--color-primary-50)] dark:bg-[rgba(var(--color-primary-rgb),0.1)] rounded-md"}
-                [:div {:class "font-medium mb-2 text-[var(--color-primary)]"} "Correct answer:"]
-                [:p correct-answer]]
+            [:div {:class (str "transition-all duration-300 mt-4 "
+                               (if (not submitted?)
+                                 "opacity-100 max-h-[300px]"
+                                 "opacity-0 max-h-0 overflow-hidden pointer-events-none"))}
+             [:textarea {:value @answer-text
+                         :placeholder "Enter your answer here..."
+                         :disabled answer-loading?
+                         :on-change #(reset! answer-text (.. % -target -value))
+                         :class (str "w-full p-3 border rounded-md bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] "
+                                     "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] "
+                                     "focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-300)] "
+                                     "min-h-[120px] text-[var(--color-light-text)] dark:text-[var(--color-dark-text)]")}]
+             [:div {:class "mt-3 flex justify-end gap-2"}
+              [button {:variant :primary
+                       :disabled (or answer-loading? (str/blank? @answer-text))
+                       :loading answer-loading?
+                       :on-click #(when (not (str/blank? @answer-text))
+                                    (http/submit-answer question-id "written" {:answer @answer-text} (fn [_] nil)))}
+               "Submit Answer"]]]
 
-               (when explanation
-                 [q-common/explanation-section
-                  {:explanation-id (str "explanation-" question-id)
-                   :explanation explanation
-                   :rx-show-explanation? show-explanation?
-                   :on-toggle #(swap! show-explanation? not)
-                   :question-id question-id}])
-
-               [:div {:class "flex justify-center gap-4 mt-6"}
-                [button {:variant :outlined
-                         :color :error
-                         :start-icon lucide-icons/X
-                         :disabled eval-loading?
-                         :loading eval-loading?
-                         :class "flex-1 max-w-40"
-                         :on-click #(http/self-evaluate question-id false (fn [_] nil))}
-                 "I was wrong"]
-                [button {:variant :primary
-                         :start-icon lucide-icons/Check
-                         :disabled eval-loading?
-                         :loading eval-loading?
-                         :class "flex-1 max-w-40"
-                         :on-click #(http/self-evaluate question-id true (fn [_] nil))}
-                 "I was right"]]]
-
-              [:div
-               (when self-evaluated?
-                 [:div {:class (str "mb-6 p-4 rounded-md "
-                                    (if is-correct?
-                                      "bg-[var(--color-success-50)] dark:bg-[rgba(var(--color-success-rgb),0.1)]"
-                                      "bg-[var(--color-error-50)] dark:bg-[rgba(var(--color-error-rgb),0.1)]"))}
-                  [:div {:class (str "font-medium mb-3 flex items-center "
-                                     (if is-correct?
-                                       "text-[var(--color-success)]"
-                                       "text-[var(--color-error)]"))}
-                   [:> (if is-correct? lucide-icons/CheckCircle lucide-icons/XCircle) {:size 20 :className "mr-2"}]
-                   (if is-correct?
-                     "You marked this as correct"
-                     "You marked this as incorrect")]
-
-                  [:div {:class "mb-4"}
-                   [:div {:class "font-medium text-sm mb-1"} "Your answer:"]
-                   [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] p-2 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-md"}
-                    (get-in user-answer [:answer-data :answer])]]
-
-                  [:div
-                   [:div {:class "font-medium text-sm mb-1"} "Correct answer:"]
-                   [:p {:class "text-[var(--color-light-text-secondary)] dark:text-[var(--color-dark-text-secondary)] p-2 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-md"}
-                    correct-answer]]
-
-                  (when explanation
-                    [q-common/explanation-section
-                     {:explanation-id (str "explanation-" question-id)
-                      :explanation explanation
-                      :rx-show-explanation? show-explanation?
-                      :on-toggle #(swap! show-explanation? not)
-                      :question-id question-id}])])
-
-               (when (not submitted?)
-                 [:div {:class "mt-4"}
-                  [:textarea {:value @answer-text
-                              :placeholder "Enter your answer here..."
-                              :disabled answer-loading?
-                              :on-change #(reset! answer-text (.. % -target -value))
-                              :class (str "w-full p-3 border rounded-md bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] "
-                                          "border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] "
-                                          "focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-300)] "
-                                          "min-h-[120px] text-[var(--color-light-text)] dark:text-[var(--color-dark-text)]")}]
-                  [:div {:class "mt-3 flex justify-end gap-2"}
-                   [button {:variant :primary
-                            :disabled (or answer-loading? (str/blank? @answer-text))
-                            :loading answer-loading?
-                            :on-click #(when (not (str/blank? @answer-text))
-                                         (http/submit-answer question-id "written" {:answer @answer-text} (fn [_] nil)))}
-                    "Submit Answer"]]])])]]))})))
+            (when explanation
+              [q-common/explanation-section
+               {:explanation-id (str "explanation-" question-id)
+                :explanation explanation
+                :rx-show-explanation? show-explanation?
+                :on-toggle #(swap! show-explanation? not)
+                :disabled? (not submitted?)
+                :question-id question-id}])]]))})))

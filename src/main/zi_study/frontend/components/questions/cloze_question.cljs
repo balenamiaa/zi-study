@@ -134,23 +134,23 @@
                        (= correct-count blank-count) "text-[var(--color-success)]"
                        (= correct-count 0) "text-[var(--color-error)]"
                        :else "text-[var(--color-primary)]")]
-    [:div {:class "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-lg p-2 mb-3 shadow-sm"}
+    [:div {:class "bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-lg p-2.5 mb-3 shadow-sm transition-all duration-300"}
      [:div {:class "flex items-center justify-between mb-1.5"}
       [:div {:class "flex items-center gap-1.5"}
        [:> (cond
              (= correct-count blank-count) lucide-icons/CheckCircle
              (= correct-count 0) lucide-icons/XCircle
              :else lucide-icons/CircleDot)
-        {:size 16
+        {:size 15
          :className status-color}]
-       [:span {:class (str "font-medium text-sm " status-color)}
+       [:span {:class (str "font-medium text-xs " status-color)}
         (str correct-count "/" blank-count " correct")]]
 
       [:span {:class "text-xs font-medium bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] px-1.5 py-0.5 rounded-full"}
        (str (Math/round percentage) "%")]]
 
      ;; Enhanced progress bar
-     [:div {:class "h-2 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-full overflow-hidden"}
+     [:div {:class "h-1.5 bg-[var(--color-light-bg)] dark:bg-[var(--color-dark-bg)] rounded-full overflow-hidden"}
       [:div {:class (str "h-full transition-all duration-700 ease-out rounded-full "
                          (cond
                            (= correct-count blank-count) "bg-[var(--color-success)]"
@@ -302,13 +302,16 @@
                                       :bookmarked bookmarked
                                       :clear-fn clear-fn}]
 
-           [:div {:class "px-2.5 pb-2.5"}
+           [:div {:class "p-2"}
             ;; Show answer progress if submitted
-            (when (and submitted? @submitted-flag (pos? @blank-count))
-              [progress-section @correct-count @blank-count])
+            [:div {:class (str "transition-all duration-300 "
+                               (if (and submitted? @submitted-flag (pos? @blank-count))
+                                 "opacity-100 max-h-24"
+                                 "opacity-0 max-h-0 overflow-hidden"))}
+             [progress-section @correct-count @blank-count]]
 
             ;; The cloze passage with blanks
-            [:div {:class "text-sm sm:text-base leading-relaxed p-2.5 mb-3 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-md" :style {:line-height "2"}}
+            [:div {:class "text-sm sm:text-base leading-relaxed p-2.5 mb-2 bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] rounded-md" :style {:line-height "1.8"}}
              (doall
               (map-indexed
                (fn [idx segment]
@@ -341,18 +344,22 @@
                current-segments))]
 
             ;; Submit button (only show if not submitted)
-            (when (and (not submitted?) (pos? @blank-count))
-              [:div {:class "flex justify-end mt-3"}
-               [button {:variant :primary
-                        :disabled (or answer-submitting? (not all-blanks-filled?))
-                        :loading answer-submitting?
-                        :size :sm
-                        :on-click handle-submit}
-                "Submit"]])
+            [:div {:class (str "transition-all duration-300 "
+                               (if (and (not submitted?) (pos? @blank-count))
+                                 "opacity-100 max-h-16 mt-2"
+                                 "opacity-0 max-h-0 overflow-hidden"))}
+             [:div {:class "flex justify-end"}
+              [button {:variant :primary
+                       :disabled (or answer-submitting? (not all-blanks-filled?))
+                       :loading answer-submitting?
+                       :size :xs
+                       :on-click handle-submit}
+               "Submit"]]]
 
             ;; Explanation section
-            (when (and explanation submitted?)
+            (when explanation
               [q-common/explanation-section {:explanation explanation
                                              :rx-show-explanation? show-explanation?
                                              :on-toggle #(swap! show-explanation? not)
+                                             :disabled? (not submitted?)
                                              :question-id question-id}])]]))})))

@@ -86,66 +86,70 @@
      {:display-name "explanation-section"
 
       :reagent-render
-      (fn [{:keys [explanation rx-show-explanation? on-toggle]}]
+      (fn [{:keys [explanation rx-show-explanation? on-toggle disabled?]}]
         (let [show-explanation? @rx-show-explanation?]
-          [:div {:class "mt-5 pt-4 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-           [:div {:class "flex justify-center mb-2"}
+          [:div {:class "pt-2 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
+           [:div {:class "flex justify-center"}
             [button {:variant :outlined
-                     :size :sm
-                     :class "w-full max-w-xs"
+                     :size :xs
+                     :class "w-full max-w-xs px-2 py-1 text-xs"
+                     :disabled disabled?
                      :start-icon (if show-explanation? lucide-icons/EyeOff lucide-icons/Eye)
                      :on-click on-toggle}
              (if show-explanation? "Hide Explanation" "Show Explanation")]]
 
-           (when show-explanation?
-             [:div {:id container-id-str
-                    :ref (fn [el] (reset! container-ref el))
-                    :class "mt-3 p-4 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"}
-              [:div {:class "prose prose-sm dark:prose-invert prose-p:text-[var(--color-light-text-secondary)] dark:prose-p:text-[var(--color-dark-text-secondary)] prose-a:text-[var(--color-primary)] prose-headings:text-[var(--color-light-text)] dark:prose-headings:text-[var(--color-dark-text)] prose-headings:font-medium prose-img:rounded-md prose-pre:bg-[var(--color-light-bg)] dark:prose-pre:bg-[var(--color-dark-bg)] prose-pre:text-sm prose-code:text-[var(--color-primary-700)] dark:prose-code:text-[var(--color-primary-300)] prose-code:bg-[var(--color-primary-50)] dark:prose-code:bg-[rgba(var(--color-primary-rgb),0.1)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-strong:text-[var(--color-light-text)] dark:prose-strong:text-[var(--color-dark-text)] prose-li:marker:text-[var(--color-light-text-secondary)] dark:prose-li:marker:text-[var(--color-dark-text-secondary)] max-w-none"}
-               (prn (str explanation))
-               (let [cleaned-explanation (str/replace (str explanation) #"(?m)^ {14}" "")]
-                 [:div {:dangerouslySetInnerHTML (r/unsafe-html (marked/parse cleaned-explanation marked-options))}])]])]))})))
+           [:div {:id container-id-str
+                  :ref (fn [el] (reset! container-ref el))
+                  :class (str "mt-1 p-2.5 bg-[var(--color-info-50)] dark:bg-[rgba(var(--color-info-rgb),0.1)] rounded-md"
+                              (if show-explanation?
+                                "opacity-100 max-h-[2000px]"
+                                "opacity-0 max-h-0 h-0 m-0 p-0 overflow-hidden pointer-events-none absolute"))}
+            [:div {:class "prose prose-sm dark:prose-invert prose-p:text-[var(--color-light-text-secondary)] dark:prose-p:text-[var(--color-dark-text-secondary)] prose-a:text-[var(--color-primary)] prose-headings:text-[var(--color-light-text)] dark:prose-headings:text-[var(--color-dark-text)] prose-headings:font-medium prose-img:rounded-md prose-pre:bg-[var(--color-light-bg)] dark:prose-pre:bg-[var(--color-dark-bg)] prose-pre:text-sm prose-code:text-[var(--color-primary-700)] dark:prose-code:text-[var(--color-primary-300)] prose-code:bg-[var(--color-primary-50)] dark:prose-code:bg-[rgba(var(--color-primary-rgb),0.1)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-strong:text-[var(--color-light-text)] dark:prose-strong:text-[var(--color-dark-text)] prose-li:marker:text-[var(--color-light-text-secondary)] dark:prose-li:marker:text-[var(--color-dark-text-secondary)] max-w-none"}
+             (let [cleaned-explanation (str/replace (str explanation) #"(?m)^ {14}" "")]
+               [:div {:dangerouslySetInnerHTML (r/unsafe-html (marked/parse cleaned-explanation marked-options))}])]]]))})))
 
 (defn question-header
   "Common header component for questions"
   [{:keys [index question-id text retention-aid submitted? is-correct? bookmarked clear-fn]}]
   (let [clearing (r/atom false)
         has-text? (not (str/blank? text))]
-    [:div {:class "p-4 sm:p-5"}
-     ;; Top row with question number, text, and bookmark button
-     [:div {:class (str "flex items-start justify-between gap-2 sm:gap-4 "
+    [:div {:class "p-3 sm:p-4"}
+     ;; Top row with question number, text, and bookmark/clear buttons
+     [:div {:class (str "flex items-start justify-between gap-2 sm:gap-3 "
                         (when-not has-text? "pb-1"))}
       ;; If there's no text, create a more compact and visual badge
       (if has-text?
         ;; With text - standard layout
-        [:div {:class "flex items-start flex-grow min-w-0"} ; min-w-0 prevents flex children from overflowing
+        [:div {:class "flex items-start flex-grow min-w-0"}
          [question-number-badge index submitted? is-correct?]
          [:div {:class "min-w-0 flex-grow"} ; min-w-0 allows text to truncate properly
-          [:div {:class "font-medium text-base sm:text-lg mb-1 break-words"} text]]]
+          [:div {:class "font-medium text-base sm:text-lg mb-0.5 break-words"} text]]]
 
         ;; Without text - stylish badge with extended shape
         [:div {:class "flex items-center h-8"} ; Set height to match badge
          [slanted-question-badge index submitted? is-correct?]])
 
-      ;; Bookmark button - always visible
-      [:div {:class "flex-shrink-0 ml-2"}
+      ;; Bookmark and clear buttons - vertical layout
+      [:div {:class "flex-shrink-0 ml-auto flex flex-col gap-1"}
+       ;; Bookmark button
        [bookmark-button {:question-id question-id
-                         :bookmarked bookmarked}]]]
+                         :bookmarked bookmarked}]
+
+       ;; Clear button - always visible but disabled unless submitted
+       [:div {:class (str "inline-flex items-center justify-center w-8 h-8 rounded-full transition-all flex-shrink-0 "
+                          (if @clearing
+                            "bg-[var(--color-error-100)] dark:bg-[rgba(var(--color-error-rgb),0.2)]"
+                            (if submitted?
+                              "cursor-pointer hover:bg-[var(--color-error-50)] dark:hover:bg-[rgba(var(--color-error-rgb),0.1)]"
+                              "opacity-40 cursor-default")))}
+        [:div {:on-click (fn []
+                           (when (and submitted? (not @clearing))
+                             (reset! clearing true)
+                             (clear-fn (fn [_] (reset! clearing false)))))}
+         (if @clearing
+           [:> lucide-icons/Loader2 {:size 20 :className "animate-spin text-[var(--color-error)]"}]
+           [:> lucide-icons/Trash2 {:size 20 :className "text-[var(--color-error)]"}])]]]]
 
      ;; Middle row - retention aid (full width on mobile)
      (when (and submitted? retention-aid)
-       [retention-hint {:text retention-aid}])
-
-     ;; Bottom row - clear button (only when submitted)
-     (when submitted?
-       [:div {:class "flex justify-end mt-2"}
-        [button {:variant :text
-                 :size :sm
-                 :color :error
-                 :loading @clearing
-                 :disabled @clearing
-                 :start-icon lucide-icons/Trash2
-                 :on-click (fn []
-                             (reset! clearing true)
-                             (clear-fn (fn [_] (reset! clearing false))))}
-         "Clear"]])]))
+       [retention-hint {:text retention-aid}])]))

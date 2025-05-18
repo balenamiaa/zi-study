@@ -89,7 +89,7 @@
          [:span {:class "italic"} "No description provided."]
          description)]
       [set-card-progress {:progress progress}]]
-     [card-footer {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] pt-3 pb-3 px-4 flex justify-end"}
+     [card-footer {:class "border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)] p-2 flex justify-end"}
       [button {:variant :text :size :sm :start-icon lucide-icons/ArrowRight
                :class "text-[var(--color-primary)] dark:text-[var(--color-primary-400)]"} "View Set"]]]))
 

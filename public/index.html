@@ -1,28 +1,26 @@
 <!DOCTYPE html>
-<html class="scrollbar-gutter-stable">
+<html lang="en" class="scrollbar-gutter-stable">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AI Generated questions to study lectures more actively.">
   <title>ZI Study</title>
+  <link rel="preload" href="/public/app.output.css" as="style">
   <link rel="stylesheet" href="/public/app.output.css">
   <link rel="icon" href="/public/favicon.svg">
   <script>
     (function () {
-      // Check localStorage for the theme setting first
       const savedTheme = localStorage.getItem('app-theme');
 
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       } else if (savedTheme === 'light') {
-        // No need to add 'light' class, absence of 'dark' implies light
         document.documentElement.classList.remove('dark');
       } else {
-        // If no setting in localStorage, check system preference as a fallback
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
           document.documentElement.classList.add('dark');
         } else {
-          // Default to light if no system preference or localStorage setting
           document.documentElement.classList.remove('dark');
         }
       }
@@ -33,7 +31,7 @@
 <body>
   <div id="app">
   </div>
-  <script src="/public/js/main.js"></script>
+  <script src="/public/js/main.js" defer></script>
 </body>
 
 </html>

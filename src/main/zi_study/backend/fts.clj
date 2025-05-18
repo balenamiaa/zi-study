@@ -22,24 +22,24 @@
                        (conj
                         (case question-type
                           :mcq-single
-                          (concat [(get q-data :question_text) (get q-data :explanation)]
+                          (concat [(get q-data :question-text) (get q-data :explanation)]
                                   (map :text (get q-data :options)))
 
                           :mcq-multi
-                          (concat [(get q-data :question_text) (get q-data :explanation)]
+                          (concat [(get q-data :question-text) (get q-data :explanation)]
                                   (map :text (get q-data :options)))
 
                           :written
                           (concat
-                           [(get q-data :question_text) (get q-data :correct_answer_text) (get q-data :explanation)]
+                           [(get q-data :question-text) (get q-data :correct-answer-text) (get q-data :explanation)]
                            (when user-data [(get-in user-data [:answer])]))
 
                           :true-false
-                          [(get q-data :question_text) (get q-data :explanation)]
+                          [(get q-data :question-text) (get q-data :explanation)]
 
                           :cloze
                           (concat
-                           [(get q-data :cloze_text) (get q-data :explanation)]
+                           [(get q-data :cloze-text) (get q-data :explanation)]
                            (get q-data :answers)
                            (when user-data (get-in user-data [:answer])))
 

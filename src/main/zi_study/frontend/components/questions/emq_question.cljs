@@ -12,7 +12,7 @@
 (defn- premise-item
   "Renders a single premise item with a dropdown for selecting an option"
   [{:keys [premise options selected-option-idx disabled? pending? on-selection-change is-submitted? is-correct? actual-correct-option-idx]}]
-  [:div {:class (cx "mb-3 transition-all rounded-lg p-3 border"
+  [:div {:class (cx "mb-3 transition-all duration-300 rounded-lg p-3 border"
                     (cond
                       pending? "bg-[var(--color-primary-50)] dark:bg-[rgba(233,30,99,0.1)] border-[var(--color-primary-200)] dark:border-[var(--color-primary-700)]"
                       (and is-submitted? is-correct?) "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] border-[var(--color-success-200)] dark:border-[var(--color-success-700)]"
@@ -72,18 +72,14 @@
                      :delay 100}
             [:span {:class "truncate"} option-text]]])])]]
 
-
-   (when (and is-submitted?
-              (not is-correct?)
-              (some? actual-correct-option-idx))
-     [:div {:class (cx "mt-2 text-sm p-2 rounded-md"
-                       "bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)]"
-                       "text-[var(--color-success-700)] dark:text-[var(--color-success-300)]"
-                       "border border-[var(--color-success-200)] dark:border-[var(--color-success-700)]")}
-      [:div {:class "flex items-center"}
-       [:> lucide-icons/AlertCircle {:size 16, :class "flex-shrink-0"}]
-       [:span {:class "ml-2 font-medium"}
-        (get options actual-correct-option-idx)]]])])
+   [:div {:class (str "transition-all duration-300 transform "
+                     (if (and is-submitted? (not is-correct?) (some? actual-correct-option-idx))
+                       "mt-2 opacity-100 max-h-20 text-sm p-2 rounded-md bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] text-[var(--color-success-700)] dark:text-[var(--color-success-300)] border border-[var(--color-success-200)] dark:border-[var(--color-success-700)]"
+                       "max-h-0 opacity-0 overflow-hidden"))}
+    [:div {:class "flex items-center"}
+     [:> lucide-icons/AlertCircle {:size 16, :class "flex-shrink-0"}]
+     [:span {:class "ml-2 font-medium"}
+      (get options actual-correct-option-idx)]]]])
 
 (defn emq-question
   "Extended Matching Questions component
@@ -173,24 +169,27 @@
                                       :bookmarked bookmarked
                                       :clear-fn clear-answers}]
 
-           [:div {:class "p-4"}
-            (when is-submitted?
-              [:div {:class "mb-6 px-3 py-2 rounded-lg bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-               [:div {:class "flex justify-between text-sm mb-1"}
-                [:span {:class "font-medium"} "Your Score"]
-                [:span {:class (cx "font-medium"
-                                   (cond
-                                     (>= percentage-correct 80) "text-[var(--color-success)]"
-                                     (>= percentage-correct 50) "text-[var(--color-warning)]"
-                                     :else "text-[var(--color-error)]"))}
-                 (str correct-count "/" total-count " (" (Math/round percentage-correct) "%)")]]
-               [:div {:class "h-2 w-full bg-[var(--color-light-bg-subtle)] dark:bg-[var(--color-dark-bg-subtle)] rounded-full overflow-hidden"}
-                [:div {:class (cx "h-full transition-all duration-1000 ease-out"
+           [:div {:class "px-4 pb-4"}
+            [:div {:class (str "transition-all duration-300 "
+                              (if is-submitted?
+                                "opacity-100 max-h-24 mb-6"
+                                "opacity-0 max-h-0 overflow-hidden"))}
+             [:div {:class "px-3 py-2 rounded-lg bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
+              [:div {:class "flex justify-between text-sm mb-1"}
+               [:span {:class "font-medium"} "Your Score"]
+               [:span {:class (cx "font-medium"
                                   (cond
-                                    (>= percentage-correct 80) "bg-[var(--color-success)]"
-                                    (>= percentage-correct 50) "bg-[var(--color-warning)]"
-                                    :else "bg-[var(--color-error)]"))
-                       :style {:width (str percentage-correct "%")}}]]])
+                                    (>= percentage-correct 80) "text-[var(--color-success)]"
+                                    (>= percentage-correct 50) "text-[var(--color-warning)]"
+                                    :else "text-[var(--color-error)]"))}
+                (str correct-count "/" total-count " (" (Math/round percentage-correct) "%)")]]
+              [:div {:class "h-2 w-full bg-[var(--color-light-bg-subtle)] dark:bg-[var(--color-dark-bg-subtle)] rounded-full overflow-hidden"}
+               [:div {:class (cx "h-full transition-all duration-1000 ease-out"
+                                 (cond
+                                   (>= percentage-correct 80) "bg-[var(--color-success)]"
+                                   (>= percentage-correct 50) "bg-[var(--color-warning)]"
+                                   :else "bg-[var(--color-error)]"))
+                      :style {:width (str percentage-correct "%")}}]]]]
 
             (doall
              (for [premise-idx (range (count premises))]
@@ -210,20 +209,24 @@
                               :actual-correct-option-idx (when is-submitted?
                                                            (get correct-matches premise-idx))}]))
 
-            (when (and (not is-submitted?) (not pending?))
-              [:div {:class "mt-6 flex justify-end"}
-               [button
-                {:variant :primary
-                 :disabled (not all-premises-selected?)
-                 :loading pending?
-                 :on-click submit-answers
-                 :class "px-6 py-2 shadow-md hover:shadow-lg transition-all"}
-                "Submit Answers"]])]
+            [:div {:class (str "transition-all duration-300 "
+                              (if (and (not is-submitted?) (not pending?))
+                                "opacity-100 max-h-20 mt-6"
+                                "opacity-0 max-h-0 overflow-hidden"))}
+             [:div {:class "flex justify-end"}
+              [button
+               {:variant :primary
+                :disabled (not all-premises-selected?)
+                :loading pending?
+                :on-click submit-answers
+                :class "px-6 py-2 shadow-md hover:shadow-lg transition-all"}
+               "Submit Answers"]]]
 
-           (when (and is-submitted? explanation)
-             [q-common/explanation-section
-              {:explanation-id (str "explanation-" question-id)
-               :explanation explanation
-               :rx-show-explanation? show-explanation?
-               :on-toggle #(swap! show-explanation? not)
-               :question-id question-id}])]))})))
+            (when explanation
+              [q-common/explanation-section
+               {:explanation-id (str "explanation-" question-id)
+                :explanation explanation
+                :rx-show-explanation? show-explanation?
+                :on-toggle #(swap! show-explanation? not)
+                :disabled? (not is-submitted?)
+                :question-id question-id}])]]))})))

@@ -315,7 +315,6 @@
     (let [questions (jdbc/execute! db-connection
                                    ["SELECT question_id, question_data FROM questions"]
                                    {:builder-fn rs/as-unqualified-kebab-maps})]
-      (println (str "Found " (count questions) " questions to process for :text -> :question-text migration."))
       (doseq [question questions]
         (let [question-id (:question-id question)
               old-data-str (:question-data question)]
@@ -323,22 +322,21 @@
             (try
               (let [parsed-data (edn/read-string old-data-str)
                     transformed-data (transform-text-to-question-text parsed-data)]
-                (if (= parsed-data transformed-data)
-                  (println (str "Question ID: " question-id " - no :text key found or data unchanged."))
-                  (do
-                    (println (str "Migrating :text key for Question ID: " question-id))
-                    (let [new-data-str (pr-str transformed-data)]
-                      (jdbc/execute-one! db-connection
-                                         ["UPDATE questions SET question_data = ? WHERE question_id = ?"
-                                          new-data-str question-id])))))
+                (println (str "Migrating :text key for Question ID: " question-id))
+                (let [new-data-str (pr-str transformed-data)]
+                  (jdbc/execute-one! db-connection
+                                     ["UPDATE questions SET question_data = ? WHERE question_id = ?"
+                                      new-data-str question-id])))
               (catch Exception e
                 (println (str "ERROR processing Question ID: " question-id " during :text key migration. Error: " (ex-message e)))
-                (println (str "Problematic data string: " old-data-str)))))))
-      (println ":text to :question-text migration completed.")))
+                (println (str "Problematic data string: " old-data-str)))))))))
 
   (defn run-text-to-question-text-migration! []
     (jdbc/with-transaction [tx @db-pool]
-      (migrate-text-key-in-question-data tx))
-    (println "Successfully ran :text to :question-text migration."))
+      (migrate-text-key-in-question-data tx)))
 
   (run-text-to-question-text-migration!))
+
+(comment
+  (sql/query @db-pool ["SELECT * from question_sets"])
+  (sql/query @db-pool ["DELETE FROM question_sets WHERE set_id = 31"]))
