@@ -34,7 +34,7 @@
               submitted? (boolean user-answer)
               self-evaluated? (and submitted? (some? (:is-correct user-answer)))
               is-correct? (= 1 (:is-correct user-answer))
-              text (:text question-data)
+              text (:question-text question-data)
               correct-answer (:correct-answer question-data)
               explanation (:explanation question-data)
               answer-loading? (:loading? submission-state)

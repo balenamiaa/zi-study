@@ -9,8 +9,8 @@
             [zi-study.backend.db :refer [db-pool]]
             [malli.core :as m]
             [malli.error :as me]
-            [zi-study.backend.shapes.questions :refer [ImportData]]
-            [zi-study.backend.shapes.question-content :as qc-shapes]
+            [zi-study.shared.schemas :as shared-schemas]
+            [zi-study.shared.import-schemas :as import-schemas]
             [zi-study.backend.fts :as fts]))
 
 (defn- to-str-temp-id [temp-id]
@@ -142,12 +142,12 @@
                         :emq (process-emq-data question)
                         (throw (ex-info (str "Unknown question type during import processing: " q-type) {:question question})))
         schema (case q-type
-                 :mcq-single qc-shapes/McqQuestionContent
-                 :mcq-multi qc-shapes/McqQuestionContent
-                 :written qc-shapes/WrittenQuestionContent
-                 :true-false qc-shapes/TrueFalseQuestionContent
-                 :cloze qc-shapes/ClozeQuestionContent
-                 :emq qc-shapes/EmqQuestionContent
+                 :mcq-single shared-schemas/McqQuestionContent
+                 :mcq-multi shared-schemas/McqQuestionContent
+                 :written shared-schemas/WrittenQuestionContent
+                 :true-false shared-schemas/TrueFalseQuestionContent
+                 :cloze shared-schemas/ClozeQuestionContent
+                 :emq shared-schemas/EmqQuestionContent
                  nil)] ; Should not happen if q-type is known
 
     (when-not (and schema (m/validate schema processed-map))
@@ -174,7 +174,7 @@
     (try
       (let [input-str (if (.exists (io/file input)) (slurp input) input)
             raw-data (parse-input input-str format)
-            _ (validate-data raw-data ImportData)
+            _ (validate-data raw-data import-schemas/ImportDataSchema)
             results (atom [])]
 
         (doseq [set-data raw-data]
@@ -297,6 +297,48 @@
 
   (import-question-set-data! (pr-str edn-example-str) :edn)
 
-  (import-question-set-data! "questionz/jaundice.edn" :edn)
+  (import-question-set-data! "questionz/medicine/palpitations.edn" :edn)
 
   (sql/query @zi-study.backend.db/db-pool ["DELETE FROM question_sets WHERE set_id = 26"]))
+
+
+(comment
+  (defn- transform-text-to-question-text [data]
+    (if (and (map? data) (contains? data :text))
+      (-> data
+          (assoc :question-text (:text data))
+          (dissoc :text))
+      data))
+
+  (defn- migrate-text-key-in-question-data [db-connection]
+    (println "Starting migration of :text to :question-text in question_data...")
+    (let [questions (jdbc/execute! db-connection
+                                   ["SELECT question_id, question_data FROM questions"]
+                                   {:builder-fn rs/as-unqualified-kebab-maps})]
+      (println (str "Found " (count questions) " questions to process for :text -> :question-text migration."))
+      (doseq [question questions]
+        (let [question-id (:question-id question)
+              old-data-str (:question-data question)]
+          (when-not (str/blank? old-data-str)
+            (try
+              (let [parsed-data (edn/read-string old-data-str)
+                    transformed-data (transform-text-to-question-text parsed-data)]
+                (if (= parsed-data transformed-data)
+                  (println (str "Question ID: " question-id " - no :text key found or data unchanged."))
+                  (do
+                    (println (str "Migrating :text key for Question ID: " question-id))
+                    (let [new-data-str (pr-str transformed-data)]
+                      (jdbc/execute-one! db-connection
+                                         ["UPDATE questions SET question_data = ? WHERE question_id = ?"
+                                          new-data-str question-id])))))
+              (catch Exception e
+                (println (str "ERROR processing Question ID: " question-id " during :text key migration. Error: " (ex-message e)))
+                (println (str "Problematic data string: " old-data-str)))))))
+      (println ":text to :question-text migration completed.")))
+
+  (defn run-text-to-question-text-migration! []
+    (jdbc/with-transaction [tx @db-pool]
+      (migrate-text-key-in-question-data tx))
+    (println "Successfully ran :text to :question-text migration."))
+
+  (run-text-to-question-text-migration!))

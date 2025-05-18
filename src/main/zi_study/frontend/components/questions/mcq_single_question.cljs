@@ -89,7 +89,7 @@
       :reagent-render
       (fn [props]
         (let [{:keys [question-id question-data user-answer retention-aid bookmarked index]} props
-
+              _ (prn question-data)
               ;; State from global app-state (reagent reactions)
               submission-state-from-global (q-common/get-deref-answer-submission-state question-id)
 
@@ -101,7 +101,7 @@
               ;; Is a submission currently in progress (either globally or initiated locally)?
               is-submission-pending-globally? (or (:loading? submission-state-from-global) @submitting-via-local-flag?)
 
-              text (:text question-data)
+              text (:question-text question-data)
               options (:options question-data)
               actual-correct-idx (:correct-index question-data)
               explanation (:explanation question-data)

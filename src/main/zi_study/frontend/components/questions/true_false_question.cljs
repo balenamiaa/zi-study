@@ -38,7 +38,7 @@
 
               is-submission-pending-globally? (or (:loading? submission-state-from-global) @submitting-via-local-flag?)
 
-              text (:text question-data)
+              text (:question-text question-data)
               explanation (:explanation question-data)
               ;; For true-false, question-data might store {:is_correct_true true/false} from the import
               ;; but the backend determines correctness, so we rely on user-answer.

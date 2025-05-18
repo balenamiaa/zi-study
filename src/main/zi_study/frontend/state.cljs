@@ -2,7 +2,8 @@
   (:require
    [malli.core :as m]
    [malli.error :as me]
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [zi-study.shared.schemas :as shared-schemas]))
 
 ;; State schema definitions
 (def auth-schema
@@ -94,7 +95,7 @@
 
 (def advanced-search-results-schema
   [:map
-   [:list [:vector :map]] ; Will store question objects with set_title etc.
+   [:list [:vector :map]]
    [:loading? :boolean]
    [:error {:optional true} [:maybe :string]]
    [:pagination [:map
@@ -103,56 +104,15 @@
                  [:total_pages :int]
                  [:total_items :int]]]])
 
-;; Detailed Question Schemas (for question-data content and user answers)
-;; These reflect the kebab-case structures now produced by the backend importer
-;; and expected in frontend state.
-
-(def McqQuestionContentSchema ; Covers mcq-single and mcq-multi
-  [:map
-   [:text :string]
-   [:options [:vector :string]]
-   [:correct-index {:optional true} :int] ; For mcq-single
-   [:correct-indices {:optional true} [:vector :int]] ; For mcq-multi
-   [:explanation {:optional true} [:maybe :string]]])
-
-(def WrittenQuestionContentSchema
-  [:map
-   [:text :string]
-   [:correct-answer {:optional true} [:maybe :string]] ; Correct answer might not always be part of question data initially
-   [:explanation {:optional true} [:maybe :string]]])
-
-(def TrueFalseQuestionContentSchema
-  [:map
-   [:text :string]
-   [:is-correct-true :boolean]
-   [:explanation {:optional true} [:maybe :string]]])
-
-(def ClozeQuestionContentSchema
-  [:map
-   [:cloze-text :string]
-   [:answers [:vector :string]]
-   [:explanation {:optional true} [:maybe :string]]])
-
-(def EmqPremiseSchema [:map [:temp-id {:optional true} :string] [:text :string]])
-(def EmqOptionSchema [:map [:temp-id {:optional true} :string] [:text :string]])
-(def EmqMatchSchema [:tuple :string :string]) ; temp-id to temp-id before processing, index to index after
-
-(def EmqQuestionContentSchema
-  [:map
-   [:instructions {:optional true} [:maybe :string]]
-   [:premises [:vector :string]] ; Stored as text only
-   [:options [:vector :string]]  ; Stored as text only
-   [:matches [:vector [:tuple :int :int]]] ; Stored as index to index
-   [:explanation {:optional true} [:maybe :string]]])
 
 (def QuestionDataSchema
-  [:multi {:dispatch (fn [val _] (-> val :question-type keyword))} ; Dispatch on parent's :question-type
-   [:mcq-single McqQuestionContentSchema]
-   [:mcq-multi McqQuestionContentSchema]
-   [:written WrittenQuestionContentSchema]
-   [:true-false TrueFalseQuestionContentSchema]
-   [:cloze ClozeQuestionContentSchema]
-   [:emq EmqQuestionContentSchema]])
+  [:multi {:dispatch (fn [_data opts] (-> opts :parent :value :question-type keyword))}
+   [:mcq-single shared-schemas/McqQuestionContent]
+   [:mcq-multi shared-schemas/McqQuestionContent]
+   [:written shared-schemas/WrittenQuestionContent]
+   [:true-false shared-schemas/TrueFalseQuestionContent]
+   [:cloze shared-schemas/ClozeQuestionContent]
+   [:emq shared-schemas/EmqQuestionContent]])
 
 (def UserAnswerDataSchema ; Structure of :answer-data in :user-answer
   [:map ; This is generic, specific types might have more structure
@@ -173,16 +133,16 @@
   [:map
    [:question-id :int]
    [:set-id :int]
-   [:question-set-title {:optional true} :string] ; Added in search results
-   [:question-type :string] ; e.g., "mcq-single", "written"
+   [:question-set-title {:optional true} :string]
+   [:question-type :string]
    [:difficulty {:optional true} [:maybe :int]]
-   [:question-data QuestionDataSchema] ; Parsed EDN content, now with kebab-case keys
+   [:question-data QuestionDataSchema]
    [:retention-aid {:optional true} [:maybe :string]]
    [:order-in-set {:optional true} [:maybe :int]]
    [:bookmarked :boolean]
    [:user-answer {:optional true} UserAnswerSchema]])
 
-(def questions-registry-schema [:map-of :string QuestionSchema]) ;; Map of question-id (as string) -> question data
+(def questions-registry-schema [:map-of :string QuestionSchema])
 
 ;; Folder Schemas
 (def folder-item-schema
