@@ -19,11 +19,4 @@
        children]]
 
      ;; Footer with nice gradient
-     [:footer {:class "mt-auto py-2 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
-      [:div {:class "flex justify-end items-center px-2 text-2xl"}
-       [:div {:class "flex items-center"}
-        "Made with "
-        [:> lucide-icons/Heart {:size 24
-                                :className "mx-1 text-pink-500 animate-pulse"
-                                :fill "currentColor"}]
-        " for darling"]]]]))
+     [:footer {:class "mt-auto py-2 border-t border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}]]))

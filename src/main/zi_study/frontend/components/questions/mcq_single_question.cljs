@@ -7,7 +7,7 @@
 
 (defn mcq-single-option
   "A single MCQ option component"
-  [{:keys [option is-selected is-correct is-actually-correct answered-globally pending-globally on-click]}]
+  [{:keys [option is-selected is-correct is-actually-correct answered-globally pending-globally on-click idx globally-submitted-idx]}]
   [:div {:class (str "mb-2 p-2.5 rounded-md border-2 transition-all duration-300 flex items-center "
                      (if pending-globally "cursor-wait" "cursor-pointer ")
                      (cond
@@ -60,16 +60,27 @@
    [:div {:class "ml-auto flex-shrink-0"}
     ;; Check mark for correct answer (visible when answered and this is actually correct)
     [:div {:class "transition-all duration-300 transform"
-           :style {:opacity (if (and answered-globally (not pending-globally) is-actually-correct) "1" "0"),
-                   :transform (if (and answered-globally (not pending-globally) is-actually-correct) "scale(1)" "scale(0.8)"),
-                   :display (if (and answered-globally (not pending-globally) is-actually-correct) "block" "none")}}
+           :style {:opacity (if (and answered-globally 
+                                     is-actually-correct
+                                     ;; Don't show this icon if we're currently submitting this option
+                                     (not (and pending-globally is-selected))) "1" "0"),
+                   :transform (if (and answered-globally 
+                                      is-actually-correct
+                                      (not (and pending-globally is-selected))) "scale(1)" "scale(0.8)"),
+                   :display (if (and answered-globally 
+                                    is-actually-correct
+                                    (not (and pending-globally is-selected))) "block" "none")}}
      [:> lucide-icons/Check {:size 18 :className "text-[var(--color-success)]"}]]
     
     ;; X mark (visible when answered, selected, and incorrect)
     [:div {:class "transition-all duration-300 transform"
-           :style {:opacity (if (and answered-globally (not pending-globally) is-selected (not is-correct)) "1" "0"),
-                   :transform (if (and answered-globally (not pending-globally) is-selected (not is-correct)) "scale(1)" "scale(0.8)"),
-                   :display (if (and answered-globally (not pending-globally) is-selected (not is-correct)) "block" "none")}}
+           :style {:opacity (if (and answered-globally is-selected (not is-correct)
+                                     ;; Only show during pending if this specific option was previously selected
+                                     (not (and pending-globally (not= idx globally-submitted-idx)))) "1" "0"),
+                   :transform (if (and answered-globally is-selected (not is-correct)
+                                       (not (and pending-globally (not= idx globally-submitted-idx)))) "scale(1)" "scale(0.8)"),
+                   :display (if (and answered-globally is-selected (not is-correct)
+                                     (not (and pending-globally (not= idx globally-submitted-idx)))) "block" "none")}}
      [:> lucide-icons/X {:size 18 :className "text-[var(--color-error)]"}]]]])
 
 (defn mcq-single-question []
@@ -166,7 +177,9 @@
                                      :is-actually-correct (= idx actual-correct-idx)
                                      :answered-globally is-globally-answered?
                                      :pending-globally is-submission-pending-globally?
-                                     :on-click #(handle-option-click idx)}])))]
+                                     :on-click #(handle-option-click idx)
+                                     :idx idx
+                                     :globally-submitted-idx globally-submitted-idx}])))]
 
            (when explanation
              [q-common/explanation-section
