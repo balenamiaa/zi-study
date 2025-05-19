@@ -507,9 +507,7 @@
 
         (if (str/blank? keywords)
           (bad-request "Search keywords are required." nil)
-          (let [fts-match-query (str keywords "*") ;; Use prefix matching for FTS
-
-                ;; Get total count for pagination from FTS table
+          (let [fts-match-query (str "\"" (str/replace keywords "\"" "\"\"") "\"*")
                 count_query_map (-> (hh/select [[:count :*] :total])
                                     (hh/from [:questions_fts :q_fts])
                                     (hh/where [:raw "searchable_text MATCH " [:lift fts-match-query]]))
@@ -923,8 +921,8 @@
 
 (comment
   (->> (sql/query @db-pool ["SELECT * FROM questions_fts"])
-      (reverse)
-      (take 50))
+       (reverse)
+       (take 50))
 
   (jdbc/with-transaction [tx @db-pool {:builder-fn rs/as-unqualified-kebab-maps}]
     (let [questions (jdbc/execute! tx ["SELECT question_id, set_id, question_type, question_data, retention_aid FROM questions"] jdbc-opts)]

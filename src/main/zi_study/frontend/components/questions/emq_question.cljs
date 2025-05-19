@@ -73,9 +73,9 @@
             [:span {:class "truncate"} option-text]]])])]]
 
    [:div {:class (str "transition-all duration-300 transform "
-                     (if (and is-submitted? (not is-correct?) (some? actual-correct-option-idx))
-                       "mt-2 opacity-100 max-h-20 text-sm p-2 rounded-md bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] text-[var(--color-success-700)] dark:text-[var(--color-success-300)] border border-[var(--color-success-200)] dark:border-[var(--color-success-700)]"
-                       "max-h-0 opacity-0 overflow-hidden"))}
+                      (if (and is-submitted? (not is-correct?) (some? actual-correct-option-idx))
+                        "mt-2 opacity-100 max-h-20 text-sm p-2 rounded-md bg-[var(--color-success-50)] dark:bg-[rgba(76,175,80,0.1)] text-[var(--color-success-700)] dark:text-[var(--color-success-300)] border border-[var(--color-success-200)] dark:border-[var(--color-success-700)]"
+                        "max-h-0 opacity-0 overflow-hidden"))}
     [:div {:class "flex items-center"}
      [:> lucide-icons/AlertCircle {:size 16, :class "flex-shrink-0"}]
      [:span {:class "ml-2 font-medium"}
@@ -169,11 +169,11 @@
                                       :bookmarked bookmarked
                                       :clear-fn clear-answers}]
 
-           [:div {:class "px-4 pb-4"}
+           [:div {:class "p-2"}
             [:div {:class (str "transition-all duration-300 "
-                              (if is-submitted?
-                                "opacity-100 max-h-24 mb-6"
-                                "opacity-0 max-h-0 overflow-hidden"))}
+                               (if is-submitted?
+                                 "opacity-100 max-h-24 mb-6"
+                                 "opacity-0 max-h-0 overflow-hidden"))}
              [:div {:class "px-3 py-2 rounded-lg bg-[var(--color-light-bg-paper)] dark:bg-[var(--color-dark-bg-paper)] border border-[var(--color-light-divider)] dark:border-[var(--color-dark-divider)]"}
               [:div {:class "flex justify-between text-sm mb-1"}
                [:span {:class "font-medium"} "Your Score"]
@@ -210,9 +210,9 @@
                                                            (get correct-matches premise-idx))}]))
 
             [:div {:class (str "transition-all duration-300 "
-                              (if (and (not is-submitted?) (not pending?))
-                                "opacity-100 max-h-20 mt-6"
-                                "opacity-0 max-h-0 overflow-hidden"))}
+                               (if (and (not is-submitted?) (not pending?))
+                                 "opacity-100 max-h-20 mt-6"
+                                 "opacity-0 max-h-0 overflow-hidden"))}
              [:div {:class "flex justify-end"}
               [button
                {:variant :primary

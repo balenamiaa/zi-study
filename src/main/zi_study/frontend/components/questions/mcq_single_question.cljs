@@ -60,18 +60,18 @@
    [:div {:class "ml-auto flex-shrink-0"}
     ;; Check mark for correct answer (visible when answered and this is actually correct)
     [:div {:class "transition-all duration-300 transform"
-           :style {:opacity (if (and answered-globally 
+           :style {:opacity (if (and answered-globally
                                      is-actually-correct
                                      ;; Don't show this icon if we're currently submitting this option
                                      (not (and pending-globally is-selected))) "1" "0"),
-                   :transform (if (and answered-globally 
-                                      is-actually-correct
-                                      (not (and pending-globally is-selected))) "scale(1)" "scale(0.8)"),
-                   :display (if (and answered-globally 
-                                    is-actually-correct
-                                    (not (and pending-globally is-selected))) "block" "none")}}
+                   :transform (if (and answered-globally
+                                       is-actually-correct
+                                       (not (and pending-globally is-selected))) "scale(1)" "scale(0.8)"),
+                   :display (if (and answered-globally
+                                     is-actually-correct
+                                     (not (and pending-globally is-selected))) "block" "none")}}
      [:> lucide-icons/Check {:size 18 :className "text-[var(--color-success)]"}]]
-    
+
     ;; X mark (visible when answered, selected, and incorrect)
     [:div {:class "transition-all duration-300 transform"
            :style {:opacity (if (and answered-globally is-selected (not is-correct)
@@ -179,13 +179,13 @@
                                      :pending-globally is-submission-pending-globally?
                                      :on-click #(handle-option-click idx)
                                      :idx idx
-                                     :globally-submitted-idx globally-submitted-idx}])))]
+                                     :globally-submitted-idx globally-submitted-idx}])))
 
-           (when explanation
-             [q-common/explanation-section
-              {:explanation-id (str "explanation-" question-id)
-               :explanation explanation
-               :rx-show-explanation? show-explanation?
-               :on-toggle #(swap! show-explanation? not)
-               :disabled? (not is-globally-answered?)
-               :question-id question-id}])]))})))
+            (when explanation
+              [q-common/explanation-section
+               {:explanation-id (str "explanation-" question-id)
+                :explanation explanation
+                :rx-show-explanation? show-explanation?
+                :on-toggle #(swap! show-explanation? not)
+                :disabled? (not is-globally-answered?)
+                :question-id question-id}])]]))})))

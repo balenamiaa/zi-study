@@ -9,8 +9,8 @@
             [zi-study.backend.db :refer [db-pool]]
             [malli.core :as m]
             [malli.error :as me]
-            [zi-study.shared.schemas :as shared-schemas]
-            [zi-study.shared.import-schemas :as import-schemas]
+            [zi-study.shared.question-schemas :as shared-schemas]
+            [zi-study.shared.question-import-schemas :as import-schemas]
             [zi-study.backend.fts :as fts]))
 
 (defn- to-str-temp-id [temp-id]
@@ -161,7 +161,7 @@
      :question_type (name q-type) ; Stays as string "mcq-single" etc.
      :difficulty (get-flexible question :difficulty)
      :question_data (pr-str processed-map) ; Store processed data as EDN string with kebab-case keys
-     :retention_aid (get-flexible question :retention_aid)}))
+     :retention_aid (get-flexible question :retention-aid)}))
 
 (defn import-question-set-data!
   "Imports question set data from an EDN or JSON string or file path.
@@ -295,8 +295,6 @@
                   ["p3" "oC"]]
         :explanation "Myelin helps speed up nerve impulses."}]}])
 
-  (import-question-set-data! (pr-str edn-example-str) :edn)
-
   (import-question-set-data! "questionz/medicine/palpitations.edn" :edn)
 
   (sql/query @zi-study.backend.db/db-pool ["DELETE FROM question_sets WHERE set_id = 26"]))
@@ -339,4 +337,4 @@
 
 (comment
   (sql/query @db-pool ["SELECT * from question_sets"])
-  (sql/query @db-pool ["DELETE FROM question_sets WHERE set_id = 31"]))
+  (sql/query @db-pool ["DELETE FROM question_sets WHERE set_id = 1"]))

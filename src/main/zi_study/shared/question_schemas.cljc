@@ -1,4 +1,4 @@
-(ns zi-study.shared.schemas)
+(ns zi-study.shared.question-schemas)
 
 ;;;-----------------------------------------------------------------------------------------------------------------------
 ;;; Utility Schemas (used by both import and processed schemas)

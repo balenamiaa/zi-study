@@ -1,5 +1,5 @@
-(ns zi-study.shared.import-schemas
-  (:require [zi-study.shared.schemas :as shared]))
+(ns zi-study.shared.question-import-schemas
+  (:require [zi-study.shared.question-schemas :as shared]))
 
 
 (def TempId [:or {:error/message "Temp ID must be a string or keyword"} :string :keyword]) ; Used during import phase

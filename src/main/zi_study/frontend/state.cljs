@@ -3,7 +3,7 @@
    [malli.core :as m]
    [malli.error :as me]
    [reagent.core :as r]
-   [zi-study.shared.schemas :as shared-schemas]))
+   [zi-study.shared.question-schemas :as shared-schemas]))
 
 ;; State schema definitions
 (def auth-schema
