@@ -1,0 +1,58 @@
+(ns frontend.core
+  (:require  [frontend.handlers :as h]
+             [frontend.layouts.main-layout :refer [main-layout]]
+             [frontend.pages.about :refer [about-page]]
+             [frontend.pages.home :refer [home-page]]
+             [frontend.pages.not-found :refer [not-found-page]]
+             [frontend.pages.todos :refer [todos-page]]
+             [frontend.routes :refer [mk-routes]]
+             [frontend.state :as state]
+             [frontend.subs :as s]
+             [frontend.utilities.theme :as theme]
+             [re-frame.core :as rf]
+             [reitit.coercion.spec :as rss]
+             [reitit.frontend :as reitit]
+             [reitit.frontend.controllers :as rfc]
+             [reitit.frontend.easy :as rfe]
+             [uix.core :as uix :refer [$ defui]]
+             [uix.dom]))
+
+(defui app []
+  (let [current-match @(state/get-current-route)
+        route-data (get current-match :data {})
+        current-route-name (:name route-data)
+        layout-component (get route-data :layout main-layout)
+        view-component (get route-data :view)]
+
+    ($ layout-component
+       {:current-route current-route-name
+        :children (if current-match
+                    (when view-component
+                      ($ view-component current-match))
+                    ($ not-found-page))})))
+
+(defonce root
+  (when-let [el (js/document.getElementById "app")]
+    (uix.dom/create-root el)))
+
+(defn render []
+  (uix.dom/render-root ($ app) root))
+
+(defn ^:export init []
+  (theme/initialize-theme)
+
+  (let [routes (mk-routes {:main-layout main-layout
+                           :home-page home-page
+                           :todos-page todos-page
+                           :about-page about-page
+                           :not-found-page not-found-page})
+        app-state-current-route-atom (state/get-current-route)]
+    (rfe/start!
+     (reitit/router routes {:data {:coercion rss/coercion}})
+     (fn on-navigate [new-match]
+       (let [old-match @app-state-current-route-atom
+             controllers (rfc/apply-controllers (:controllers old-match) new-match)]
+         (state/set-current-route (assoc new-match :controllers controllers))))
+     {:use-fragment false}))
+
+  (render))

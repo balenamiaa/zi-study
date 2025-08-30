@@ -1,0 +1,504 @@
+@import "tailwindcss";
+@import "./inter.css";
+@import "./autofill-fix.css";
+
+@plugin "daisyui" {
+  themes: gold_light --default, gold_dark --prefersdark;
+}
+
+@custom-variant dark (&:where([data-theme="gold_dark"], [data-theme="gold_dark"] *));
+
+@plugin "daisyui/theme" {
+  name: "gold_dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: oklch(24% 0.023 329.708);
+  --color-base-200: oklch(21% 0.021 329.708);
+  --color-base-300: oklch(16% 0.019 329.708);
+  --color-base-content: oklch(72.354% 0.092 79.129);
+
+  /* Semantic colors */
+  --color-primary: oklch(71.996% 0.123 62.756);
+  --color-primary-content: oklch(14.399% 0.024 62.756);
+  --color-primary-focus: oklch(67% 0.14 62.756);
+  --color-primary-hover: oklch(76% 0.11 62.756);
+
+  --color-secondary: oklch(34.465% 0.029 199.194);
+  --color-secondary-content: oklch(86.893% 0.005 199.194);
+  --color-secondary-focus: oklch(30% 0.035 199.194);
+  --color-secondary-hover: oklch(38% 0.025 199.194);
+
+  --color-accent: oklch(42.621% 0.074 224.389);
+  --color-accent-content: oklch(88.524% 0.014 224.389);
+  --color-accent-focus: oklch(38% 0.08 224.389);
+  --color-accent-hover: oklch(46% 0.07 224.389);
+
+  --color-neutral: oklch(16.51% 0.015 326.261);
+  --color-neutral-content: oklch(83.302% 0.003 326.261);
+
+  /* State colors */
+  --color-info: oklch(79.49% 0.063 184.558);
+  --color-info-content: oklch(15.898% 0.012 184.558);
+
+  --color-success: oklch(74.722% 0.072 131.116);
+  --color-success-content: oklch(14.944% 0.014 131.116);
+
+  --color-warning: oklch(88.15% 0.14 87.722);
+  --color-warning-content: oklch(17.63% 0.028 87.722);
+
+  --color-error: oklch(77.318% 0.128 31.871);
+  --color-error-content: oklch(15.463% 0.025 31.871);
+
+  /* UI element properties */
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 1;
+  --noise: 1;
+
+  /* Shadows for elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+
+  /* Animation timing */
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --transition-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-emphasis: cubic-bezier(0.4, 0, 0.6, 1);
+
+  /* Theme-specific variables only */
+}
+
+@plugin "daisyui/theme" {
+  name: "gold_light";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+  --color-base-100: oklch(98% 0.016 73.684);
+  --color-base-200: oklch(95% 0.038 75.164);
+  --color-base-300: oklch(90% 0.076 70.697);
+  --color-base-content: oklch(40% 0.123 38.172);
+
+  /* Semantic colors */
+  --color-primary: oklch(65% 0.15 45);
+  --color-primary-content: oklch(100% 0 0);
+  --color-primary-focus: oklch(5% 0 0);
+  --color-primary-hover: oklch(10% 0 0);
+
+  --color-secondary: oklch(22.45% 0.075 37.85);
+  --color-secondary-content: oklch(90% 0.076 70.697);
+  --color-secondary-focus: oklch(18% 0.08 37.85);
+  --color-secondary-hover: oklch(26% 0.07 37.85);
+
+  --color-accent: oklch(46.44% 0.111 37.85);
+  --color-accent-content: oklch(90% 0.076 70.697);
+  --color-accent-focus: oklch(42% 0.12 37.85);
+  --color-accent-hover: oklch(50% 0.1 37.85);
+
+  --color-neutral: oklch(55% 0.195 38.402);
+  --color-neutral-content: oklch(98% 0.016 73.684);
+
+  /* State colors */
+  --color-info: oklch(42% 0.199 265.638);
+  --color-info-content: oklch(90% 0.076 70.697);
+
+  --color-success: oklch(43% 0.095 166.913);
+  --color-success-content: oklch(90% 0.076 70.697);
+
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(41% 0.112 45.904);
+
+  --color-error: oklch(70% 0.191 22.216);
+  --color-error-content: oklch(39% 0.141 25.723);
+
+  /* UI element properties */
+  --radius-selector: 2rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 1;
+  --noise: 1;
+
+  /* Shadows for elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Animation timing */
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --transition-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-emphasis: cubic-bezier(0.4, 0, 0.6, 1);
+
+  /* Theme-specific variables only */
+}
+
+:root {
+  /* Shared variables that don't change between themes */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  --icon-xs: 16px;
+  --icon-sm: 20px;
+  --icon-md: 24px;
+  --icon-lg: 28px;
+  --icon-xl: 32px;
+
+  /* Standard breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* Global font settings */
+html {
+  scrollbar-gutter: stable;
+  font-family: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  font-variant-numeric: oldstyle-nums;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Improve focus visibility */
+  scroll-behavior: smooth;
+}
+
+/* Prevent layout shift during font loading */
+@font-display swap;
+
+/* Consistent typography utilities */
+.text-heading-1 {
+  @apply text-3xl sm:text-4xl font-bold leading-tight tracking-tight;
+}
+
+.text-heading-2 {
+  @apply text-2xl sm:text-3xl font-semibold leading-tight tracking-tight;
+}
+
+.text-heading-3 {
+  @apply text-xl sm:text-2xl font-semibold leading-snug;
+}
+
+.text-heading-4 {
+  @apply text-lg sm:text-xl font-medium leading-snug;
+}
+
+.text-body-lg {
+  @apply text-base sm:text-lg leading-relaxed;
+}
+
+.text-body {
+  @apply text-sm sm:text-base leading-relaxed;
+}
+
+.text-body-sm {
+  @apply text-xs sm:text-sm leading-normal;
+}
+
+/* Consistent spacing utilities */
+.space-content {
+  @apply space-y-4 sm:space-y-6;
+}
+
+.space-section {
+  @apply space-y-6 sm:space-y-8;
+}
+
+.padding-content {
+  @apply p-4 sm:p-6;
+}
+
+.padding-section {
+  @apply p-4 sm:p-6 lg:p-8;
+}
+
+.margin-content {
+  @apply m-4 sm:m-6;
+}
+
+/* Enhanced button styles */
+.btn {
+  @apply font-medium tracking-wide transition-all duration-200;
+  font-size: var(--text-sm);
+}
+
+.btn-sm {
+  font-size: var(--text-xs);
+}
+
+.btn-lg {
+  font-size: var(--text-base);
+}
+
+/* Enhanced input styles */
+.input,
+.textarea,
+.select {
+  @apply transition-all duration-200 border-2;
+  font-size: var(--text-base);
+}
+
+.input-sm,
+.textarea-sm,
+.select-sm {
+  font-size: var(--text-sm);
+}
+
+.input-lg,
+.textarea-lg,
+.select-lg {
+  font-size: var(--text-lg);
+}
+
+/* Enhanced card styles */
+.card {
+  @apply shadow-md transition-shadow duration-200 hover:shadow-lg;
+}
+
+.card-compact {
+  @apply shadow-sm;
+}
+
+/* Responsive spacing utilities */
+@media (max-width: 640px) {
+  .responsive-padding {
+    @apply px-4 py-3;
+  }
+
+  .responsive-margin {
+    @apply mx-2 my-3;
+  }
+
+  .responsive-text {
+    @apply text-sm;
+  }
+}
+
+@media (min-width: 641px) {
+  .responsive-padding {
+    @apply px-6 py-4;
+  }
+
+  .responsive-margin {
+    @apply mx-4 my-4;
+  }
+
+  .responsive-text {
+    @apply text-base;
+  }
+}
+
+/* Enhanced utilities */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.retention-aid-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255 255 255 / 0.8) rgba(255 255 255 / 0.2);
+}
+
+.retention-aid-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.retention-aid-scroll::-webkit-scrollbar-track {
+  background: rgba(255 255 255 / 0.2);
+  border-radius: 2px;
+}
+
+.retention-aid-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255 255 255 / 0.8);
+  border-radius: 2px;
+}
+
+.retention-aid-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255 255 255 / 1);
+}
+
+/* Enhanced focus styles */
+.focus-enhanced:focus {
+  @apply outline-none ring-2 ring-primary ring-offset-2;
+}
+
+/* Improved accessibility */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  @apply absolute -top-full left-4 z-50 bg-primary text-primary-content px-4 py-2 rounded focus:top-4 transition-all;
+}
+
+/* Consistent icon sizing */
+.icon-xs {
+  width: var(--icon-xs);
+  height: var(--icon-xs);
+}
+
+.icon-sm {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.icon-md {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.icon-lg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.icon-xl {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .mobile-stack {
+    @apply flex-col space-y-3 space-x-0;
+  }
+
+  .mobile-full {
+    @apply w-full;
+  }
+
+  .mobile-center {
+    @apply text-center;
+  }
+
+  .mobile-compact {
+    @apply px-3 py-2;
+  }
+}
+
+/* Animation improvements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Missing interactive states */
+.btn:disabled,
+.input:disabled,
+.textarea:disabled,
+.select:disabled {
+  @apply opacity-50 cursor-not-allowed pointer-events-none;
+}
+
+.input:invalid,
+.textarea:invalid {
+  @apply border-error focus:ring-error;
+}
+
+.input:valid,
+.textarea:valid {
+  @apply border-success focus:ring-success;
+}
+
+/* Modern focus management */
+.btn:focus-visible,
+.input:focus-visible,
+.textarea:focus-visible,
+.select:focus-visible {
+  @apply outline-none ring-2 ring-primary ring-offset-2;
+}
+
+/* Loading states */
+.loading-skeleton {
+  @apply bg-gradient-to-r from-base-300 via-base-200 to-base-300 animate-pulse;
+  background-size: 200% 100%;
+}
+
+.btn-loading {
+  @apply relative text-transparent pointer-events-none;
+}
+
+.btn-loading::after {
+  content: '';
+  @apply absolute inset-0 m-auto w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-after: always;
+  }
+  
+  .card {
+    @apply border border-gray-300 shadow-none;
+  }
+  
+  html {
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    @apply border-2 border-current;
+  }
+  
+  .card {
+    @apply border border-current;
+  }
+  
+  .input,
+  .textarea,
+  .select {
+    @apply border-2 border-current;
+  }
+}

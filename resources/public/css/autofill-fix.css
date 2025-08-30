@@ -1,0 +1,107 @@
+/* DaisyUI Autofill styling fix - matches theme colors */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.autofill-fix:-webkit-autofill,
+.autofill-fix:-webkit-autofill:hover,
+.autofill-fix:-webkit-autofill:focus,
+.autofill-fix:-webkit-autofill:active {
+    /* Use DaisyUI's actual CSS variables with fallback colors */
+    -webkit-box-shadow: 0 0 0 30px hsl(var(--fallback-b1, var(--b1))) inset !important;
+    -webkit-text-fill-color: hsl(var(--fallback-bc, var(--bc))) !important;
+    caret-color: hsl(var(--fallback-bc, var(--bc))) !important;
+    background-color: transparent !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Firefox autofill */
+.autofill-fix:-moz-autofill {
+    background-color: hsl(var(--fallback-b1, var(--b1))) !important;
+    color: hsl(var(--fallback-bc, var(--bc))) !important;
+    box-shadow: none !important;
+}
+
+/* Modern browsers autofill (newer syntax) */
+.autofill-fix:autofill {
+    background-color: hsl(var(--fallback-b1, var(--b1))) !important;
+    color: hsl(var(--fallback-bc, var(--bc))) !important;
+    box-shadow: none !important;
+}
+
+/* Focus states with autofill - adds primary color border */
+.autofill-fix:focus:-webkit-autofill,
+.autofill-fix:focus:-webkit-autofill:hover,
+.autofill-fix:focus:-webkit-autofill:focus,
+.autofill-fix:focus:-webkit-autofill:active {
+    -webkit-box-shadow:
+        0 0 0 30px hsl(var(--fallback-b1, var(--b1))) inset,
+        0 0 0 2px hsl(var(--fallback-p, var(--p))) !important;
+    -webkit-text-fill-color: hsl(var(--fallback-bc, var(--bc))) !important;
+    caret-color: hsl(var(--fallback-p, var(--p))) !important;
+}
+
+/* Alternative approach using CSS custom properties directly */
+/* This works better if DaisyUI variables aren't being recognized */
+[data-theme="light"] .autofill-fix:-webkit-autofill,
+[data-theme="light"] .autofill-fix:-webkit-autofill:hover,
+[data-theme="light"] .autofill-fix:-webkit-autofill:focus,
+[data-theme="light"] .autofill-fix:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px oklch(98% 0.016 73.684) inset !important;
+    -webkit-text-fill-color: oklch(40% 0.123 38.172) !important;
+    caret-color: oklch(40% 0.123 38.172) !important;
+}
+
+[data-theme="dark"] .autofill-fix:-webkit-autofill,
+[data-theme="dark"] .autofill-fix:-webkit-autofill:hover,
+[data-theme="dark"] .autofill-fix:-webkit-autofill:focus,
+[data-theme="dark"] .autofill-fix:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px oklch(24% 0.023 329.708) inset !important;
+    -webkit-text-fill-color: oklch(72.354% 0.092 79.129) !important;
+    caret-color: oklch(72.354% 0.092 79.129) !important;
+}
+
+[data-theme="light"] .autofill-fix:focus:-webkit-autofill,
+[data-theme="light"] .autofill-fix:focus:-webkit-autofill:hover,
+[data-theme="light"] .autofill-fix:focus:-webkit-autofill:focus,
+[data-theme="light"] .autofill-fix:focus:-webkit-autofill:active {
+    -webkit-box-shadow:
+        0 0 0 30px oklch(98% 0.016 73.684) inset,
+        0 0 0 2px oklch(0% 0 0) !important;
+    -webkit-text-fill-color: oklch(40% 0.123 38.172) !important;
+    caret-color: oklch(0% 0 0) !important;
+}
+
+[data-theme="dark"] .autofill-fix:focus:-webkit-autofill,
+[data-theme="dark"] .autofill-fix:focus:-webkit-autofill:hover,
+[data-theme="dark"] .autofill-fix:focus:-webkit-autofill:focus,
+[data-theme="dark"] .autofill-fix:focus:-webkit-autofill:active {
+    -webkit-box-shadow:
+        0 0 0 30px oklch(24% 0.023 329.708) inset,
+        0 0 0 2px oklch(71.996% 0.123 62.756) !important;
+    -webkit-text-fill-color: oklch(72.354% 0.092 79.129) !important;
+    caret-color: oklch(71.996% 0.123 62.756) !important;
+}
+
+/* System theme fallback - uses CSS prefers-color-scheme */
+@media (prefers-color-scheme: light) {
+
+    html:not([data-theme]) .autofill-fix:-webkit-autofill,
+    html:not([data-theme]) .autofill-fix:-webkit-autofill:hover,
+    html:not([data-theme]) .autofill-fix:-webkit-autofill:focus,
+    html:not([data-theme]) .autofill-fix:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px oklch(98% 0.016 73.684) inset !important;
+        -webkit-text-fill-color: oklch(40% 0.123 38.172) !important;
+        caret-color: oklch(40% 0.123 38.172) !important;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+
+    html:not([data-theme]) .autofill-fix:-webkit-autofill,
+    html:not([data-theme]) .autofill-fix:-webkit-autofill:hover,
+    html:not([data-theme]) .autofill-fix:-webkit-autofill:focus,
+    html:not([data-theme]) .autofill-fix:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px oklch(24% 0.023 329.708) inset !important;
+        -webkit-text-fill-color: oklch(72.354% 0.092 79.129) !important;
+        caret-color: oklch(72.354% 0.092 79.129) !important;
+    }
+}
