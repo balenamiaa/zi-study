@@ -1,6 +1,4 @@
-(ns frontend.utilities.theme
-  (:require [frontend.state :as state]
-            [re-frame.db :as rfdb]))
+(ns frontend.utilities.theme)
 
 (defn get-system-preference []
   (if (and js/window.matchMedia
@@ -16,11 +14,8 @@
     (.setAttribute html-element "data-theme"
                    (if (= effective-theme :dark) "gold_dark" "gold_light"))))
 
-(defn set-theme [theme]
-  (state/set-theme theme)
-  (apply-theme theme)
+(defn persist-theme! [theme]
   (.setItem js/localStorage "theme" (name theme))
-  ;; Also persist in a cookie so the server can render index.html with correct theme immediately
   (set! (.-cookie js/document)
         (str "theme=" (name theme)
              "; path=/; max-age=" (* 60 60 24 365)
@@ -30,15 +25,11 @@
   (when-let [saved (.getItem js/localStorage "theme")]
     (keyword saved)))
 
-(defn initialize-theme []
-  (let [saved-theme (or (get-saved-theme) :system)]
-    (set-theme saved-theme)
-
-    (when (and js/window.matchMedia (= saved-theme :system))
-      (.addEventListener
-       (.matchMedia js/window "(prefers-color-scheme: dark)")
-       "change"
-       (fn [_e]
-         ;; Avoid creating a subscription outside reactive context
-         (when (= (get-in @rfdb/app-db [:ui :theme]) :system)
-           (apply-theme :system)))))))
+(defn listen-system-change!
+  "Attach a listener for system theme changes. Calls `f` on change."
+  [f]
+  (when js/window.matchMedia
+    (.addEventListener
+     (.matchMedia js/window "(prefers-color-scheme: dark)")
+     "change"
+     (fn [_e] (f)))))

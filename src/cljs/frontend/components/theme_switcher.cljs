@@ -1,14 +1,15 @@
 (ns frontend.components.theme-switcher
   (:require ["lucide-react" :refer [Monitor Sun Moon]]
-            [frontend.state :as state]
+            [frontend.state.handlers :as state-h]
+            [frontend.state.subs :as state-subs]
             [frontend.uix.hooks :as hooks]
-            [frontend.utilities.theme :as theme]
+            [re-frame.core :as rf]
             [uix.core :as uix :refer [$ defui]]))
 
 (defui theme-switcher
   "A theme switcher component that allows selecting between system, light, and dark themes."
   []
-  (let [ui (hooks/use-subscribe [::state/ui-state])
+  (let [ui (hooks/use-subscribe [::state-subs/ui-state])
         current-theme (:theme ui)
         themes [{:value :system :icon Monitor :title "Auto (System)"}
                 {:value :light  :icon Sun :title "Light Theme"}
@@ -30,7 +31,7 @@
             {:key value
              :title title
              :class "relative z-10 flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 hover:text-primary-focus"
-             :on-click #(theme/set-theme value)
+             :on-click #(rf/dispatch [::state-h/set-theme value])
              :aria-label title}
             ($ icon {:size 18
                      :className (if (= current-theme value)

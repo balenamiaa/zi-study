@@ -1,13 +1,12 @@
 (ns frontend.core
-  (:require  [frontend.handlers :as h]
-             [frontend.layouts.main-layout :refer [main-layout]]
+  (:require  [frontend.layouts.main-layout :refer [main-layout]]
              [frontend.pages.about :refer [about-page]]
              [frontend.pages.home :refer [home-page]]
              [frontend.pages.not-found :refer [not-found-page]]
              [frontend.pages.todos :refer [todos-page]]
              [frontend.routes :refer [mk-routes]]
-             [frontend.state :as state]
-             [frontend.subs :as s]
+             [frontend.state.handlers :as state-h]
+             [frontend.state.subs :as state-subs]
              [frontend.uix.hooks :refer [use-subscribe]]
              [frontend.utilities.theme :as theme]
              [re-frame.core :as rf]
@@ -20,7 +19,7 @@
              [uix.dom]))
 
 (defui app []
-  (let [current-match (use-subscribe [::state/current-route])
+  (let [current-match (use-subscribe [::state-subs/current-route])
         route-data (get current-match :data {})
         current-route-name (:name route-data)
         layout-component (get route-data :layout main-layout)
@@ -41,7 +40,7 @@
   (uix.dom/render-root ($ app) root))
 
 (defn ^:export init []
-  (theme/initialize-theme)
+  (state-h/init-theme!)
 
   (let [routes (mk-routes {:main-layout main-layout
                            :home-page home-page
@@ -56,7 +55,7 @@
      (fn on-navigate [new-match]
        (let [old-match (:current-route @rfdb/app-db)
              controllers (rfc/apply-controllers (:controllers old-match) new-match)]
-         (state/set-current-route (assoc new-match :controllers controllers))))
+         (rf/dispatch [::state-h/set-current-route (assoc new-match :controllers controllers)])))
      {:use-fragment false}))
 
   (render))

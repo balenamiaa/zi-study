@@ -69,7 +69,8 @@
     @reaction
     ;; otherwise manage subscription via hooks
     (let [subscribe (use-batched-subscribe reaction)
-          get-snapshot (uix/use-callback #(run-reaction reaction) [reaction])]
+          get-snapshot #_{:clj-kondo/ignore [:uix.core/hook-in-branch]}
+          (uix/use-callback #(run-reaction reaction) [reaction])]
       (use-sync-external-store subscribe get-snapshot))))
 
 (defn use-subscribe

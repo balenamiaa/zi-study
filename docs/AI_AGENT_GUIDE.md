@@ -4,7 +4,7 @@
 - React via UIx: `uix.core`, root in `src/cljs/frontend/core.cljs`.
 - State: re-frame (`re-frame.core`) with subs/events and a central `app-db`.
 - Router: Reitit frontend (`reitit.frontend.easy`), routes in `src/cljs/frontend/routes.cljs`.
-- HTTP: custom `::fetch` effect wrapping Fetch API (`src/cljs/frontend/http_fx.cljs`).
+- HTTP: custom `::fetch` effect wrapping Fetch API (`src/cljs/frontend/state/http_fx.cljs`).
 - CSS/UI: Tailwind + DaisyUI, theme via `data-theme` attribute.
 
 ## Rendering & UIx
@@ -24,17 +24,22 @@
   - Effects: `rf/reg-event-fx` returns effects map, e.g. HTTP call via `::http/fetch`.
 - Effects:
   - Register custom effects with `rf/reg-fx`. We use `::fetch` in `http_fx.cljs`.
+  - Built-in effect keys:
+    - `:dispatch` — dispatch a single event vector, e.g. `{:dispatch [::evt arg]}`.
+    - `:fx` — run multiple effects in sequence: `{:fx [[:dispatch [::evt]] [::ns/custom-effect payload]]]}`.
+    - `:db` — replace the app-db value.
+  - `reg-event-db` returns only `:db`. `reg-event-fx` returns an effects map (can include `:db`, `:dispatch`, `:fx`, custom effects, etc.).
 
 ## HTTP Fetch Flow (Todos example)
-1. UI dispatches `::handlers/get-todos`.
+1. UI dispatches `::state.todos.handlers/get-todos`.
 2. Event returns effects:
    - `[:dispatch [:http/init [:todos]]]` → sets `:http [:todos] :status` to `:initial-loading`/`:loading`.
-   - `[::http/fetch {...}]` → triggers Fetch with Transit/JSON handling.
+   - `[::state.http-fx/fetch {...}]` → triggers Fetch with Transit/JSON handling.
 3. On success/failure:
    - `:http/success` or `:http/failure` updates `:http [:todos]` with `:resp` or `:error` and `:status`.
 4. Derived sub:
    - `:http/body` pulls `:body` from `:http` path.
-   - `::subs/todos` sorts by `:id` for rendering.
+   - `::state.todos.subs/todos` sorts by `:id` for rendering.
 
 ## Routing
 - Routes carry `:layout` and `:view` in `:data` (`src/cljs/frontend/routes.cljs`).
@@ -45,8 +50,10 @@
 - Theme state in `[:ui :theme]` (`:system` | `:light` | `:dark`).
 - `frontend.utilities.theme`:
   - `apply-theme` sets `<html data-theme>` to DaisyUI theme names (`gold_dark` / `gold_light`).
-  - `set-theme` updates re-frame state, applies theme, persists to `localStorage` and a `theme` cookie (used server-side).
-  - `initialize-theme` reads saved theme and wires system preference listener.
+  - `apply-theme` applies DOM only. `persist-theme!` writes cookie + localStorage.
+  - `initialize-theme` dispatches `::state.handlers/set-theme` with saved theme, and wires system preference listener that re-dispatches when in `:system`.
+- Global handlers (`frontend.state.handlers`):
+  - `::set-theme` is an `reg-event-fx` that updates `[:ui :theme]` and triggers the custom fx to apply + persist.
 - Server boot:
   - `backend.routes/index` reads `theme` cookie and sets `data-theme` before CSS to avoid FOUC; small inline script covers `system`.
 
@@ -63,7 +70,7 @@
 ## Add a Feature: Recipe
 1. Define events in a new or existing module under `frontend.handlers`.
 2. If you fetch data:
-   - Use `[:dispatch [:http/init [:your/path]]]` and `::http/fetch` with `:on-success`/`:on-failure`.
+   - Use `[:dispatch [:http/init [:your/path]]]` and `::state.http-fx/fetch` with `:on-success`/`:on-failure`.
 3. Register subscriptions (raw or derived) under `frontend.subs` or a domain sub ns.
 4. In UIx components, read data with `(use-subscribe [::<ns>/your-sub ...])` and `rf/dispatch` events on user actions.
 5. Compose views in layouts via routes (`src/cljs/frontend/routes.cljs`).
@@ -79,10 +86,10 @@
 - `frontend/routes.cljs` — Route table, nav links.
 - `frontend/layouts/main_layout.cljs` — Shell layout (header/footer), theme switcher.
 - `frontend/pages/*` — Views (home/about/todos/not-found).
-- `frontend/handlers.cljs` — Re-frame events for Todos.
-- `frontend/subs.cljs` — Derived subs (Todos).
-- `frontend/http_fx.cljs` — Fetch effect + http status events + `:http/body` sub.
-- `frontend/state.cljs` — Global UI/route events and subs (theme, current route).
-- `frontend/utilities/theme.cljs` — Theme application and persistence.
+- `frontend/state/todos/handlers.cljs` — Re-frame events for Todos.
+- `frontend/state/todos/subs.cljs` — Derived subs (Todos).
+- `frontend/state/http_fx.cljs` — Fetch effect + http status events + `:http/body` sub.
+- `frontend/state/handlers.cljs` — Global UI/route events and side-effecting theme event.
+- `frontend/state/subs.cljs` — Global subs (`::current-route`, `::ui-state`).
+- `frontend/utilities/theme.cljs` — Theme DOM/persistence helpers and `listen-system-change!`.
 - `backend/routes.clj` — Server routes and theme-aware index.
-

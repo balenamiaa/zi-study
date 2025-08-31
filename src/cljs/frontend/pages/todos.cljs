@@ -1,7 +1,7 @@
 (ns frontend.pages.todos
   (:require ["lucide-react" :refer [Plus Trash2 ListTodo]]
-            [frontend.handlers :as h]
-            [frontend.subs :as s]
+            [frontend.state.todos.handlers :as h]
+            [frontend.state.todos.subs :as s]
             [frontend.uix.hooks :refer [use-subscribe]]
             [re-frame.core :as rf]
             [uix.core :as uix :refer [$ defui]]))

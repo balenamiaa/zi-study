@@ -1,5 +1,5 @@
-(ns frontend.handlers
-  (:require [frontend.http-fx :as http]
+(ns frontend.state.todos.handlers
+  (:require [frontend.state.http-fx :as http]
             [re-frame.core :as rf]))
 
 (rf/reg-event-fx ::get-todos
@@ -16,10 +16,6 @@
                                   :url "/api/todo"
                                   :request-content-type :json
                                   :body todo
-                                  ;; TODO: :http/init / success / failure could be used to store
-                                  ;; action status also (i.e. action is pending), maybe
-                                  ;; replace success with clear handler so the data is removed when
-                                  ;; operation is done (or maybe with a timeout?)
                                   :on-success [::get-todos]}}))
 
 (rf/reg-event-fx ::remove
@@ -28,7 +24,6 @@
                                   :url (str "/api/todo/" id)
                                   :on-success [::get-todos]}}))
 
-;; TODO: Need a callback to clear the UI state
 (rf/reg-event-fx ::save-changes
                  (fn [_ [_ id changes]]
                    {::http/fetch {:method :put
