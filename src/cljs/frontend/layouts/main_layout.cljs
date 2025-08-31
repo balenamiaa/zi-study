@@ -1,5 +1,5 @@
 (ns frontend.layouts.main-layout
-  (:require ["lucide-react" :as lucide]
+  (:require ["lucide-react" :refer [Menu Zap User UserCircle Settings LogOut Heart]]
             [frontend.components.theme-switcher :refer [theme-switcher]]
             [frontend.routes :refer [topbar-nav-links]]
             [reitit.frontend.easy :as rfe]
@@ -16,7 +16,7 @@
                     "bg-primary/10 text-primary hover:bg-primary/20"
                     "hover:bg-base-200"))}
      (when icon
-       ($ :> icon {:size 20 :class "mr-2"}))
+       ($ icon {:size 20 :className "mr-2"}))
      ($ :span label)))
 
 (defui header [{:keys [current-route]}]
@@ -29,7 +29,7 @@
               {:tabIndex 0
                :class "btn btn-ghost btn-circle"
                :aria-label "Open menu"}
-              ($ :> lucide/Menu {:size 24}))
+              ($ Menu {:size 24}))
            ($ :ul
               {:tabIndex 0
                :class "menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200"}
@@ -37,8 +37,8 @@
                 ($ :li {:key name}
                    ($ nav-link (assoc link :active? (= current-route name)))))))
 
-        ($ :div {:class "flex items-center space-x-2"}
-           ($ :> lucide/Zap {:size 28 :class "text-primary"})
+           ($ :div {:class "flex items-center space-x-2"}
+           ($ Zap {:size 28 :className "text-primary"})
            ($ :span {:class "text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"}
               "Template")))
 
@@ -56,21 +56,21 @@
               {:tabIndex 0
                :class "btn btn-ghost btn-circle avatar"}
               ($ :div {:class "w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center"}
-                 ($ :> lucide/User {:size 20 :class "text-primary-content"})))
+                 ($ User {:size 20 :className "text-primary-content"})))
            ($ :ul
               {:tabIndex 0
                :class "menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200"}
               ($ :li
                  ($ :a {:href "#"}
-                    ($ :> lucide/UserCircle {:size 16 :class "mr-2"})
+                    ($ UserCircle {:size 16 :className "mr-2"})
                     "Profile"))
               ($ :li
                  ($ :a {:href "#"}
-                    ($ :> lucide/Settings {:size 16 :class "mr-2"})
+                    ($ Settings {:size 16 :className "mr-2"})
                     "Settings"))
               ($ :li
                  ($ :a {:href "#"}
-                    ($ :> lucide/LogOut {:size 16 :class "mr-2"})
+                    ($ LogOut {:size 16 :className "mr-2"})
                     "Logout")))))))
 
 (defui footer []
@@ -83,7 +83,7 @@
      ($ :aside
         ($ :p {:class "flex items-center gap-2"}
            "© 2025 Template. Built with"
-           ($ :> lucide/Heart {:size 16 :class "text-error fill-error"})
+           ($ Heart {:size 16 :className "text-error fill-error"})
            "and ClojureScript"))))
 
 (defui main-layout [{:keys [current-route children]}]

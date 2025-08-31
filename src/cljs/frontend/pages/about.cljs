@@ -1,5 +1,5 @@
 (ns frontend.pages.about
-  (:require ["lucide-react" :as lucide]
+  (:require ["lucide-react" :refer [Moon Smartphone Zap Code2 Package Palette Wind Database Route Sparkles]]
             [uix.core :as uix :refer [$ defui]]))
 
 (defui feature-card [{:keys [icon title description]}]
@@ -7,7 +7,7 @@
      ($ :div {:class "card-body"}
         ($ :div {:class "flex items-center gap-3 mb-3"}
            ($ :div {:class "p-3 rounded-lg bg-primary/10"}
-              ($ :> icon {:size 24 :class "text-primary"}))
+              ($ icon {:size 24 :className "text-primary"}))
            ($ :h3 {:class "card-title"} title))
         ($ :p {:class "text-base-content/80"} description))))
 
@@ -24,32 +24,32 @@
         ($ :h2 {:class "text-3xl font-bold text-center"} "Technologies")
         ($ :div {:class "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}
            ($ feature-card
-              {:icon lucide/Package
+              {:icon Package
                :title "UIx"
                :description "React wrapper for ClojureScript with excellent performance and developer experience"})
 
            ($ feature-card
-              {:icon lucide/Palette
+              {:icon Palette
                :title "DaisyUI"
                :description "Beautiful component library built on top of Tailwind CSS with semantic color system"})
 
            ($ feature-card
-              {:icon lucide/Wind
+              {:icon Wind
                :title "Tailwind CSS"
                :description "Utility-first CSS framework for rapidly building custom user interfaces"})
 
            ($ feature-card
-              {:icon lucide/Database
+              {:icon Database
                :title "Re-frame"
                :description "A pattern for writing SPAs in ClojureScript, using Reagent's reactive data flow"})
 
            ($ feature-card
-              {:icon lucide/Route
+              {:icon Route
                :title "Reitit"
                :description "Fast data-driven router for Clojure(Script) with coercion and middleware support"})
 
            ($ feature-card
-              {:icon lucide/Sparkles
+              {:icon Sparkles
                :title "Lucide Icons"
                :description "Beautiful and consistent icon set with over 1000+ icons for modern web apps"})))
 
@@ -57,17 +57,17 @@
         ($ :h2 {:class "text-3xl font-bold text-center"} "Features")
         ($ :div {:class "space-y-4"}
            ($ :div {:class "alert alert-info"}
-              ($ :> lucide/Moon {:size 20})
+              ($ Moon {:size 20})
               ($ :span "Dark mode support with system preference detection"))
 
            ($ :div {:class "alert alert-success"}
-              ($ :> lucide/Smartphone {:size 20})
+              ($ Smartphone {:size 20})
               ($ :span "Fully responsive design that works on all devices"))
 
            ($ :div {:class "alert alert-warning"}
-              ($ :> lucide/Zap {:size 20})
+              ($ Zap {:size 20})
               ($ :span "Lightning fast performance with optimized builds"))
 
            ($ :div {:class "alert"}
-              ($ :> lucide/Code2 {:size 20})
+              ($ Code2 {:size 20})
               ($ :span "Clean, maintainable code structure with functional programming"))))))

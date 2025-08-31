@@ -2,6 +2,7 @@
   (:require [backend.api.todo :as todo]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [cognitect.transit :as transit]
             [common.schema :as schema]
@@ -51,25 +52,65 @@
       first
       :output-name))
 
-(defn index []
-  (hiccup/html {:mode :html}
-               (hiccup/raw "<!DOCTYPE html>\n")
-               [:html
-                {:lang "en"}
-                [:head
-                 [:title "Template Title"]
-                 [:meta {:charset "utf-8"}]
-                 [:meta {:name "viewport" :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]
-                 [:link {:rel "icon" :type "image/svg+xml" :href "/css/logo.svg"}]
-                 [:link {:rel "stylesheet" :href "/css/main.css"}]]
-                [:body {:class "bg-gray-50 antialiased"}
-                 [:div#app
-                  [:div {:class "min-h-screen flex items-center justify-center"}
-                   [:div {:class "text-center"}
-                    [:div {:class "inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"}]
-                    [:h1 {:class "text-xl font-semibold text-gray-700"} "Loading..."]
-                    [:p {:class "text-sm text-gray-500 mt-2"} "Please wait while we prepare your application"]]]]
-                 [:script {:type "text/javascript" :src (str "/js/" (main-js-file))}]]]))
+(defn ^:private cookie-theme [req]
+  (some-> (get-in req [:cookies "theme" :value]) str/lower-case))
+
+(defn ^:private cookie->data-theme [theme]
+  (case theme
+    "light" "gold_light"
+    "dark"  "gold_dark"
+    nil))
+
+(defn index [req]
+  (let [initial-data-theme (cookie->data-theme (cookie-theme req))]
+    (hiccup/html {:mode :html}
+                 (hiccup/raw "<!DOCTYPE html>\n")
+                 [:html
+                  (cond-> {:lang "en"}
+                    initial-data-theme (assoc :data-theme initial-data-theme))
+                  [:head
+                   [:title "Template Title"]
+                   [:meta {:charset "utf-8"}]
+                   [:meta {:name "viewport" :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]
+                   [:link {:rel "icon" :type "image/svg+xml" :href "/css/logo.svg"}]
+                   ;; Set theme ASAP before CSS loads to avoid FOUC
+                  [:script
+                   (hiccup/raw
+                    (str
+                     "(function(){\n"
+                     "  try {\n"
+                     "    var existing=document.documentElement.getAttribute('data-theme');\n"
+                     "    if(!existing){\n"
+                     "      var saved=localStorage.getItem('theme')||'system';\n"
+                     "      var prefersDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;\n"
+                     "      var effective=(saved==='system')?(prefersDark?'dark':'light'):saved;\n"
+                     "      var name=(effective==='dark')?'gold_dark':'gold_light';\n"
+                     "      document.documentElement.setAttribute('data-theme', name);\n"
+                     "    }\n"
+                     "  } catch(e){}\n"
+                     "})();"))]
+                   [:link {:rel "stylesheet" :href "/css/main.css"}]]
+                  [:body {:class "bg-base-100 antialiased"}
+                   [:div#app
+                    ;; Beautiful, theme-aware preloader
+                    [:div {:class "min-h-screen flex items-center justify-center relative overflow-hidden"}
+                     ;; soft glow background
+                     [:div {:class "absolute inset-0 -z-10 pointer-events-none"}
+                      [:div {:class "absolute -top-24 -left-24 w-72 h-72 bg-primary/20 rounded-full blur-3xl"}]
+                      [:div {:class "absolute -bottom-24 -right-24 w-72 h-72 bg-secondary/20 rounded-full blur-3xl"}]]
+                     [:div {:class "text-center space-y-5"}
+                      ;; ring loader
+                      [:div {:class "relative mx-auto w-24 h-24"}
+                       [:div {:class "absolute inset-0 rounded-full bg-gradient-to-tr from-primary to-secondary opacity-80 animate-spin p-[2px]"}
+                        [:div {:class "w-full h-full rounded-full bg-base-100"}]]
+                       [:div {:class "absolute inset-0 flex items-center justify-center"}
+                        [:span {:class "loading loading-spinner loading-lg text-primary"}]]]
+                      [:h1 {:class "text-2xl font-bold text-base-content"} "Loading"]
+                      [:p {:class "text-base-content/60"} "Preparing your application…"]]]]
+                   [:noscript
+                    [:div {:class "p-4 text-center text-warning"}
+                     "JavaScript is required to run this app."]]
+                   [:script {:defer true :src (str "/js/" (main-js-file))}]]])))
 
 (defn app [env]
   (ring/ring-handler
@@ -112,7 +153,7 @@
        ["/api/*" {:handler (fn [_req]
                              (resp/not-found))}]
        ;; Return index.html for any non-API routes for History API routing
-       ["/*" {:get {:handler (fn [_req] (resp/ok (str (index))))}}]]
+       ["/*" {:get {:handler (fn [req] (resp/ok (str (index req))))}}]]
       {:conflicts nil})))))
 
 (defmethod ig/init-key :web/routes [_ env]

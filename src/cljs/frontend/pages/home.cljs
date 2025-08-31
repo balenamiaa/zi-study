@@ -1,5 +1,5 @@
 (ns frontend.pages.home
-  (:require ["lucide-react" :as lucide]
+  (:require ["lucide-react" :refer [Zap Palette Code2 ArrowRight Info]]
             [uix.core :as uix :refer [$ defui]]))
 
 (defui home-page [_match]
@@ -15,21 +15,21 @@
            ($ :div {:class "stats shadow"}
               ($ :div {:class "stat"}
                  ($ :div {:class "stat-figure text-primary"}
-                    ($ :> lucide/Zap {:size 32}))
+                    ($ Zap {:size 32}) )
                  ($ :div {:class "stat-title"} "Fast")
                  ($ :div {:class "stat-value text-primary"} "Lightning")
                  ($ :div {:class "stat-desc"} "Optimized performance"))
 
               ($ :div {:class "stat"}
                  ($ :div {:class "stat-figure text-secondary"}
-                    ($ :> lucide/Palette {:size 32}))
+                    ($ Palette {:size 32}))
                  ($ :div {:class "stat-title"} "Beautiful")
                  ($ :div {:class "stat-value text-secondary"} "Modern")
                  ($ :div {:class "stat-desc"} "Eye-candy UI"))
 
               ($ :div {:class "stat"}
                  ($ :div {:class "stat-figure text-accent"}
-                    ($ :> lucide/Code2 {:size 32}))
+                    ($ Code2 {:size 32}))
                  ($ :div {:class "stat-title"} "Clean")
                  ($ :div {:class "stat-value text-accent"} "Code")
                  ($ :div {:class "stat-desc"} "Well structured"))))
@@ -37,10 +37,10 @@
         ($ :div {:class "flex gap-4 justify-center"}
            ($ :a {:href "/todos"
                   :class "btn btn-primary btn-lg gap-2"}
-              ($ :> lucide/ArrowRight {:size 20})
+              ($ ArrowRight {:size 20})
               "Get Started")
 
            ($ :a {:href "/about"
                   :class "btn btn-outline btn-lg gap-2"}
-              ($ :> lucide/Info {:size 20})
+              ($ Info {:size 20})
               "Learn More")))))

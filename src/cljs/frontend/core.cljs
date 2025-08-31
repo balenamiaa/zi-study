@@ -8,8 +8,10 @@
              [frontend.routes :refer [mk-routes]]
              [frontend.state :as state]
              [frontend.subs :as s]
+             [frontend.uix.hooks :refer [use-subscribe]]
              [frontend.utilities.theme :as theme]
              [re-frame.core :as rf]
+             [re-frame.db :as rfdb]
              [reitit.coercion.spec :as rss]
              [reitit.frontend :as reitit]
              [reitit.frontend.controllers :as rfc]
@@ -18,18 +20,18 @@
              [uix.dom]))
 
 (defui app []
-  (let [current-match @(state/get-current-route)
+  (let [current-match (use-subscribe [::state/current-route])
         route-data (get current-match :data {})
         current-route-name (:name route-data)
         layout-component (get route-data :layout main-layout)
         view-component (get route-data :view)]
 
     ($ layout-component
-       {:current-route current-route-name
-        :children (if current-match
-                    (when view-component
-                      ($ view-component current-match))
-                    ($ not-found-page))})))
+       {:current-route current-route-name}
+       (if current-match
+         (when view-component
+           ($ view-component current-match))
+         ($ not-found-page)))))
 
 (defonce root
   (when-let [el (js/document.getElementById "app")]
@@ -46,11 +48,13 @@
                            :todos-page todos-page
                            :about-page about-page
                            :not-found-page not-found-page})
-        app-state-current-route-atom (state/get-current-route)]
+        ;; Avoid re-frame warning: subscribe used outside reactive context.
+        ;; Read old route directly from app-db inside router callback.
+        _app-state-current-route-atom nil]
     (rfe/start!
      (reitit/router routes {:data {:coercion rss/coercion}})
      (fn on-navigate [new-match]
-       (let [old-match @app-state-current-route-atom
+       (let [old-match (:current-route @rfdb/app-db)
              controllers (rfc/apply-controllers (:controllers old-match) new-match)]
          (state/set-current-route (assoc new-match :controllers controllers))))
      {:use-fragment false}))

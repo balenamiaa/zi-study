@@ -1,5 +1,5 @@
 (ns frontend.pages.not-found
-  (:require ["lucide-react" :as lucide]
+  (:require ["lucide-react" :refer [Home ArrowLeft]]
             [uix.core :as uix :refer [$ defui]]))
 
 (defui not-found-page []
@@ -12,9 +12,9 @@
         ($ :div {:class "flex gap-4 justify-center mt-8"}
            ($ :a {:href "/"
                   :class "btn btn-primary gap-2"}
-              ($ :> lucide/Home {:size 20})
+              ($ Home {:size 20})
               "Go Home")
            ($ :button {:class "btn btn-outline gap-2"
                        :on-click #(.back js/window.history)}
-              ($ :> lucide/ArrowLeft {:size 20})
+              ($ ArrowLeft {:size 20})
               "Go Back")))))

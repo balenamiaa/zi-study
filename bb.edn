@@ -1,63 +1,66 @@
 {:tasks {;; Development
-        dev {:doc "Setup database and start nREPL + frontend"
-             :task (do
-                     (println "🚀 Setting up development environment...")
-                     (println "📦 Starting database...")
-                     (shell "docker-compose up -d")
-                     (Thread/sleep 3000)
-                     (println "🗄️  Running migrations...")
-                     (clojure "-M:backend -m backend.migrations migrate")
-                     (println "🎨 Starting frontend...")
-                     (shell {:dir "."} "npm run dev &")
-                     (Thread/sleep 2000)
-                     (println "🔧 Starting nREPL server...")
-                     (println "Connect VS Code to nREPL, then run: (go)")
-                     (clojure "-M:dev:backend:repl"))}
-        
-        start-frontend {:doc "Start frontend dev server with CSS watch"
-                        :task (do
-                                (println "🎨 Starting frontend on http://localhost:8080")
-                                (shell "npm run dev"))}
-        
-        ;; Database
-        db-up {:doc "Start database"
-               :task (shell "docker-compose up -d")}
-        
-        db-down {:doc "Stop database"
-                 :task (shell "docker-compose down")}
-        
-        migrate {:doc "Run database migrations"
-                 :task (clojure "-M:backend -m backend.migrations migrate")}
-        
-        create-migration {:doc "Create new migration: bb create-migration my-table"
-                          :task (let [name (first *command-line-args*)]
-                                  (if name
-                                    (clojure (str "-M:backend -m backend.migrations create " name))
-                                    (println "Usage: bb create-migration <name>")))}
-        
-        ;; Build & Deploy
-        build {:doc "Build production uberjar"
-               :task (do
-                       (println "🏗️  Building CSS...")
-                       (shell "npm run css:build")
-                       (println "🏗️  Building uberjar...")
-                       (clojure "-T:shadow-cljs:frontend:backend:build uberjar"))}
-        
-        ;; Utilities
-        outdated {:doc "Check outdated dependencies"
-                  :task (clojure "-M:outdated")}
-        
-        test {:doc "Run backend unit tests"
-              :task (clojure "-M:backend:test")}
-        
-        clean {:doc "Clean build artifacts"
-               :task (do
-                       (println "🧹 Cleaning build artifacts...")
-                       (shell "rm -rf target")
-                       (shell "rm -rf .shadow-cljs"))}
-        
-        user-repl {:doc "Start user configured nREPL process"
-                   :task (if-let [cmd (:repl-command (read-string (slurp ".user.edn")))]
-                           (apply shell cmd)
-                           (do (println "Missing :repl-command in .user.edn")
-                               (System/exit 1)))}}}
+         dev {:doc "Setup database and start nREPL + frontend"
+              :task (do
+                      (println "🚀 Setting up development environment...")
+                      (println "📦 Starting database...")
+                      (shell "docker-compose up -d")
+                      (Thread/sleep 2000)
+                      (println "🗄️  Running migrations...")
+                      (clojure "-M:backend -m backend.migrations migrate")
+                      (println "🎨 Starting CSS watcher in background...")
+                      (future (shell "npm run css:dev"))
+                      (Thread/sleep 3000)
+                      (println "🎨 Starting Shadow-CLJS watcher in background...")
+                      (future (shell "npm run shadow:watch"))
+                      (Thread/sleep 3000)
+                      (println "🔧 Starting nREPL server...")
+                      (println "Connect VS Code to nREPL, then run: (go)")
+                      (clojure "-M:dev:backend:repl"))}
+
+         start-frontend {:doc "Start frontend dev server with CSS watch"
+                         :task (do
+                                 (println "🎨 Starting frontend on http://localhost:8080")
+                                 (shell "npm run dev"))}
+
+         ;; Database
+         db-up {:doc "Start database"
+                :task (shell "docker-compose up -d")}
+
+         db-down {:doc "Stop database"
+                  :task (shell "docker-compose down")}
+
+         migrate {:doc "Run database migrations"
+                  :task (clojure "-M:backend -m backend.migrations migrate")}
+
+         create-migration {:doc "Create new migration: bb create-migration my-table"
+                           :task (let [name (first *command-line-args*)]
+                                   (if name
+                                     (clojure (str "-M:backend -m backend.migrations create " name))
+                                     (println "Usage: bb create-migration <name>")))}
+
+         ;; Build & Deploy
+         build {:doc "Build production uberjar"
+                :task (do
+                        (println "🏗️  Building CSS...")
+                        (shell "npm run css:build")
+                        (println "🏗️  Building uberjar...")
+                        (clojure "-T:shadow-cljs:frontend:backend:build uberjar"))}
+
+         ;; Utilities
+         outdated {:doc "Check outdated dependencies"
+                   :task (clojure "-M:outdated")}
+
+         test {:doc "Run backend unit tests"
+               :task (clojure "-M:backend:test")}
+
+         clean {:doc "Clean build artifacts"
+                :task (do
+                        (println "🧹 Cleaning build artifacts...")
+                        (shell "rm -rf target")
+                        (shell "rm -rf .shadow-cljs"))}
+
+         user-repl {:doc "Start user configured nREPL process"
+                    :task (if-let [cmd (:repl-command (read-string (slurp ".user.edn")))]
+                            (apply shell cmd)
+                            (do (println "Missing :repl-command in .user.edn")
+                                (System/exit 1)))}}}

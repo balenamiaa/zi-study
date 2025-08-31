@@ -1,14 +1,14 @@
 (ns frontend.routes
-  (:require ["lucide-react" :as lucide]))
+  (:require ["lucide-react" :refer [Home ListTodo Info]]))
 
 (def sym-home-route ::home)
 (def sym-todos-route ::todos)
 (def sym-about-route ::about)
 
 (def topbar-nav-links
-  [{:name sym-home-route :label "Home" :icon lucide/Home}
-   {:name sym-todos-route :label "Todos" :icon lucide/ListTodo}
-   {:name sym-about-route :label "About" :icon lucide/Info}])
+  [{:name sym-home-route :label "Home" :icon Home}
+   {:name sym-todos-route :label "Todos" :icon ListTodo}
+   {:name sym-about-route :label "About" :icon Info}])
 
 (defn mk-routes
   [{:keys [main-layout home-page todos-page about-page _not-found-page]}]

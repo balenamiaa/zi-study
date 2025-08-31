@@ -1,5 +1,5 @@
 (ns frontend.pages.todos
-  (:require ["lucide-react" :as lucide]
+  (:require ["lucide-react" :refer [Plus Trash2 ListTodo]]
             [frontend.handlers :as h]
             [frontend.subs :as s]
             [frontend.uix.hooks :refer [use-subscribe]]
@@ -26,7 +26,7 @@
                        (when (not= "" value)
                          (on-add-todo {:text value :status :unresolved})
                          (set-value! "")))}
-          ($ :> lucide/Plus {:size 20})))))
+          ($ Plus {:size 20})))))
 
 (defui todo-item [{:keys [todo]}]
   (let [{:keys [id text status]} todo
@@ -68,7 +68,7 @@
              ($ :button
                 {:class "btn btn-ghost btn-circle btn-sm text-error"
                  :on-click #(rf/dispatch [::h/remove id])}
-                ($ :> lucide/Trash2 {:size 16})))))))
+                ($ Trash2 {:size 16})))))))
 
 (defui todos-page [_match]
   (let [todos (use-subscribe [::s/todos])]
@@ -87,7 +87,7 @@
        (if (empty? todos)
          ($ :div {:class "card bg-base-200"}
             ($ :div {:class "card-body text-center py-12"}
-               ($ :> lucide/ListTodo {:size 48 :class "mx-auto mb-4 text-base-content/30"})
+               ($ ListTodo {:size 48 :class "mx-auto mb-4 text-base-content/30"})
                ($ :p {:class "text-lg text-base-content/70"} "No todos yet!")
                ($ :p {:class "text-base-content/50"} "Add one above to get started")))
 

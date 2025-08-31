@@ -1,16 +1,18 @@
 (ns frontend.components.theme-switcher
-  (:require [uix.core :as uix :refer [$ defui]]
-            ["lucide-react" :as lucide]
+  (:require ["lucide-react" :refer [Monitor Sun Moon]]
+            [frontend.state :as state]
+            [frontend.uix.hooks :as hooks]
             [frontend.utilities.theme :as theme]
-            [frontend.state :as state]))
+            [uix.core :as uix :refer [$ defui]]))
 
 (defui theme-switcher
   "A theme switcher component that allows selecting between system, light, and dark themes."
   []
-  (let [current-theme (uix/use-subscribe #(:theme @(state/get-ui-state)))
-        themes [{:value :system :icon lucide/Monitor :title "Auto (System)"}
-                {:value :light  :icon lucide/Sun :title "Light Theme"}
-                {:value :dark   :icon lucide/Moon :title "Dark Theme"}]]
+  (let [ui (hooks/use-subscribe [::state/ui-state])
+        current-theme (:theme ui)
+        themes [{:value :system :icon Monitor :title "Auto (System)"}
+                {:value :light  :icon Sun :title "Light Theme"}
+                {:value :dark   :icon Moon :title "Dark Theme"}]]
 
     ($ :div {:class "relative flex items-center p-0.5 rounded-full bg-base-200 border border-base-300"}
 
@@ -30,7 +32,7 @@
              :class "relative z-10 flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 hover:text-primary-focus"
              :on-click #(theme/set-theme value)
              :aria-label title}
-            ($ :> icon {:size 18
-                        :class (if (= current-theme value)
-                                 "text-primary-content"
-                                 "text-base-content opacity-60 hover:opacity-100")}))))))
+            ($ icon {:size 18
+                     :className (if (= current-theme value)
+                                  "text-primary-content"
+                                  "text-base-content opacity-60 hover:opacity-100")}))))))

@@ -1,0 +1,958 @@
+; This is the Calva REPL Window.
+; It's just a file, really, with some special treatment from Calva.
+; Use it as a REPL input prompt if you like. (When the REPL is connected.)
+; TIPS: The keyboard shortcut `ctrl+alt+o r` shows and focuses this window
+; Please see https://calva.io/repl-window/ for more info.
+; Happy coding! ♥️
+
+; TIPS: As with any Clojure file when the REPL is connected:
+; - `alt+enter` evaluates the current top level form.
+; - `ctrl+enter` evaluates the current form.
+; Special for this file:
+; - `alt+up` and `alt+down` traverse up and down the REPL command history
+;    when the cursor is after the last contents at the prompt
+; 
+; See also the Calva Inspector: https://calva.io/inspector/
+
+PLEASE NOTE
+We will update the default location of this file.
+The new default location will be
+  "<projectRootPath>/.calva/repl.calva-repl"
+For now the legacy path is used by default.
+To give yourself a smooth transition, you can opt in
+to the change, by configuring this setting as false:
+  "calva.useLegacyReplWindowPath"
+and then add "**/.calva/repl.calva-repl" to your ".gitignore" file.
+
+
+This file is configured as the output destination for all REPL output.
+You can configure this with the setting:
+  "calva.outputDestinations"
+
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:49170 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> 
+"Please see https://calva.io/output/#about-stdout-in-the-repl-window
+about why stdout printed to this file is prepended with `;` to be line comments."
+clj꞉user꞉> (go)
+; 23:26:57.632 [nREPL-session-32f44521-eeb2-42a3-a9e4-d7d1d1bb85c0] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 23:26:57.869 [nREPL-session-32f44521-eeb2-42a3-a9e4-d7d1d1bb85c0] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; 23:26:58.126 [nREPL-session-32f44521-eeb2-42a3-a9e4-d7d1d1bb85c0] INFO  backend.main -- Stopping Jetty
+; 23:26:58.146 [nREPL-session-32f44521-eeb2-42a3-a9e4-d7d1d1bb85c0] INFO  backend.routes -- Shutting down web routes
+; 23:26:58.148 [nREPL-session-32f44521-eeb2-42a3-a9e4-d7d1d1bb85c0] INFO  backend.main -- Shutting down DB pool
+; 23:26:58.173 [nREPL-session-32f44521-eeb2-42a3-a9e4-d7d1d1bb85c0] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 23:26:58.217 [nREPL-session-32f44521-eeb2-42a3-a9e4-d7d1d1bb85c0] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; nREPL connection failed: Error: read ECONNRESET
+; Failed connecting.
+; nREPL Connection was closed
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:53808 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> 
+"Please see https://calva.io/output/#about-stdout-in-the-repl-window
+about why stdout printed to this file is prepended with `;` to be line comments."
+clj꞉user꞉> (go)
+; 16:07:53.604 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 16:07:53.873 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; #error {
+;  :cause "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;  :via
+;  [{:type org.postgresql.util.PSQLException
+;    :message "ERROR: relation \"todo\" does not exist\n  Position: 15"
+;    :at [org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]}]
+;  :trace
+;  [[org.postgresql.core.v3.QueryExecutorImpl receiveErrorResponse "QueryExecutorImpl.java" 2734]
+;   [org.postgresql.core.v3.QueryExecutorImpl processResults "QueryExecutorImpl.java" 2421]
+;   [org.postgresql.core.v3.QueryExecutorImpl execute "QueryExecutorImpl.java" 372]
+;   [org.postgresql.jdbc.PgStatement executeInternal "PgStatement.java" 518]
+;   [org.postgresql.jdbc.PgStatement execute "PgStatement.java" 435]
+;   [org.postgresql.jdbc.PgPreparedStatement executeWithFlags "PgPreparedStatement.java" 196]
+;   [org.postgresql.jdbc.PgPreparedStatement execute "PgPreparedStatement.java" 182]
+;   [com.zaxxer.hikari.pool.ProxyPreparedStatement execute "ProxyPreparedStatement.java" 44]
+;   [com.zaxxer.hikari.pool.HikariProxyPreparedStatement execute "HikariProxyPreparedStatement.java" -1]
+;   [next.jdbc.result_set$stmt__GT_result_set invokeStatic "result_set.clj" 675]
+;   [next.jdbc.result_set$stmt__GT_result_set invoke "result_set.clj" 670]
+;   [next.jdbc.result_set$eval5112$fn__5120 invoke "result_set.clj" 952]
+;   [next.jdbc.protocols$eval4137$fn__4153$G__4128__4162 invoke "protocols.clj" 34]
+;   [next.jdbc$execute_BANG_ invokeStatic "jdbc.clj" 272]
+;   [next.jdbc$execute_BANG_ invoke "jdbc.clj" 254]
+;   [next.jdbc.sql$find_by_keys invokeStatic "sql.clj" 140]
+;   [next.jdbc.sql$find_by_keys invoke "sql.clj" 109]
+;   [backend.api.todo$get_todos invokeStatic "todo.clj" 19]
+;   [backend.api.todo$get_todos invoke "todo.clj" 18]
+;   [clojure.lang.Var invoke "Var.java" 386]
+;   [backend.routes$wrap_database_middleware$fn__28491 invoke "routes.clj" 32]
+;   [reitit.ring.coercion$fn__28178$fn__28180$fn__28181 invoke "coercion.cljc" 65]
+;   [reitit.ring.coercion$fn__28191$fn__28193$fn__28194 invoke "coercion.cljc" 81]
+;   [reitit.ring.middleware.exception$wrap$fn__28234$fn__28235 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__28289 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__28006 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__29481 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; Syntax error compiling at (c:\userdata\clj\zistudy\src\clj\backend\migrations.clj:35:3).
+; Unable to resolve symbol: run-migration-system in this context
+clj꞉backend.migrations꞉> 
+nil
+clj꞉backend.migrations꞉> 
+; 20:04:51.951 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 20:04:51.968 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  migratus.core -- Starting migrations
+; 20:04:51.989 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  migratus.core -- Ending migrations
+; 20:04:51.990 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Shutting down DB pool
+nil
+clj꞉backend.migrations꞉> 
+; 20:05:25.718 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 20:05:25.731 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  migratus.core -- Starting migrations
+; 20:05:25.741 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  migratus.core -- Running up for [20250830180000]
+; 20:05:25.741 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  migratus.core -- Up 20250830180000-todo
+; 20:05:25.744 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  migratus.database -- Connection is  {:connection #object[com.zaxxer.hikari.pool.HikariProxyConnection 0x76272840 HikariProxyConnection@1982277696 wrapping org.postgresql.jdbc.PgConnection@683861f9]} Config is {:store :database, :migration-dir resources/db/migrations/, :init-in-transaction? true, :migration-table-name migrations, :db {:datasource #object[com.zaxxer.hikari.HikariDataSource 0x5cd1f0 HikariDataSource (HikariPool-3)]}}
+; 20:05:25.798 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  migratus.core -- Ending migrations
+; 20:05:25.799 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Shutting down DB pool
+nil
+clj꞉backend.migrations꞉> (reset)
+; Syntax error compiling at (c:\userdata\clj\zistudy\.calva\output-window\output.calva-repl:856:26).
+; Unable to resolve symbol: reset in this context
+clj꞉backend.migrations꞉> (ns user)
+nil
+clj꞉user꞉> 
+(reset)
+; 20:10:28.492 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Stopping Jetty
+; 20:10:28.497 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.routes -- Shutting down web routes
+; 20:10:28.498 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.db common.schema backend.api.todo backend.routes backend.main user backend.migrations)
+; 20:10:28.643 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 20:10:28.666 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> (reset)
+; 20:13:44.198 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Stopping Jetty
+; 20:13:44.200 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.routes -- Shutting down web routes
+; 20:13:44.200 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.routes backend.main backend.migrations)
+; :error-while-loading backend.routes
+#error {
+ :cause "EOF while reading, starting at line 64"
+ :via
+ [{:type clojure.lang.Compiler$CompilerException
+   :message "Syntax error reading source at (backend/routes.clj:163:1)."
+   :data #:clojure.error{:phase :read-source, :line 163, :column 1, :source "backend/routes.clj"}
+   :at [clojure.lang.Compiler load "Compiler.java" 8230]}
+  {:type java.lang.RuntimeException
+   :message "EOF while reading, starting at line 64"
+   :at [clojure.lang.Util runtimeException "Util.java" 221]}]
+ :trace
+ [[clojure.lang.Util runtimeException "Util.java" 221]
+  [clojure.lang.LispReader readDelimitedList "LispReader.java" 1408]
+  [clojure.lang.LispReader$ListReader invoke "LispReader.java" 1246]
+  [clojure.lang.LispReader read "LispReader.java" 287]
+  [clojure.lang.LispReader read "LispReader.java" 218]
+  [clojure.lang.Compiler load "Compiler.java" 8218]
+  [clojure.lang.RT loadResourceScript "RT.java" 401]
+  [clojure.lang.RT loadResourceScript "RT.java" 392]
+  [clojure.lang.RT load "RT.java" 479]
+  [clojure.lang.RT load "RT.java" 444]
+  [clojure.core$load$fn__6933 invoke "core.clj" 6189]
+  [clojure.core$load invokeStatic "core.clj" 6188]
+  [clojure.core$load doInvoke "core.clj" 6172]
+  [clojure.lang.RestFn invoke "RestFn.java" 411]
+  [clojure.core$load_one invokeStatic "core.clj" 5961]
+  [clojure.core$load_one invoke "core.clj" 5956]
+  [clojure.core$load_lib$fn__6875 invoke "core.clj" 6003]
+  [clojure.core$load_lib invokeStatic "core.clj" 6002]
+  [clojure.core$load_lib doInvoke "core.clj" 5981]
+  [clojure.lang.RestFn applyTo "RestFn.java" 145]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$load_libs invokeStatic "core.clj" 6044]
+  [clojure.core$load_libs doInvoke "core.clj" 6028]
+  [clojure.lang.RestFn applyTo "RestFn.java" 140]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$require invokeStatic "core.clj" 6066]
+  [clojure.core$require doInvoke "core.clj" 6066]
+  [clojure.lang.RestFn invoke "RestFn.java" 424]
+  [clojure.tools.namespace.reload$track_reload_one invokeStatic "reload.clj" 35]
+  [clojure.tools.namespace.reload$track_reload_one invoke "reload.clj" 21]
+  [clojure.tools.namespace.reload$track_reload invokeStatic "reload.clj" 52]
+  [clojure.tools.namespace.reload$track_reload invoke "reload.clj" 43]
+  [clojure.lang.AFn applyToHelper "AFn.java" 154]
+  [clojure.lang.AFn applyTo "AFn.java" 144]
+  [clojure.lang.Var alterRoot "Var.java" 310]
+  [clojure.core$alter_var_root invokeStatic "core.clj" 5563]
+  [clojure.core$alter_var_root doInvoke "core.clj" 5558]
+  [clojure.lang.RestFn invoke "RestFn.java" 428]
+  [clojure.tools.namespace.repl$refresh_scanned invokeStatic "repl.clj" 135]
+  [clojure.tools.namespace.repl$refresh_scanned doInvoke "repl.clj" 109]
+  [clojure.lang.RestFn applyTo "RestFn.java" 140]
+  [clojure.core$apply invokeStatic "core.clj" 667]
+  [clojure.core$apply invoke "core.clj" 662]
+  [clojure.tools.namespace.repl$refresh invokeStatic "repl.clj" 187]
+  [clojure.tools.namespace.repl$refresh doInvoke "repl.clj" 169]
+  [clojure.lang.RestFn invoke "RestFn.java" 424]
+  [integrant.repl$reset invokeStatic "repl.clj" 90]
+  [integrant.repl$reset invoke "repl.clj" 88]
+  [user$eval30582 invokeStatic "NO_SOURCE_FILE" 870]
+  [user$eval30582 invoke "NO_SOURCE_FILE" 870]
+  [clojure.lang.Compiler eval "Compiler.java" 7751]
+  [nrepl.middleware.interruptible_eval$evaluator$run__7412$fn__7423 invoke "interruptible_eval.clj" 106]
+  [nrepl.middleware.interruptible_eval$evaluator$run__7412 invoke "interruptible_eval.clj" 101]
+  [nrepl.middleware.session$session_exec$session_loop__7496 invoke "session.clj" 230]
+  [nrepl.SessionThread run "SessionThread.java" 21]]}
+clj꞉user꞉> (reset)
+; 20:14:09.389 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Stopping Jetty
+; 20:14:09.389 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.routes -- Shutting down web routes
+; 20:14:09.389 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.routes backend.main backend.migrations)
+; 20:14:09.496 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 20:14:09.525 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> (reset)
+; 20:18:05.138 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Stopping Jetty
+; 20:18:05.140 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.routes -- Shutting down web routes
+; 20:18:05.141 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.routes backend.main backend.migrations)
+; 20:18:05.281 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 20:18:05.304 [nREPL-session-8af190c7-1431-4713-9add-5cbc2f1c91a8] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
