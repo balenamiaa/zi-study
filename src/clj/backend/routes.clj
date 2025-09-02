@@ -1,5 +1,7 @@
 (ns backend.routes
   (:require [backend.api.todo :as todo]
+            [backend.api.user]
+            [backend.api.auth :as auth]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -16,6 +18,9 @@
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
+            [ring.middleware.multipart-params :refer [wrap-multipart-params]]
+            [ring.middleware.session :refer [wrap-session]]
+            [ring.middleware.session.cookie :refer [cookie-store]]
             [ring.util.http-response :as resp]))
 
 (def muuntaja-instance
@@ -35,6 +40,15 @@
      (handler (assoc request :db database)
               respond
               raise))))
+
+(defn wrap-env-middleware
+  "Attach selected env config to request map."
+  [handler env]
+  (fn
+    ([request]
+     (handler (assoc request :env env)))
+    ([request respond raise]
+     (handler (assoc request :env env) respond raise))))
 
 (defn default-error-handler
   "Default safe handler for any exception."
@@ -89,7 +103,8 @@
                      "    }\n"
                      "  } catch(e){}\n"
                      "})();"))]
-                   [:link {:rel "stylesheet" :href "/css/main.css"}]]
+                   [:link {:rel "stylesheet" :href "/css/main.css"}]
+                   [:link {:rel "stylesheet" :href "/css/autofill-fix.css"}]]
                   [:body {:class "bg-base-100 antialiased"}
                    [:div#app
                     ;; Beautiful, theme-aware preloader
@@ -116,6 +131,16 @@
   (ring/ring-handler
    (ring/router
     ["/api"
+     ["/user"
+      ["/profile" {:post {:handler #'backend.api.user/update-profile}}]
+      ["/avatar" {:post {:handler #'backend.api.user/upload-avatar}}]]
+     ["/auth"
+      ["/me" {:get {:handler #'auth/me}}]
+      ["/register" {:post {:handler #'auth/register}}]
+      ["/login" {:post {:handler #'auth/login}}]
+      ["/logout" {:post {:handler #'auth/logout}}]
+      ["/google/start" {:get {:handler #'auth/google-start}}]
+      ["/google/callback" {:get {:handler #'auth/google-callback}}]]
      ["/todo"
       [""
        {:summary "Return a list of todo items"
@@ -141,12 +166,25 @@
                          ring.coercion/coerce-exceptions-middleware
                          ring.coercion/coerce-request-middleware
                          ring.coercion/coerce-response-middleware
-                         [wrap-database-middleware (:db env)]]}})
+                         (fn [handler] (wrap-multipart-params handler))
+                         [wrap-database-middleware (:db env)]
+                         [wrap-env-middleware (:env env)]
+                         ;; session cookie store (signed). Provide a real secret in env.
+                         (fn [handler]
+                           (let [cfg (:env env)]
+                             (wrap-session handler {:store (cookie-store {:key (.getBytes (get-in cfg [:session :secret]) "UTF-8")
+                                                                           :readers {} :writers {}})
+                                                   :cookie-name (or (get-in cfg [:session :cookie-name]) "sid")
+                                                   :cookie-attrs {:http-only true :same-site :lax}})))]}})
 
-   ;; Default handler - handle resources (js files), index.html and 404 for API endpoints
-   (ring/routes
+  ;; Default handler - handle resources (js files), index.html and 404 for API endpoints
+  (ring/routes
     (ring/create-resource-handler {:path ""
                                    :root "public"})
+    ;; Serve uploaded files from configurable uploads root at /uploads
+    (let [uploads-root (or (get-in (:env env) [:uploads :root]) "uploads")]
+      (ring/create-file-handler {:path "/uploads"
+                                 :root uploads-root}))
     (ring/ring-handler
      (ring/router
       [""

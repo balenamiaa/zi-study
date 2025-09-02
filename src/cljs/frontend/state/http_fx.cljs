@@ -48,3 +48,19 @@
             (fn [db [_ path]]
               (:body (:resp (get-in (:http db) path)))))
 
+;; Simple upload effect for multipart file uploads
+(rf/reg-fx ::upload
+           (fn [{:keys [url file on-success on-failure]}]
+             (let [fd (js/FormData.)]
+               (.append fd "file" file)
+               (-> (js/fetch url #js {:method "POST" :body fd})
+                   (.then (fn [resp]
+                            (if (.-ok resp)
+                              (.json resp)
+                              (throw (js/Error. (str "Upload failed: " (.-status resp)))))))
+                   (.then (fn [data]
+                            (when on-success
+                              (rf/dispatch (conj on-success data)))))
+                   (.catch (fn [err]
+                             (when on-failure
+                               (rf/dispatch (conj on-failure {:message (.-message err)})))))))))

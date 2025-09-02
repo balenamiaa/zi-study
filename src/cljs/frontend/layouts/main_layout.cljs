@@ -1,7 +1,11 @@
 (ns frontend.layouts.main-layout
-  (:require ["lucide-react" :refer [Menu Zap User UserCircle Settings LogOut Heart]]
+  (:require ["lucide-react" :refer [Menu Zap User UserCircle Settings LogOut Heart Image]]
             [frontend.components.theme-switcher :refer [theme-switcher]]
-            [frontend.routes :refer [topbar-nav-links]]
+            [frontend.routes :as routes :refer [topbar-nav-links]]
+            [frontend.state.auth.handlers :as auth-h]
+            [frontend.state.auth.subs :as auth-subs]
+            [frontend.uix.hooks :refer [use-subscribe]]
+            [re-frame.core :as rf]
             [reitit.frontend.easy :as rfe]
             [uix.core :as uix :refer [$ defui]]))
 
@@ -37,7 +41,7 @@
                 ($ :li {:key name}
                    ($ nav-link (assoc link :active? (= current-route name)))))))
 
-           ($ :div {:class "flex items-center space-x-2"}
+        ($ :div {:class "flex items-center space-x-2"}
            ($ Zap {:size 28 :className "text-primary"})
            ($ :span {:class "text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"}
               "Template")))
@@ -51,27 +55,41 @@
      ($ :div {:class "navbar-end gap-3"}
         ($ theme-switcher)
 
-        ($ :div {:class "dropdown dropdown-end"}
-           ($ :button
-              {:tabIndex 0
-               :class "btn btn-ghost btn-circle avatar"}
-              ($ :div {:class "w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center"}
-                 ($ User {:size 20 :className "text-primary-content"})))
-           ($ :ul
-              {:tabIndex 0
-               :class "menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200"}
-              ($ :li
-                 ($ :a {:href "#"}
-                    ($ UserCircle {:size 16 :className "mr-2"})
-                    "Profile"))
-              ($ :li
-                 ($ :a {:href "#"}
-                    ($ Settings {:size 16 :className "mr-2"})
-                    "Settings"))
-              ($ :li
-                 ($ :a {:href "#"}
-                    ($ LogOut {:size 16 :className "mr-2"})
-                    "Logout")))))))
+        (let [auth (use-subscribe [::auth-subs/auth])
+              status (:status auth)
+              user (:user auth)
+              avatar (:avatar_url user)]
+          (cond
+            (= status :loading)
+            ($ :div {:class "btn btn-ghost btn-circle"}
+               ($ :span {:class "loading loading-spinner text-primary"}))
+
+            (= status :authenticated)
+            ($ :div {:class "dropdown dropdown-end"}
+               ($ :label {:tabIndex 0 :class "btn btn-ghost btn-circle avatar"}
+                  ($ :div {:class "w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary to-secondary flex items-center justify-center"}
+                     (if avatar
+                       ($ :img {:src avatar :alt "avatar" :class "w-full h-full object-cover"})
+                       ($ User {:size 20 :className "text-primary-content"}))))
+               ($ :ul {:tabIndex 0 :class "menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-56 border border-base-200"}
+                  ($ :li ($ :a {:href "#"} ($ UserCircle {:size 16 :className "mr-2"}) "Profile"))
+                  ($ :li ($ :label {:class "cursor-pointer"}
+                            ($ Image {:size 16 :className "mr-2"})
+                            "Change avatar"
+                            ($ :input {:type "file" :accept "image/*" :class "hidden"
+                                       :on-change (fn [e]
+                                                    (when-let [file (aget (.. e -target -files) 0)]
+                                                      (rf/dispatch [::auth-h/upload-avatar file [::auth-h/get-me]])))})))
+                  ($ :li ($ :a {:href "#" :on-click #(rf/dispatch [::auth-h/logout])}
+                            ($ LogOut {:size 16 :className "mr-2"})
+                            "Logout"))))
+
+            :else
+            ($ :div {:class "flex gap-2"}
+               ($ :button {:class "btn btn-sm btn-primary"
+                           :on-click #(rfe/push-state routes/sym-login-route)} "Login")
+               ($ :button {:class "btn btn-sm btn-outline"
+                           :on-click #(rfe/push-state (keyword (namespace routes/sym-login-route) "register"))} "Register")))))))
 
 (defui footer []
   ($ :footer {:class "footer footer-center p-10 bg-base-200 text-base-content rounded-t-3xl mt-auto"}

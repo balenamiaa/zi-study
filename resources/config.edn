@@ -1,6 +1,8 @@
 {:adapter/jetty {:port #long #or [#env "HTTP_PORT" 3333]
                  :routes #ig/ref :web/routes}
- :web/routes {:db #ig/ref :database/pool}
+ :web/routes {:db #ig/ref :database/pool
+              :env #ig/ref :config/env}
+ :config/env {}
  :database/pool {:adapter "postgresql"
                  :username #or [#env "DB_USERNAME" "template_db_user"]
                  :password #or [#env "DB_PASSWORD" "template_db_password"]

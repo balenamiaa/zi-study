@@ -21,3 +21,4 @@ node_modules/
 *.iml
 .user.edn
 .claude
+secret.edn

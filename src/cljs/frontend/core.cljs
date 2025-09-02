@@ -4,9 +4,15 @@
              [frontend.pages.home :refer [home-page]]
              [frontend.pages.not-found :refer [not-found-page]]
              [frontend.pages.todos :refer [todos-page]]
-             [frontend.routes :refer [mk-routes]]
+             [frontend.pages.login :refer [login-page]]
+             [frontend.pages.register :refer [register-page]]
+             [frontend.routes :as routes :refer [mk-routes]]
+             [frontend.components.route-guard :refer [route-guard]]
              [frontend.state.handlers :as state-h]
              [frontend.state.subs :as state-subs]
+             [frontend.state.auth.handlers :as auth-h]
+             [frontend.state.auth.subs :as auth-subs]
+             [frontend.state.app :as app]
              [frontend.uix.hooks :refer [use-subscribe]]
              [frontend.utilities.theme :as theme]
              [re-frame.core :as rf]
@@ -20,6 +26,7 @@
 
 (defui app []
   (let [current-match (use-subscribe [::state-subs/current-route])
+        authenticated? (use-subscribe [::auth-subs/authenticated?])
         route-data (get current-match :data {})
         current-route-name (:name route-data)
         layout-component (get route-data :layout main-layout)
@@ -27,6 +34,7 @@
 
     ($ layout-component
        {:current-route current-route-name}
+       ($ route-guard {:current-match current-match :authenticated? authenticated?})
        (if current-match
          (when view-component
            ($ view-component current-match))
@@ -40,15 +48,15 @@
   (uix.dom/render-root ($ app) root))
 
 (defn ^:export init []
-  (state-h/init-theme!)
+  (app/init!)
 
   (let [routes (mk-routes {:main-layout main-layout
                            :home-page home-page
                            :todos-page todos-page
                            :about-page about-page
+                           :login-page login-page
+                           :register-page register-page
                            :not-found-page not-found-page})
-        ;; Avoid re-frame warning: subscribe used outside reactive context.
-        ;; Read old route directly from app-db inside router callback.
         _app-state-current-route-atom nil]
     (rfe/start!
      (reitit/router routes {:data {:coercion rss/coercion}})
