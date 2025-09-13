@@ -4,8 +4,14 @@
 - React via UIx: `uix.core`, root in `src/cljs/frontend/core.cljs`.
 - State: re-frame (`re-frame.core`) with subs/events and a central `app-db`.
 - Router: Reitit frontend (`reitit.frontend.easy`), routes in `src/cljs/frontend/routes.cljs` (supports `:protected?`).
-- HTTP: custom `::fetch` effect wrapping Fetch API (`src/cljs/frontend/state/http_fx.cljs`).
+ - HTTP: fetch-fx based `::fetch` effect (`src/cljs/frontend/state/http_fx.cljs`).
+  - Encodes request bodies with Transit JSON by default (or JSON with `:request-content-type :json`).
+  - Always includes cookies (`credentials: "include"`).
+  - Injects CSRF header automatically for unsafe methods (POST/PUT/PATCH/DELETE) when a token is present.
+  - Uploads use a dedicated `::http/upload` effect with `FormData` and CSRF header.
 - CSS/UI: Tailwind + DaisyUI, theme via `data-theme` attribute.
+ - UI components: see `docs/UI_COMPONENTS.md` for Buttons, Inputs, Card, Avatar, Dropdown, Toasts, and more.
+ - In-depth architecture: see `docs/SYSTEM_ARCHITECTURE.md` for how backend and frontend interact.
  - Auth: Session cookie (HttpOnly, SameSite=Lax) with `/api/auth/*` endpoints.
  - Env: Integrant key `:config/env` loads from `secret.edn`, then ENV vars, then defaults (logs warnings on defaults).
    - secret.edn search order: `SECRET_EDN_PATH` → project root `./secret.edn` → classpath `resources/secret.edn` (classpath option discouraged for production).
@@ -17,7 +23,7 @@
 - React component interop: call components directly, e.g. `($ Button {:on-click ...})`.
 - Lucide icons: import named icons and call, e.g. `($ Home {:size 20})`.
 
-## re-frame State Model
+## re-frame State Model (Feature-First)
 - `app-db`: single map holding UI, route and domain data.
 - Subscriptions:
   - Register with `rf/reg-sub`. Example: `::state/current-route`, `::state/ui-state`.
@@ -37,7 +43,7 @@
   - `reg-event-db` returns only `:db`. `reg-event-fx` returns an effects map (can include `:db`, `:dispatch`, `:fx`, custom effects, etc.).
 
 ## HTTP Fetch Flow (Todos example)
-1. UI dispatches `::state.todos.handlers/get-todos`.
+1. UI dispatches `::state.todos/get-todos`.
 2. Event returns effects:
    - `[:dispatch [:http/init [:todos]]]` → sets `:http [:todos] :status` to `:initial-loading`/`:loading`.
    - `[::state.http-fx/fetch {...}]` → triggers Fetch with Transit/JSON handling.
@@ -45,7 +51,7 @@
    - `:http/success` or `:http/failure` updates `:http [:todos]` with `:resp` or `:error` and `:status`.
 4. Derived sub:
    - `:http/body` pulls `:body` from `:http` path.
-   - `::state.todos.subs/todos` sorts by `:id` for rendering.
+   - `::state.todos/todos` sorts by `:id` for rendering.
 
 ## Routing
 - Routes carry `:layout` and `:view` in `:data` (`src/cljs/frontend/routes.cljs`).
@@ -59,8 +65,8 @@
   - `apply-theme` sets `<html data-theme>` to DaisyUI theme names (`gold_dark` / `gold_light`).
   - `apply-theme` applies DOM only. `persist-theme!` writes cookie + localStorage.
   - `initialize-theme` dispatches `::state.handlers/set-theme` with saved theme, and wires system preference listener that re-dispatches when in `:system`.
-- Global handlers (`frontend.state.handlers`):
-  - `::set-theme` is an `reg-event-fx` that updates `[:ui :theme]` and triggers the custom fx to apply + persist.
+- Global handlers moved to feature modules:
+  - `frontend.state.ui` exposes `::set-theme`, `::ui-state`, and `init-theme!`.
 - Server boot:
   - `backend.routes/index` reads `theme` cookie and sets `data-theme` before CSS to avoid FOUC; small inline script covers `system`.
 - App init:
@@ -95,20 +101,34 @@
 - `frontend/core.cljs` — App root, router start, layout/view composition.
 - `frontend/routes.cljs` — Route table, nav links.
 - `frontend/layouts/main_layout.cljs` — Shell layout (header/footer), theme switcher.
-- `frontend/pages/*` — Views (home/about/todos/not-found/login).
-- `frontend/state/todos/handlers.cljs` — Re-frame events for Todos.
-- `frontend/state/todos/subs.cljs` — Derived subs (Todos).
-- `frontend/state/http_fx.cljs` — Fetch effect + http status events + `:http/body` sub.
-- `frontend/state/handlers.cljs` — Global UI/route events and side-effecting theme event.
-- `frontend/state/subs.cljs` — Global subs (`::current-route`, `::ui-state`).
-- `frontend/utilities/theme.cljs` — Theme DOM/persistence helpers and `listen-system-change!`.
- - Auth pages: `frontend/pages/login.cljs` for manual + Google sign-in start.
-- `backend/routes.clj` — Server routes and theme-aware index.
-- `backend/api/auth.clj` — Session-based auth endpoints (register/login/logout/me, Google skeleton).
-- `backend/env.clj` — Env loader (secret.edn > ENV > defaults) as Integrant key `:config/env`.
-- `resources/config.edn` — Wires `:web/routes` with `:env` from `:config/env`.
+- `frontend/pages/*` — Views (home/about/todos/not-found/login/profile).
+- Feature state modules:
+  - `frontend/state/auth.cljs` — auth events + subs in one place (login/register/logout/get-me/upload-avatar).
+  - `frontend/state/user.cljs` — profile updates, password change, avatar uploaded.
+  - `frontend/state/todos.cljs` — todos events + subs.
+- Shared state:
+  - `frontend/state/http_fx.cljs` — Fetch effect (fetch-fx) + upload + `:http/body` sub; CSRF token support.
+  - `frontend/state/ui.cljs` — Theme events and `::ui-state`.
+  - `frontend/state/router.cljs` — Route events and `::current-route`.
+  - `frontend/state/toasts.cljs` — Toast store + subs; rendered by `frontend/ui/feedback.cljs`.
+  - `frontend/state/nav.cljs` — Navigation helpers; `frontend/state/app.cljs` — bootstraps app.
+ - Auth pages: `frontend/pages/login.cljs` for manual + Google sign-in start; `frontend/pages/profile.cljs` for settings.
+- Backend key files:
+  - `backend/routes.clj` — Server routes and theme-aware index.
+  - `backend/api/auth.clj` — Session-based auth endpoints (register/login/logout/me, Google skeleton); heartbeat refreshes cookie TTL.
+  - `backend/api/user.clj` — Profile + avatar + change password.
+  - `backend/image.clj` — Robust avatar processing (validate/crop/resize/PNG).
+  - `resources/config.edn` — Wires `:web/routes` with `:env` from `:config/env`.
 
-## Uploads
+## Uploads & Image Pipeline
 - Root folder is configurable via env key `:uploads {:root "uploads"}` (defaults to `uploads` under CWD).
 - Override with env var `UPLOADS_ROOT`.
-- Files are served under `/uploads/**`; avatars go to `<root>/avatars` and are accessible at `/uploads/avatars/<file>`.
+ - Files are served under `/uploads/**`; avatars go to `<root>/avatars` and are accessible at `/uploads/avatars/<file>`.
+ - Backend image processing (`src/clj/backend/image.clj`): read, validate, square-crop, scale, re-encode to PNG. Upload endpoint saves processed file and refreshes session user, so `/api/auth/me` includes `:avatar-url`.
+
+## Schemas
+- `common.schema/user-public` includes `:avatar-url` and `:has-password?`.
+
+## CSRF
+- Token endpoint `GET /api/auth/csrf` returns a token stored on the client.
+- Client automatically sends `X-CSRF-Token` for unsafe requests when available.

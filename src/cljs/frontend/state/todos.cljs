@@ -1,7 +1,8 @@
-(ns frontend.state.todos.handlers
+(ns frontend.state.todos
   (:require [frontend.state.http-fx :as http]
             [re-frame.core :as rf]))
 
+;; Events
 (rf/reg-event-fx ::get-todos
                  (fn [_ _]
                    {:fx [[:dispatch [:http/init [:todos]]]
@@ -12,11 +13,12 @@
 
 (rf/reg-event-fx ::add
                  (fn [_ [_ todo]]
-                   {::http/fetch {:method :post
-                                  :url "/api/todo"
-                                  :request-content-type :json
-                                  :body todo
-                                  :on-success [::get-todos]}}))
+                   (let [body {:text (:text todo)}]
+                     {::http/fetch {:method :post
+                                    :url "/api/todo"
+                                    :request-content-type :transit+json
+                                    :body body
+                                    :on-success [::get-todos]}})))
 
 (rf/reg-event-fx ::remove
                  (fn [_ [_ id]]
@@ -28,6 +30,13 @@
                  (fn [_ [_ id changes]]
                    {::http/fetch {:method :put
                                   :url (str "/api/todo/" id)
-                                  :request-content-type :json
+                                  ;; Use Transit to preserve keyword status values
+                                  :request-content-type :transit+json
                                   :body changes
                                   :on-success [::get-todos]}}))
+
+;; Subs
+(rf/reg-sub ::todos
+            :<- [:http/body [:todos]]
+            (fn [todos _]
+              (sort-by :id todos)))

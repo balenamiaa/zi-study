@@ -2,8 +2,11 @@
   (:require ["lucide-react" :refer [Menu Zap User UserCircle Settings LogOut Heart Image]]
             [frontend.components.theme-switcher :refer [theme-switcher]]
             [frontend.routes :as routes :refer [topbar-nav-links]]
-            [frontend.state.auth.handlers :as auth-h]
-            [frontend.state.auth.subs :as auth-subs]
+            [frontend.state.auth :as auth]
+            [frontend.state.user :as user]
+            [frontend.ui.avatar :refer [Avatar]]
+            [frontend.ui.dropdown :refer [Dropdown]]
+            [frontend.ui.feedback :refer [Toasts]]
             [frontend.uix.hooks :refer [use-subscribe]]
             [re-frame.core :as rf]
             [reitit.frontend.easy :as rfe]
@@ -55,34 +58,32 @@
      ($ :div {:class "navbar-end gap-3"}
         ($ theme-switcher)
 
-        (let [auth (use-subscribe [::auth-subs/auth])
+        (let [auth (use-subscribe [::auth/auth])
               status (:status auth)
-              user (:user auth)
-              avatar (:avatar_url user)]
+              raw-user (:user auth)
+              user (cond
+                     (and (map? raw-user) (:body raw-user)) (:body raw-user)
+                     (map? raw-user) raw-user
+                     :else nil)
+              avatar (:avatar-url user)]
           (cond
             (= status :loading)
             ($ :div {:class "btn btn-ghost btn-circle"}
                ($ :span {:class "loading loading-spinner text-primary"}))
 
             (= status :authenticated)
-            ($ :div {:class "dropdown dropdown-end"}
-               ($ :label {:tabIndex 0 :class "btn btn-ghost btn-circle avatar"}
-                  ($ :div {:class "w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary to-secondary flex items-center justify-center"}
-                     (if avatar
-                       ($ :img {:src avatar :alt "avatar" :class "w-full h-full object-cover"})
-                       ($ User {:size 20 :className "text-primary-content"}))))
-               ($ :ul {:tabIndex 0 :class "menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-56 border border-base-200"}
-                  ($ :li ($ :a {:href "#"} ($ UserCircle {:size 16 :className "mr-2"}) "Profile"))
-                  ($ :li ($ :label {:class "cursor-pointer"}
-                            ($ Image {:size 16 :className "mr-2"})
-                            "Change avatar"
-                            ($ :input {:type "file" :accept "image/*" :class "hidden"
-                                       :on-change (fn [e]
-                                                    (when-let [file (aget (.. e -target -files) 0)]
-                                                      (rf/dispatch [::auth-h/upload-avatar file [::auth-h/get-me]])))})))
-                  ($ :li ($ :a {:href "#" :on-click #(rf/dispatch [::auth-h/logout])}
-                            ($ LogOut {:size 16 :className "mr-2"})
-                            "Logout"))))
+            ($ Dropdown {:align :end
+                         :trigger ($ :div {:class "btn btn-ghost btn-circle"}
+                                     ($ Avatar {:src avatar :name (:name user) :email (:email user) :size :md}))
+                         :children ($ :ul nil
+                                      ($ :li ($ :a {:href "#"
+                                                    :on-click (fn [e] (.preventDefault e)
+                                                                (rfe/push-state routes/sym-profile-route))}
+                                                ($ UserCircle {:size 16 :className "mr-2"})
+                                                "Profile"))
+                                      ($ :li ($ :a {:href "#" :on-click #(rf/dispatch [::auth/logout])}
+                                                ($ LogOut {:size 16 :className "mr-2"})
+                                                "Logout")))})
 
             :else
             ($ :div {:class "flex gap-2"}
@@ -109,4 +110,5 @@
      ($ header {:current-route current-route})
      ($ :main {:class "flex-1 container mx-auto px-4 py-8 lg:px-8"}
         children)
-     ($ footer)))
+     ($ footer)
+     ($ Toasts {:portal? true :position :top-right})))

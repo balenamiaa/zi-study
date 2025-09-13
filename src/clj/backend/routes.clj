@@ -1,7 +1,8 @@
 (ns backend.routes
-  (:require [backend.api.todo :as todo]
+  (:require [backend.api.auth :as auth]
+            [backend.api.todo :as todo]
             [backend.api.user]
-            [backend.api.auth :as auth]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -18,7 +19,10 @@
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
+            [ring.middleware.anti-forgery :as anti-forgery]
+            [ring.middleware.cors :refer [wrap-cors]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
+            [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.session :refer [wrap-session]]
             [ring.middleware.session.cookie :refer [cookie-store]]
             [ring.util.http-response :as resp]))
@@ -88,21 +92,21 @@
                    [:meta {:name "viewport" :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]
                    [:link {:rel "icon" :type "image/svg+xml" :href "/css/logo.svg"}]
                    ;; Set theme ASAP before CSS loads to avoid FOUC
-                  [:script
-                   (hiccup/raw
-                    (str
-                     "(function(){\n"
-                     "  try {\n"
-                     "    var existing=document.documentElement.getAttribute('data-theme');\n"
-                     "    if(!existing){\n"
-                     "      var saved=localStorage.getItem('theme')||'system';\n"
-                     "      var prefersDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;\n"
-                     "      var effective=(saved==='system')?(prefersDark?'dark':'light'):saved;\n"
-                     "      var name=(effective==='dark')?'gold_dark':'gold_light';\n"
-                     "      document.documentElement.setAttribute('data-theme', name);\n"
-                     "    }\n"
-                     "  } catch(e){}\n"
-                     "})();"))]
+                   [:script
+                    (hiccup/raw
+                     (str
+                      "(function(){\n"
+                      "  try {\n"
+                      "    var existing=document.documentElement.getAttribute('data-theme');\n"
+                      "    if(!existing){\n"
+                      "      var saved=localStorage.getItem('theme')||'system';\n"
+                      "      var prefersDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;\n"
+                      "      var effective=(saved==='system')?(prefersDark?'dark':'light'):saved;\n"
+                      "      var name=(effective==='dark')?'gold_dark':'gold_light';\n"
+                      "      document.documentElement.setAttribute('data-theme', name);\n"
+                      "    }\n"
+                      "  } catch(e){}\n"
+                      "})();"))]
                    [:link {:rel "stylesheet" :href "/css/main.css"}]
                    [:link {:rel "stylesheet" :href "/css/autofill-fix.css"}]]
                   [:body {:class "bg-base-100 antialiased"}
@@ -132,12 +136,22 @@
    (ring/router
     ["/api"
      ["/user"
-      ["/profile" {:post {:handler #'backend.api.user/update-profile}}]
-      ["/avatar" {:post {:handler #'backend.api.user/upload-avatar}}]]
+      ["/profile" {:post {:parameters {:body schema/user-profile-update}
+                          :handler #'backend.api.user/update-profile}}]
+      ["/avatar" {:post {:handler #'backend.api.user/upload-avatar}
+                  :delete {:handler #'backend.api.user/delete-avatar}}]
+      ["/password" {:post {:parameters {:body schema/change-password-request}
+                           :handler #'backend.api.user/change-password}}]]
      ["/auth"
-      ["/me" {:get {:handler #'auth/me}}]
-      ["/register" {:post {:handler #'auth/register}}]
-      ["/login" {:post {:handler #'auth/login}}]
+      ["/me" {:get {:handler #'auth/me
+                    :responses {200 {:body schema/user-public}}}}]
+      ["/csrf" {:get {:handler (fn [req] (resp/ok {:token (:anti-forgery-token req)}))}}]
+      ["/register" {:post {:parameters {:body schema/register-request}
+                           :responses {200 {:body schema/user-public}}
+                           :handler #'auth/register}}]
+      ["/login" {:post {:parameters {:body schema/login-request}
+                        :responses {200 {:body schema/user-public}}
+                        :handler #'auth/login}}]
       ["/logout" {:post {:handler #'auth/logout}}]
       ["/google/start" {:get {:handler #'auth/google-start}}]
       ["/google/callback" {:get {:handler #'auth/google-callback}}]]
@@ -166,19 +180,48 @@
                          ring.coercion/coerce-exceptions-middleware
                          ring.coercion/coerce-request-middleware
                          ring.coercion/coerce-response-middleware
+                         (fn [handler]
+                           (wrap-cors handler
+                                      :access-control-allow-origin [#"http://localhost:8080" #"http://127.0.0.1:8080"]
+                                      :access-control-allow-methods [:get :post :put :patch :delete :options]
+                                      :access-control-allow-headers ["content-type" "accept" "x-csrf-token" "x-xsrf-token"]
+                                      :access-control-allow-credentials true))
+                         (fn [handler] (wrap-params handler))
                          (fn [handler] (wrap-multipart-params handler))
                          [wrap-database-middleware (:db env)]
                          [wrap-env-middleware (:env env)]
                          ;; session cookie store (signed). Provide a real secret in env.
                          (fn [handler]
                            (let [cfg (:env env)]
-                             (wrap-session handler {:store (cookie-store {:key (.getBytes (get-in cfg [:session :secret]) "UTF-8")
-                                                                           :readers {} :writers {}})
-                                                   :cookie-name (or (get-in cfg [:session :cookie-name]) "sid")
-                                                   :cookie-attrs {:http-only true :same-site :lax}})))]}})
+                             (wrap-session handler {:store (cookie-store {:key (.getBytes (get-in cfg [:session :secret]) "UTF-8")})
+                                                    :cookie-name (or (get-in cfg [:session :cookie-name]) "sid")
+                                                    :cookie-attrs {:http-only true :same-site :lax}})))
+                         ;; CSRF protection: accept synchronizer token OR safe-header for browser requests
+                         (fn [handler]
+                           (anti-forgery/wrap-anti-forgery handler
+                                                           {:safe-header "x-csrf-token"
+                                                            :read-token (fn [req]
+                                                                          (or (get-in req [:headers "x-csrf-token"]) ; normalized lowercase
+                                                                              (get-in req [:headers "x-xsrf-token"]) ; alternative
+                                                                              (get-in req [:headers "x-csrf-token"]) ; allow both cases
+                                                                              (get-in req [:params "__anti-forgery-token"]) ; form param
+                                                                              (get-in req [:params "csrf-token"])))
+                                                            :error-handler (fn [req]
+                                                                             (let [h (:headers req)
+                                                                                   meth (:request-method req)
+                                                                                   uri (:uri req)
+                                                                                   cookie-name (or (get-in req [:env :session :cookie-name]) "sid")
+                                                                                   has-sid (boolean (get-in req [:cookies cookie-name]))
+                                                                                   tk1 (get h "x-csrf-token")
+                                                                                   tk2 (get h "x-xsrf-token")
+                                                                                   tkp (or (get-in req [:params "__anti-forgery-token"]) (get-in req [:params "csrf-token"]))]
+                                                                               (log/warn "CSRF failure" {:method meth :uri uri :has-sid has-sid :x-csrf (boolean tk1) :x-xsrf (boolean tk2) :param (boolean tkp)})
+                                                                               {:status 403
+                                                                                :headers {"Content-Type" "application/json"}
+                                                                                :body (json/generate-string {:error "invalid-anti-forgery"})}))}))]}})
 
-  ;; Default handler - handle resources (js files), index.html and 404 for API endpoints
-  (ring/routes
+   ;; Default handler - handle resources (js files), index.html and 404 for API endpoints
+   (ring/routes
     (ring/create-resource-handler {:path ""
                                    :root "public"})
     ;; Serve uploaded files from configurable uploads root at /uploads

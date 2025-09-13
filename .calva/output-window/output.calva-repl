@@ -994,3 +994,931 @@ clj꞉user꞉> (go)
 ; 16:18:48.771 [nREPL-session-f808c506-8adc-42fc-b6da-944e1c9974e4] INFO  backend.main -- Starting Jetty server on http://localhost:3333
 :initiated
 clj꞉user꞉> 
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:56582 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> 
+"Please see https://calva.io/output/#about-stdout-in-the-repl-window
+about why stdout printed to this file is prepended with `;` to be line comments."
+clj꞉user꞉> (go)
+; Execution error (IllegalArgumentException) at integrant.core/eval823$fn (core.cljc:481).
+; No such namespace: config
+clj꞉user꞉> 
+(reset)
+; :reloading (backend.db common.schema backend.api.todo backend.api.auth backend.uploads backend.api.user backend.routes backend.main database backend.env config adapter web user backend.migrations)
+; 21:08:48.333 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 21:08:48.560 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+(go)
+; 21:08:50.579 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Stopping Jetty
+; 21:08:50.588 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.routes -- Shutting down web routes
+; 21:08:50.588 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Shutting down DB pool
+; 21:08:50.595 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 21:08:50.626 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> (reset)
+; 23:31:38.984 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Stopping Jetty
+; 23:31:38.990 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.routes -- Shutting down web routes
+; 23:31:38.990 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.api.auth backend.routes backend.main database config adapter web backend.migrations)
+(); 23:31:39.329 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 23:31:39.380 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+(go)
+; 23:31:42.920 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Stopping Jetty
+; 23:31:42.922 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.routes -- Shutting down web routes
+; 23:31:42.923 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Shutting down DB pool
+; 23:31:42.930 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 23:31:42.966 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; #error {
+;  :cause "No reader function for tag object"
+;  :via
+;  [{:type java.lang.RuntimeException
+;    :message "No reader function for tag object"
+;    :at [clojure.lang.EdnReader$TaggedReader readTagged "EdnReader.java" 801]}]
+;  :trace
+;  [[clojure.lang.EdnReader$TaggedReader readTagged "EdnReader.java" 801]
+;   [clojure.lang.EdnReader$TaggedReader invoke "EdnReader.java" 783]
+;   [clojure.lang.EdnReader$DispatchReader invoke "EdnReader.java" 549]
+;   [clojure.lang.EdnReader readDelimitedList "EdnReader.java" 757]
+;   [clojure.lang.EdnReader$MapReader invoke "EdnReader.java" 680]
+;   [clojure.lang.EdnReader readDelimitedList "EdnReader.java" 757]
+;   [clojure.lang.EdnReader$MapReader invoke "EdnReader.java" 680]
+;   [clojure.lang.EdnReader read "EdnReader.java" 145]
+;   [clojure.lang.EdnReader read "EdnReader.java" 111]
+;   [clojure.lang.EdnReader readString "EdnReader.java" 67]
+;   [clojure.edn$read_string invokeStatic "edn.clj" 46]
+;   [clojure.edn$read_string invoke "edn.clj" 37]
+;   [ring.middleware.session.cookie$deserialize invokeStatic "cookie.clj" 75]
+;   [ring.middleware.session.cookie$deserialize invoke "cookie.clj" 74]
+;   [ring.middleware.session.cookie$serialize invokeStatic "cookie.clj" 78]
+;   [ring.middleware.session.cookie$serialize invoke "cookie.clj" 77]
+;   [ring.middleware.session.cookie$seal invokeStatic "cookie.clj" 84]
+;   [ring.middleware.session.cookie$seal invoke "cookie.clj" 81]
+;   [ring.middleware.session.cookie.CookieStore write_session "cookie.clj" 101]
+;   [ring.middleware.session$bare_session_response invokeStatic "session.clj" 53]
+;   [ring.middleware.session$bare_session_response invoke "session.clj" 44]
+;   [ring.middleware.session$session_response invokeStatic "session.clj" 75]
+;   [ring.middleware.session$session_response invoke "session.clj" 67]
+;   [ring.middleware.session$wrap_session$fn__30614 invoke "session.clj" 113]
+;   [backend.routes$wrap_env_middleware$fn__33153 invoke "routes.clj" 50]
+;   [backend.routes$wrap_database_middleware$fn__33150 invoke "routes.clj" 39]
+;   [ring.middleware.multipart_params$handle_request_and_errors$fn__30278$fn__30279 invoke "multipart_params.clj" 140]
+;   [ring.middleware.multipart_params$handle_request_and_errors invokeStatic "multipart_params.clj" 138]
+;   [ring.middleware.multipart_params$handle_request_and_errors invoke "multipart_params.clj" 137]
+;   [ring.middleware.multipart_params$wrap_multipart_params$fn__30284 invoke "multipart_params.clj" 192]
+;   [ring.middleware.params$wrap_params$fn__33137 invoke "params.clj" 75]
+;   [reitit.ring.middleware.exception$wrap$fn__29757$fn__29758 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__29812 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__29529 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__32007 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+(reset)
+; 23:36:14.171 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Stopping Jetty
+; 23:36:14.173 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.routes -- Shutting down web routes
+; 23:36:14.173 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.api.auth backend.routes backend.main database adapter web backend.migrations)
+(); 23:36:14.368 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 23:36:14.417 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+goclj꞉user꞉> (go)
+; 23:36:17.438 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Stopping Jetty
+; 23:36:17.439 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.routes -- Shutting down web routes
+; 23:36:17.440 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Shutting down DB pool
+; 23:36:17.445 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 23:36:17.471 [nREPL-session-746d1609-9955-4b32-8a08-cf4450f3716f] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; #error {
+;  :cause "No reader function for tag object"
+;  :via
+;  [{:type java.lang.RuntimeException
+;    :message "No reader function for tag object"
+;    :at [clojure.lang.EdnReader$TaggedReader readTagged "EdnReader.java" 801]}]
+;  :trace
+;  [[clojure.lang.EdnReader$TaggedReader readTagged "EdnReader.java" 801]
+;   [clojure.lang.EdnReader$TaggedReader invoke "EdnReader.java" 783]
+;   [clojure.lang.EdnReader$DispatchReader invoke "EdnReader.java" 549]
+;   [clojure.lang.EdnReader readDelimitedList "EdnReader.java" 757]
+;   [clojure.lang.EdnReader$MapReader invoke "EdnReader.java" 680]
+;   [clojure.lang.EdnReader readDelimitedList "EdnReader.java" 757]
+;   [clojure.lang.EdnReader$MapReader invoke "EdnReader.java" 680]
+;   [clojure.lang.EdnReader read "EdnReader.java" 145]
+;   [clojure.lang.EdnReader read "EdnReader.java" 111]
+;   [clojure.lang.EdnReader readString "EdnReader.java" 67]
+;   [clojure.edn$read_string invokeStatic "edn.clj" 46]
+;   [clojure.edn$read_string invoke "edn.clj" 37]
+;   [ring.middleware.session.cookie$deserialize invokeStatic "cookie.clj" 75]
+;   [ring.middleware.session.cookie$deserialize invoke "cookie.clj" 74]
+;   [ring.middleware.session.cookie$serialize invokeStatic "cookie.clj" 78]
+;   [ring.middleware.session.cookie$serialize invoke "cookie.clj" 77]
+;   [ring.middleware.session.cookie$seal invokeStatic "cookie.clj" 84]
+;   [ring.middleware.session.cookie$seal invoke "cookie.clj" 81]
+;   [ring.middleware.session.cookie.CookieStore write_session "cookie.clj" 101]
+;   [ring.middleware.session$bare_session_response invokeStatic "session.clj" 53]
+;   [ring.middleware.session$bare_session_response invoke "session.clj" 44]
+;   [ring.middleware.session$session_response invokeStatic "session.clj" 75]
+;   [ring.middleware.session$session_response invoke "session.clj" 67]
+;   [ring.middleware.session$wrap_session$fn__30614 invoke "session.clj" 113]
+;   [backend.routes$wrap_env_middleware$fn__33734 invoke "routes.clj" 50]
+;   [backend.routes$wrap_database_middleware$fn__33731 invoke "routes.clj" 39]
+;   [ring.middleware.multipart_params$handle_request_and_errors$fn__30278$fn__30279 invoke "multipart_params.clj" 140]
+;   [ring.middleware.multipart_params$handle_request_and_errors invokeStatic "multipart_params.clj" 138]
+;   [ring.middleware.multipart_params$handle_request_and_errors invoke "multipart_params.clj" 137]
+;   [ring.middleware.multipart_params$wrap_multipart_params$fn__30284 invoke "multipart_params.clj" 192]
+;   [ring.middleware.params$wrap_params$fn__33137 invoke "params.clj" 75]
+;   [reitit.ring.middleware.exception$wrap$fn__29757$fn__29758 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__29812 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__29529 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__32007 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+; nREPL connection failed: Error: read ECONNRESET
+; Failed connecting.
+; nREPL Connection was closed
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; No nrepl port file found.
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:61484 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> (go)
+; Execution error (IllegalArgumentException) at integrant.core/eval823$fn (core.cljc:481).
+; No such namespace: config
+clj꞉user꞉> 
+; Execution error (IllegalArgumentException) at integrant.core/eval823$fn (core.cljc:481).
+; No such namespace: config
+clj꞉user꞉> (reset)
+; :reloading (backend.db common.schema backend.api.todo backend.api.auth backend.uploads backend.api.user backend.routes backend.main database backend.env config adapter web user backend.migrations)
+; 23:38:08.977 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 23:38:09.208 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+(go)
+; 23:38:12.761 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Stopping Jetty
+; 23:38:12.769 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.routes -- Shutting down web routes
+; 23:38:12.769 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Shutting down DB pool
+; 23:38:12.776 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 23:38:12.807 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; #error {
+;  :cause "No reader function for tag object"
+;  :via
+;  [{:type java.lang.RuntimeException
+;    :message "No reader function for tag object"
+;    :at [clojure.lang.EdnReader$TaggedReader readTagged "EdnReader.java" 801]}]
+;  :trace
+;  [[clojure.lang.EdnReader$TaggedReader readTagged "EdnReader.java" 801]
+;   [clojure.lang.EdnReader$TaggedReader invoke "EdnReader.java" 783]
+;   [clojure.lang.EdnReader$DispatchReader invoke "EdnReader.java" 549]
+;   [clojure.lang.EdnReader readDelimitedList "EdnReader.java" 757]
+;   [clojure.lang.EdnReader$MapReader invoke "EdnReader.java" 680]
+;   [clojure.lang.EdnReader readDelimitedList "EdnReader.java" 757]
+;   [clojure.lang.EdnReader$MapReader invoke "EdnReader.java" 680]
+;   [clojure.lang.EdnReader read "EdnReader.java" 145]
+;   [clojure.lang.EdnReader read "EdnReader.java" 111]
+;   [clojure.lang.EdnReader readString "EdnReader.java" 67]
+;   [clojure.edn$read_string invokeStatic "edn.clj" 46]
+;   [clojure.edn$read_string invoke "edn.clj" 37]
+;   [ring.middleware.session.cookie$deserialize invokeStatic "cookie.clj" 75]
+;   [ring.middleware.session.cookie$deserialize invoke "cookie.clj" 74]
+;   [ring.middleware.session.cookie$serialize invokeStatic "cookie.clj" 78]
+;   [ring.middleware.session.cookie$serialize invoke "cookie.clj" 77]
+;   [ring.middleware.session.cookie$seal invokeStatic "cookie.clj" 84]
+;   [ring.middleware.session.cookie$seal invoke "cookie.clj" 81]
+;   [ring.middleware.session.cookie.CookieStore write_session "cookie.clj" 101]
+;   [ring.middleware.session$bare_session_response invokeStatic "session.clj" 53]
+;   [ring.middleware.session$bare_session_response invoke "session.clj" 44]
+;   [ring.middleware.session$session_response invokeStatic "session.clj" 75]
+;   [ring.middleware.session$session_response invoke "session.clj" 67]
+;   [ring.middleware.session$wrap_session$fn__30379 invoke "session.clj" 113]
+;   [backend.routes$wrap_env_middleware$fn__32261 invoke "routes.clj" 50]
+;   [backend.routes$wrap_database_middleware$fn__32258 invoke "routes.clj" 39]
+;   [ring.middleware.multipart_params$handle_request_and_errors$fn__30016$fn__30017 invoke "multipart_params.clj" 140]
+;   [ring.middleware.multipart_params$handle_request_and_errors invokeStatic "multipart_params.clj" 138]
+;   [ring.middleware.multipart_params$handle_request_and_errors invoke "multipart_params.clj" 137]
+;   [ring.middleware.multipart_params$wrap_multipart_params$fn__30022 invoke "multipart_params.clj" 192]
+;   [ring.middleware.params$wrap_params$fn__30059 invoke "params.clj" 75]
+;   [reitit.ring.middleware.exception$wrap$fn__29495$fn__29496 invoke "exception.clj" 52]
+;   [muuntaja.middleware$wrap_format$fn__29550 invoke "middleware.clj" 73]
+;   [reitit.ring$ring_handler$fn__29267 invoke "ring.cljc" 386]
+;   [clojure.lang.AFn applyToHelper "AFn.java" 154]
+;   [clojure.lang.AFn applyTo "AFn.java" 144]
+;   [clojure.lang.AFunction$1 doInvoke "AFunction.java" 33]
+;   [clojure.lang.RestFn invoke "RestFn.java" 411]
+;   [ring.adapter.jetty$proxy_handler$fn__31774 invoke "jetty.clj" 115]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doHandle nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextHandle "ScopedHandler.java" 193]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doHandle "ContextHandler.java" 1041]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 162]
+;   [org.eclipse.jetty.ee9.servlet.ServletHandler doScope "ServletHandler.java" 483]
+;   [ring.adapter.jetty.proxy$org.eclipse.jetty.ee9.servlet.ServletHandler$ff19274a doScope nil -1]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler nextScope "ScopedHandler.java" 160]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler doScope "ContextHandler.java" 962]
+;   [org.eclipse.jetty.ee9.nested.ScopedHandler handle "ScopedHandler.java" 123]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler handle "ContextHandler.java" 1723]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel$RequestDispatchable dispatch "HttpChannel.java" 1581]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel dispatch "HttpChannel.java" 733]
+;   [org.eclipse.jetty.ee9.nested.HttpChannel handle "HttpChannel.java" 520]
+;   [org.eclipse.jetty.ee9.nested.ContextHandler$CoreContextHandler$CoreToNestedHandler handle "ContextHandler.java" 3048]
+;   [org.eclipse.jetty.server.handler.ContextHandler handle "ContextHandler.java" 1174]
+;   [org.eclipse.jetty.server.Server handle "Server.java" 182]
+;   [org.eclipse.jetty.server.internal.HttpChannelState$HandlerInvoker run "HttpChannelState.java" 682]
+;   [org.eclipse.jetty.server.internal.HttpConnection onFillable "HttpConnection.java" 411]
+;   [org.eclipse.jetty.server.internal.HttpConnection$FillableCallback succeeded "HttpConnection.java" 1819]
+;   [org.eclipse.jetty.io.FillInterest fillable "FillInterest.java" 99]
+;   [org.eclipse.jetty.io.SelectableChannelEndPoint$1 run "SelectableChannelEndPoint.java" 54]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy runTask "AdaptiveExecutionStrategy.java" 521]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy epcRunTask "AdaptiveExecutionStrategy.java" 492]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy consumeTask "AdaptiveExecutionStrategy.java" 447]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy tryProduce "AdaptiveExecutionStrategy.java" 297]
+;   [org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy run "AdaptiveExecutionStrategy.java" 202]
+;   [org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread run "ReservedThreadExecutor.java" 312]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool runJob "QueuedThreadPool.java" 999]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner doRunJob "QueuedThreadPool.java" 1229]
+;   [org.eclipse.jetty.util.thread.QueuedThreadPool$Runner run "QueuedThreadPool.java" 1184]
+;   [java.lang.Thread run "Thread.java" 1447]]}
+(reset)
+; 02:19:59.388 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Stopping Jetty
+; 02:19:59.398 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.routes -- Shutting down web routes
+; 02:19:59.398 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.config backend.api.auth backend.routes backend.main database adapter web backend.migrations)
+(); 02:19:59.713 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 02:19:59.762 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+(go
+#function[integrant.repl/go]
+clj꞉user꞉> 
+(go)
+; 02:20:06.942 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Stopping Jetty
+; 02:20:06.943 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.routes -- Shutting down web routes
+; 02:20:06.943 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Shutting down DB pool
+; 02:20:06.952 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 02:20:06.982 [nREPL-session-5bfadacc-6bee-4066-bdbc-36df030d7c22] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; 02:20:20.579 [qtp1635540297-399] WARN  o.e.jetty.ee9.nested.HttpChannel -- handleException /api/auth/register com.fasterxml.jackson.core.JsonParseException: Unexpected character (':' (code 58)): was expecting double-quote to start field name
+;  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; No nrepl port file found.
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:62614 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> 
+"Please see https://calva.io/output/#about-stdout-in-the-repl-window
+about why stdout printed to this file is prepended with `;` to be line comments."
+clj꞉user꞉> (go)
+; 02:15:37.351 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 02:15:37.575 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Shutting down DB pool
+; Execution error (ExceptionInfo) at reitit.exception/exception (exception.cljc:19).
+; :malli.core/invalid-schema
+; 
+; {:schema :min, :form [:min 8]}
+clj꞉user꞉> (reset)
+; :reloading (backend.env backend.config backend.db common.schema backend.api.todo backend.api.auth backend.uploads backend.api.user backend.routes backend.main database adapter web user backend.migrations)
+; 02:17:41.018 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 02:17:41.074 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+(go)
+; 02:17:43.290 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Stopping Jetty
+; 02:17:43.297 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.routes -- Shutting down web routes
+; 02:17:43.298 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Shutting down DB pool
+; 02:17:43.304 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 02:17:43.360 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; 02:18:37.743 [qtp1692618813-155] WARN  o.e.jetty.ee9.nested.HttpChannel -- handleException /api/auth/register com.fasterxml.jackson.core.JsonParseException: Unexpected character (':' (code 58)): was expecting double-quote to start field name
+;  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]
+; 02:18:42.733 [qtp1692618813-155] WARN  o.e.jetty.ee9.nested.HttpChannel -- handleException /api/auth/register com.fasterxml.jackson.core.JsonParseException: Unexpected character (':' (code 58)): was expecting double-quote to start field name
+;  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]
+(reset)
+; 02:19:41.827 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Stopping Jetty
+; 02:19:41.830 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.routes -- Shutting down web routes
+; 02:19:41.831 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.api.auth backend.routes backend.main database adapter web backend.migrations)
+; 02:19:42.013 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 02:19:42.052 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+(go)
+; 02:19:43.309 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Stopping Jetty
+; 02:19:43.311 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.routes -- Shutting down web routes
+; 02:19:43.312 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Shutting down DB pool
+; 02:19:43.317 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 02:19:43.345 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; 02:19:46.242 [qtp1619923745-211] WARN  o.e.jetty.ee9.nested.HttpChannel -- handleException /api/auth/register com.fasterxml.jackson.core.JsonParseException: Unexpected character (':' (code 58)): was expecting double-quote to start field name
+;  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]
+#'backend.api.auth/register
+clj꞉backend.api.auth꞉> (ns user)
+nil
+clj꞉user꞉> 
+; 02:20:10.925 [qtp1619923745-206] WARN  o.e.jetty.ee9.nested.HttpChannel -- handleException /api/auth/register com.fasterxml.jackson.core.JsonParseException: Unexpected character (':' (code 58)): was expecting double-quote to start field name
+;  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]
+(reset)
+; 02:20:19.932 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Stopping Jetty
+; 02:20:19.934 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.routes -- Shutting down web routes
+; 02:20:19.934 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Shutting down DB pool
+; :reloading ()
+; 02:20:19.986 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 02:20:20.013 [nREPL-session-2b9b3a04-b5bc-49d7-ae9d-4b802f0d58f4] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+(); 02:20:27.456 [qtp1146175688-237] WARN  o.e.jetty.ee9.nested.HttpChannel -- handleException /api/auth/register com.fasterxml.jackson.core.JsonParseException: Unexpected character (':' (code 58)): was expecting double-quote to start field name
+;  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]
+; {:email "balencpp@gmail.com", :password "A72hb3454", :name "Balen"}
+; {:email "balencpp@gmail.com", :password "A72hb3454", :name "Balen"}
+; nREPL connection failed: Error: read ECONNRESET
+; Failed connecting.
+; nREPL Connection was closed
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:52335 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> (go)
+; 19:31:59.748 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 19:32:00.054 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> (reset)
+
+; 14:53:45.591 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Stopping Jetty
+; 14:53:45.611 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.routes -- Shutting down web routes
+; 14:53:45.612 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.env backend.config backend.db common.schema backend.api.todo backend.api.auth backend.image backend.uploads backend.api.user backend.routes backend.main database adapter web user backend.migrations)
+; 14:53:45.977 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 14:53:46.037 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> (reset)
+; 15:03:25.283 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Stopping Jetty
+; 15:03:25.285 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.routes -- Shutting down web routes
+; 15:03:25.285 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.api.auth backend.api.user backend.routes backend.main database adapter web backend.migrations)
+; 15:03:25.481 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:03:25.514 [nREPL-session-7762c427-8bf9-4cd3-a879-85016b563447] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+; nREPL connection failed: Error: read ECONNRESET
+; Failed connecting.
+; nREPL Connection was closed
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; No nrepl port file found.
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; No nrepl port file found.
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; No nrepl port file found.
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; No nrepl port file found.
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:52845 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> 
+(go); 15:05:23.637 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:05:23.905 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; 15:05:24.139 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Stopping Jetty
+; 15:05:24.153 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.routes -- Shutting down web routes
+; 15:05:24.154 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Shutting down DB pool
+; 15:05:24.209 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:05:24.257 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> (reset)
+; 15:09:34.001 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Stopping Jetty
+; 15:09:34.004 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.routes -- Shutting down web routes
+; 15:09:34.004 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.env backend.config backend.db common.schema backend.api.todo backend.api.auth backend.image backend.uploads backend.api.user backend.routes backend.main database adapter web user backend.migrations)
+; 15:09:34.274 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:09:34.321 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> (reset)
+; 15:22:55.218 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Stopping Jetty
+; 15:22:55.219 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.routes -- Shutting down web routes
+; 15:22:55.220 [nREPL-session-c3e40ce1-ebf8-4dff-933f-56c6ffdba970] INFO  backend.main -- Shutting down DB pool
+; :reloading (common.schema backend.api.todo backend.api.auth backend.api.user backend.routes backend.main database adapter web backend.migrations)
+; :error-while-loading backend.api.auth
+#error {
+ :cause "Could not locate buddy/sign/jws__init.class, buddy/sign/jws.clj or buddy/sign/jws.cljc on classpath."
+ :via
+ [{:type clojure.lang.Compiler$CompilerException
+   :message "Syntax error macroexpanding at (backend/api/auth.clj:1:1)."
+   :data #:clojure.error{:phase :execution, :line 1, :column 1, :source "backend/api/auth.clj"}
+   :at [clojure.lang.Compiler load "Compiler.java" 8235]}
+  {:type java.io.FileNotFoundException
+   :message "Could not locate buddy/sign/jws__init.class, buddy/sign/jws.clj or buddy/sign/jws.cljc on classpath."
+   :at [clojure.lang.RT load "RT.java" 482]}]
+ :trace
+ [[clojure.lang.RT load "RT.java" 482]
+  [clojure.lang.RT load "RT.java" 444]
+  [clojure.core$load$fn__6933 invoke "core.clj" 6189]
+  [clojure.core$load invokeStatic "core.clj" 6188]
+  [clojure.core$load doInvoke "core.clj" 6172]
+  [clojure.lang.RestFn invoke "RestFn.java" 411]
+  [clojure.core$load_one invokeStatic "core.clj" 5961]
+  [clojure.core$load_one invoke "core.clj" 5956]
+  [clojure.core$load_lib$fn__6875 invoke "core.clj" 6003]
+  [clojure.core$load_lib invokeStatic "core.clj" 6002]
+  [clojure.core$load_lib doInvoke "core.clj" 5981]
+  [clojure.lang.RestFn applyTo "RestFn.java" 145]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$load_libs invokeStatic "core.clj" 6044]
+  [clojure.core$load_libs doInvoke "core.clj" 6028]
+  [clojure.lang.RestFn applyTo "RestFn.java" 140]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$require invokeStatic "core.clj" 6066]
+  [clojure.core$require doInvoke "core.clj" 6066]
+  [clojure.lang.RestFn invoke "RestFn.java" 622]
+  [backend.api.auth$eval33021$loading__6814__auto____33022 invoke "auth.clj" 1]
+  [backend.api.auth$eval33021 invokeStatic "auth.clj" 1]
+  [backend.api.auth$eval33021 invoke "auth.clj" 1]
+  [clojure.lang.Compiler eval "Compiler.java" 7751]
+  [clojure.lang.Compiler eval "Compiler.java" 7740]
+  [clojure.lang.Compiler load "Compiler.java" 8223]
+  [clojure.lang.RT loadResourceScript "RT.java" 401]
+  [clojure.lang.RT loadResourceScript "RT.java" 392]
+  [clojure.lang.RT load "RT.java" 479]
+  [clojure.lang.RT load "RT.java" 444]
+  [clojure.core$load$fn__6933 invoke "core.clj" 6189]
+  [clojure.core$load invokeStatic "core.clj" 6188]
+  [clojure.core$load doInvoke "core.clj" 6172]
+  [clojure.lang.RestFn invoke "RestFn.java" 411]
+  [clojure.core$load_one invokeStatic "core.clj" 5961]
+  [clojure.core$load_one invoke "core.clj" 5956]
+  [clojure.core$load_lib$fn__6875 invoke "core.clj" 6003]
+  [clojure.core$load_lib invokeStatic "core.clj" 6002]
+  [clojure.core$load_lib doInvoke "core.clj" 5981]
+  [clojure.lang.RestFn applyTo "RestFn.java" 145]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$load_libs invokeStatic "core.clj" 6044]
+  [clojure.core$load_libs doInvoke "core.clj" 6028]
+  [clojure.lang.RestFn applyTo "RestFn.java" 140]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$require invokeStatic "core.clj" 6066]
+  [clojure.core$require doInvoke "core.clj" 6066]
+  [clojure.lang.RestFn invoke "RestFn.java" 424]
+  [clojure.tools.namespace.reload$track_reload_one invokeStatic "reload.clj" 35]
+  [clojure.tools.namespace.reload$track_reload_one invoke "reload.clj" 21]
+  [clojure.tools.namespace.reload$track_reload invokeStatic "reload.clj" 52]
+  [clojure.tools.namespace.reload$track_reload invoke "reload.clj" 43]
+  [clojure.lang.AFn applyToHelper "AFn.java" 154]
+  [clojure.lang.AFn applyTo "AFn.java" 144]
+  [clojure.lang.Var alterRoot "Var.java" 310]
+  [clojure.core$alter_var_root invokeStatic "core.clj" 5563]
+  [clojure.core$alter_var_root doInvoke "core.clj" 5558]
+  [clojure.lang.RestFn invoke "RestFn.java" 428]
+  [clojure.tools.namespace.repl$refresh_scanned invokeStatic "repl.clj" 135]
+  [clojure.tools.namespace.repl$refresh_scanned doInvoke "repl.clj" 109]
+  [clojure.lang.RestFn applyTo "RestFn.java" 140]
+  [clojure.core$apply invokeStatic "core.clj" 667]
+  [clojure.core$apply invoke "core.clj" 662]
+  [clojure.tools.namespace.repl$refresh invokeStatic "repl.clj" 187]
+  [clojure.tools.namespace.repl$refresh doInvoke "repl.clj" 169]
+  [clojure.lang.RestFn invoke "RestFn.java" 424]
+  [integrant.repl$reset invokeStatic "repl.clj" 90]
+  [integrant.repl$reset invoke "repl.clj" 88]
+  [user$eval32986 invokeStatic "NO_SOURCE_FILE" 1539]
+  [user$eval32986 invoke "NO_SOURCE_FILE" 1539]
+  [clojure.lang.Compiler eval "Compiler.java" 7751]
+  [nrepl.middleware.interruptible_eval$evaluator$run__7412$fn__7423 invoke "interruptible_eval.clj" 106]
+  [nrepl.middleware.interruptible_eval$evaluator$run__7412 invoke "interruptible_eval.clj" 101]
+  [nrepl.middleware.session$session_exec$session_loop__7496 invoke "session.clj" 230]
+  [nrepl.SessionThread run "SessionThread.java" 21]]}
+clj꞉user꞉> 
+; nREPL connection failed: Error: read ECONNRESET
+; Failed connecting.
+; nREPL Connection was closed
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; No nrepl port file found.
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:65455 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> (go)
+; 15:38:58.087 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:38:58.336 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; 15:38:58.575 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Stopping Jetty
+; 15:38:58.586 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.routes -- Shutting down web routes
+; 15:38:58.587 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Shutting down DB pool
+; 15:38:58.642 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:38:58.686 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> (reset)
+; 15:50:19.599 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Stopping Jetty
+; 15:50:19.601 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.routes -- Shutting down web routes
+; 15:50:19.601 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.env backend.config backend.db common.schema backend.api.todo backend.api.auth backend.image backend.uploads backend.api.user backend.routes backend.main database adapter web user backend.migrations)
+; 15:50:19.909 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:50:19.946 [nREPL-session-82af4752-1694-4e29-bbda-42fa486b2e36] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+; nREPL connection failed: Error: read ECONNRESET
+; Failed connecting.
+; nREPL Connection was closed
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:61340 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> (go)
+; 15:51:09.528 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:51:09.760 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; 15:51:09.974 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Stopping Jetty
+; 15:51:09.988 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.routes -- Shutting down web routes
+; 15:51:09.988 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Shutting down DB pool
+; 15:51:10.000 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:51:10.071 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+; 15:51:10.085 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Stopping Jetty
+; 15:51:10.087 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.routes -- Shutting down web routes
+; 15:51:10.088 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Shutting down DB pool
+; 15:51:10.091 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:51:10.131 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+:initiated
+clj꞉user꞉> (reset)
+; 15:59:38.691 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Stopping Jetty
+; 15:59:38.692 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.routes -- Shutting down web routes
+; 15:59:38.693 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.env backend.config backend.db common.schema backend.api.todo backend.api.auth backend.image backend.uploads backend.api.user backend.routes backend.main database adapter web user backend.migrations)
+; 15:59:38.943 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 15:59:38.982 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> (reset)
+; 16:09:27.764 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Stopping Jetty
+; 16:09:27.766 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.routes -- Shutting down web routes
+; 16:09:27.766 [nREPL-session-9d5eacd8-3a2a-4c0b-85cb-123233975416] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.routes backend.main database adapter web backend.migrations)
+; :error-while-loading backend.routes
+#error {
+ :cause "Could not locate ring/middleware/cors__init.class, ring/middleware/cors.clj or ring/middleware/cors.cljc on classpath."
+ :via
+ [{:type clojure.lang.Compiler$CompilerException
+   :message "Syntax error macroexpanding at (backend/routes.clj:1:1)."
+   :data #:clojure.error{:phase :execution, :line 1, :column 1, :source "backend/routes.clj"}
+   :at [clojure.lang.Compiler load "Compiler.java" 8235]}
+  {:type java.io.FileNotFoundException
+   :message "Could not locate ring/middleware/cors__init.class, ring/middleware/cors.clj or ring/middleware/cors.cljc on classpath."
+   :at [clojure.lang.RT load "RT.java" 482]}]
+ :trace
+ [[clojure.lang.RT load "RT.java" 482]
+  [clojure.lang.RT load "RT.java" 444]
+  [clojure.core$load$fn__6933 invoke "core.clj" 6189]
+  [clojure.core$load invokeStatic "core.clj" 6188]
+  [clojure.core$load doInvoke "core.clj" 6172]
+  [clojure.lang.RestFn invoke "RestFn.java" 411]
+  [clojure.core$load_one invokeStatic "core.clj" 5961]
+  [clojure.core$load_one invoke "core.clj" 5956]
+  [clojure.core$load_lib$fn__6875 invoke "core.clj" 6003]
+  [clojure.core$load_lib invokeStatic "core.clj" 6002]
+  [clojure.core$load_lib doInvoke "core.clj" 5981]
+  [clojure.lang.RestFn applyTo "RestFn.java" 145]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$load_libs invokeStatic "core.clj" 6044]
+  [clojure.core$load_libs doInvoke "core.clj" 6028]
+  [clojure.lang.RestFn applyTo "RestFn.java" 140]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$require invokeStatic "core.clj" 6066]
+  [clojure.core$require doInvoke "core.clj" 6066]
+  [clojure.lang.RestFn invoke "RestFn.java" 3897]
+  [backend.routes$eval33921$loading__6814__auto____33922 invoke "routes.clj" 1]
+  [backend.routes$eval33921 invokeStatic "routes.clj" 1]
+  [backend.routes$eval33921 invoke "routes.clj" 1]
+  [clojure.lang.Compiler eval "Compiler.java" 7751]
+  [clojure.lang.Compiler eval "Compiler.java" 7740]
+  [clojure.lang.Compiler load "Compiler.java" 8223]
+  [clojure.lang.RT loadResourceScript "RT.java" 401]
+  [clojure.lang.RT loadResourceScript "RT.java" 392]
+  [clojure.lang.RT load "RT.java" 479]
+  [clojure.lang.RT load "RT.java" 444]
+  [clojure.core$load$fn__6933 invoke "core.clj" 6189]
+  [clojure.core$load invokeStatic "core.clj" 6188]
+  [clojure.core$load doInvoke "core.clj" 6172]
+  [clojure.lang.RestFn invoke "RestFn.java" 411]
+  [clojure.core$load_one invokeStatic "core.clj" 5961]
+  [clojure.core$load_one invoke "core.clj" 5956]
+  [clojure.core$load_lib$fn__6875 invoke "core.clj" 6003]
+  [clojure.core$load_lib invokeStatic "core.clj" 6002]
+  [clojure.core$load_lib doInvoke "core.clj" 5981]
+  [clojure.lang.RestFn applyTo "RestFn.java" 145]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$load_libs invokeStatic "core.clj" 6044]
+  [clojure.core$load_libs doInvoke "core.clj" 6028]
+  [clojure.lang.RestFn applyTo "RestFn.java" 140]
+  [clojure.core$apply invokeStatic "core.clj" 669]
+  [clojure.core$require invokeStatic "core.clj" 6066]
+  [clojure.core$require doInvoke "core.clj" 6066]
+  [clojure.lang.RestFn invoke "RestFn.java" 424]
+  [clojure.tools.namespace.reload$track_reload_one invokeStatic "reload.clj" 35]
+  [clojure.tools.namespace.reload$track_reload_one invoke "reload.clj" 21]
+  [clojure.tools.namespace.reload$track_reload invokeStatic "reload.clj" 52]
+  [clojure.tools.namespace.reload$track_reload invoke "reload.clj" 43]
+  [clojure.lang.AFn applyToHelper "AFn.java" 154]
+  [clojure.lang.AFn applyTo "AFn.java" 144]
+  [clojure.lang.Var alterRoot "Var.java" 310]
+  [clojure.core$alter_var_root invokeStatic "core.clj" 5563]
+  [clojure.core$alter_var_root doInvoke "core.clj" 5558]
+  [clojure.lang.RestFn invoke "RestFn.java" 428]
+  [clojure.tools.namespace.repl$refresh_scanned invokeStatic "repl.clj" 135]
+  [clojure.tools.namespace.repl$refresh_scanned doInvoke "repl.clj" 109]
+  [clojure.lang.RestFn applyTo "RestFn.java" 140]
+  [clojure.core$apply invokeStatic "core.clj" 667]
+  [clojure.core$apply invoke "core.clj" 662]
+  [clojure.tools.namespace.repl$refresh invokeStatic "repl.clj" 187]
+  [clojure.tools.namespace.repl$refresh doInvoke "repl.clj" 169]
+  [clojure.lang.RestFn invoke "RestFn.java" 424]
+  [integrant.repl$reset invokeStatic "repl.clj" 90]
+  [integrant.repl$reset invoke "repl.clj" 88]
+  [user$eval33917 invokeStatic "NO_SOURCE_FILE" 1715]
+  [user$eval33917 invoke "NO_SOURCE_FILE" 1715]
+  [clojure.lang.Compiler eval "Compiler.java" 7751]
+  [nrepl.middleware.interruptible_eval$evaluator$run__7412$fn__7423 invoke "interruptible_eval.clj" 106]
+  [nrepl.middleware.interruptible_eval$evaluator$run__7412 invoke "interruptible_eval.clj" 101]
+  [nrepl.middleware.session$session_exec$session_loop__7496 invoke "session.clj" 230]
+  [nrepl.SessionThread run "SessionThread.java" 21]]}
+clj꞉user꞉> 
+; nREPL connection failed: Error: read ECONNRESET
+; Failed connecting.
+; nREPL Connection was closed
+; Connecting using "deps.edn" project type.
+; You can make Calva auto-select this.
+;   - See https://calva.io/connect-sequences/
+; 
+
+; Connecting ...
+; Reading port file: file:///c%3A/userdata/clj/zistudy/.nrepl-port ...
+; Using host:port localhost:62037 ...
+; Hooking up nREPL sessions ...
+; Connected session: clj
+; Evaluating code from settings: 'calva.autoEvaluateCode.onConnect.clj'
+nil
+clj꞉user꞉> 
+(go)
+; 16:18:34.936 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 16:18:35.174 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+; 16:18:35.390 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Stopping Jetty
+; 16:18:35.404 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.routes -- Shutting down web routes
+; 16:18:35.404 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Shutting down DB pool
+; 16:18:35.417 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+:initiated
+clj꞉user꞉> 
+; 16:18:35.479 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:initiated
+clj꞉user꞉> 
+; 16:18:45.130 [qtp1331207279-104] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :has-token false}
+(reset)
+; 16:22:27.283 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Stopping Jetty
+; 16:22:27.285 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.routes -- Shutting down web routes
+; 16:22:27.285 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.env backend.config backend.db common.schema backend.api.todo backend.api.auth backend.image backend.uploads backend.api.user backend.routes backend.main database adapter web user backend.migrations)
+; 16:22:27.572 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 16:22:27.608 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+; 16:22:37.362 [qtp1631230148-144] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:22:56.750 [qtp1631230148-159] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:32:19.498 [qtp1631230148-160] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:32:24.780 [qtp1631230148-143] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:33:00.808 [qtp1631230148-159] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:33:20.576 [qtp1631230148-159] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:33:32.593 [qtp1631230148-159] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:34:07.968 [qtp1631230148-143] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:34:15.081 [qtp1631230148-159] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:35:09.038 [qtp1631230148-143] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:35:26.979 [qtp1631230148-159] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+; 16:38:25.287 [qtp1631230148-166] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf false, :x-xsrf false, :param false}
+(reset)
+; 17:54:04.079 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Stopping Jetty
+; 17:54:04.084 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.routes -- Shutting down web routes
+; 17:54:04.084 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.api.user backend.routes backend.main database adapter web backend.migrations)
+; 17:54:04.354 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 17:54:04.428 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+; 17:54:16.140 [qtp254761445-316] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/user/password, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 17:54:41.866 [qtp254761445-329] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/user/password, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 17:54:55.315 [qtp254761445-330] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/user/password, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 17:55:12.757 [qtp254761445-310] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:00:00.939 [qtp254761445-329] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/user/password, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:00:16.273 [qtp254761445-311] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:00:17.853 [qtp254761445-310] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:04:28.365 [qtp254761445-310] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/user/password, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+(reset)
+; 18:04:38.732 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Stopping Jetty
+; 18:04:38.733 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.routes -- Shutting down web routes
+; 18:04:38.734 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.routes backend.main database adapter web backend.migrations)
+; 18:04:38.867 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 18:04:38.906 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 
+; 18:04:41.235 [qtp405383323-351] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/user/password, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:04:49.257 [qtp405383323-364] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:05:36.056 [qtp405383323-345] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:49:16.209 [qtp405383323-398] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:49:16.224 [qtp405383323-398] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:49:49.902 [qtp405383323-366] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+; 18:49:49.912 [qtp405383323-366] WARN  backend.routes -- CSRF failure {:method :post, :uri /api/auth/logout, :has-sid true, :x-csrf true, :x-xsrf true, :param false}
+(reset)
+; 18:58:59.417 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Stopping Jetty
+; 18:58:59.420 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.routes -- Shutting down web routes
+; 18:58:59.420 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Shutting down DB pool
+; :reloading (backend.routes backend.main database adapter web backend.migrations)
+; 18:58:59.594 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 18:58:59.645 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> (reset)
+; 19:16:52.117 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Stopping Jetty
+; 19:16:52.119 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.routes -- Shutting down web routes
+; 19:16:52.119 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Shutting down DB pool
+; :reloading ()
+; 19:16:52.189 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 19:16:52.237 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> (reset)
+; 21:33:32.479 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Stopping Jetty
+; 21:33:32.483 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.routes -- Shutting down web routes
+; 21:33:32.483 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Shutting down DB pool
+; :reloading ()
+; 21:33:32.559 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 21:33:32.615 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> (reset)
+
+; 21:38:59.182 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Stopping Jetty
+; 21:38:59.183 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.routes -- Shutting down web routes
+; 21:38:59.183 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Shutting down DB pool
+; :reloading ()
+; 21:38:59.246 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting DB pool, JDBC config is {:database-name "template_db_dev", :adapter "postgresql", :password "***", :port-number 8532, :username "template_db_user", :connection-timeout 5000, :server-name "localhost", :maximum-pool-size 16, :validation-timeout 5000}
+; 21:38:59.275 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
+:resumed
+clj꞉user꞉> 

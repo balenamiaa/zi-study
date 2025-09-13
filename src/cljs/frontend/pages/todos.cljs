@@ -1,7 +1,6 @@
 (ns frontend.pages.todos
   (:require ["lucide-react" :refer [Plus Trash2 ListTodo]]
-            [frontend.state.todos.handlers :as h]
-            [frontend.state.todos.subs :as s]
+            [frontend.state.todos :as todos]
             [frontend.uix.hooks :refer [use-subscribe]]
             [re-frame.core :as rf]
             [uix.core :as uix :refer [$ defui]]))
@@ -30,6 +29,7 @@
 
 (defui todo-item [{:keys [todo]}]
   (let [{:keys [id text status]} todo
+        status-kw (keyword status)
         [editing? set-editing!] (uix/use-state false)
         [edit-value set-edit-value!] (uix/use-state text)]
 
@@ -38,10 +38,10 @@
           ($ :div {:class "flex items-center gap-3"}
              ($ :input
                 {:type "checkbox"
-                 :checked (= :resolved status)
+                 :checked (= :resolved status-kw)
                  :class "checkbox checkbox-primary"
-                 :on-change #(rf/dispatch [::h/save-changes id
-                                           {:status (if (= :resolved status)
+                 :on-change #(rf/dispatch [::todos/save-changes id
+                                           {:status (if (= :resolved status-kw)
                                                       :unresolved
                                                       :resolved)}])})
 
@@ -53,27 +53,27 @@
                    :auto-focus true
                    :on-change #(set-edit-value! (.. % -target -value))
                    :on-blur #(do
-                               (rf/dispatch [::h/save-changes id {:text edit-value}])
+                               (rf/dispatch [::todos/save-changes id {:text edit-value}])
                                (set-editing! false))
                    :on-key-down (fn [e]
                                   (when (= "Enter" (.-key e))
-                                    (rf/dispatch [::h/save-changes id {:text edit-value}])
+                                    (rf/dispatch [::todos/save-changes id {:text edit-value}])
                                     (set-editing! false)))})
 
                ($ :div {:class (str "flex-1 cursor-pointer "
-                                    (when (= :resolved status) "line-through opacity-60"))
+                                    (when (= :resolved status-kw) "line-through opacity-60"))
                         :on-click #(set-editing! true)}
                   text))
 
              ($ :button
                 {:class "btn btn-ghost btn-circle btn-sm text-error"
-                 :on-click #(rf/dispatch [::h/remove id])}
+                 :on-click #(rf/dispatch [::todos/remove id])}
                 ($ Trash2 {:size 16})))))))
 
 (defui todos-page [_match]
-  (let [todos (use-subscribe [::s/todos])]
+  (let [todos (use-subscribe [::todos/todos])]
     (uix/use-effect
-     #(rf/dispatch [::h/get-todos])
+     #(rf/dispatch [::todos/get-todos])
      [])
 
     ($ :div {:class "max-w-4xl mx-auto space-y-6"}
@@ -82,7 +82,7 @@
           ($ :p {:class "text-base-content/70"}
              "Keep track of your tasks with this beautiful todo app"))
 
-       ($ todo-input {:on-add-todo #(rf/dispatch [::h/add %])})
+       ($ todo-input {:on-add-todo #(rf/dispatch [::todos/add %])})
 
        (if (empty? todos)
          ($ :div {:class "card bg-base-200"}

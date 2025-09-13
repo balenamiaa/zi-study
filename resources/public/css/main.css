@@ -502,3 +502,34 @@ html {
     @apply border-2 border-current;
   }
 }
+
+/* Password inputs: hide native reveal/clear icons (edge cases across browsers) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* Some WebKit variants may expose credentials or decoration buttons */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Glass panel + glow utilities for UI components */
+.glass-panel {
+  @apply bg-base-200/70 backdrop-blur-md border border-base-300/40 shadow-lg;
+}
+
+.glow-primary {
+  box-shadow: 0 0 0px 0 rgba(0 0 0 / 0), 0 0 30px 2px color-mix(in oklch, var(--color-primary), transparent 70%);
+}
+
+.ring-gradient {
+  background: conic-gradient(from 180deg at 50% 50%, color-mix(in oklch, var(--color-primary), transparent 40%), color-mix(in oklch, var(--color-secondary), transparent 40%), color-mix(in oklch, var(--color-accent), transparent 50%), transparent);
+}
+
+.toast-item {
+  @apply bg-base-100/90 backdrop-blur-md border border-base-300/40;
+}

@@ -1,5 +1,6 @@
 (ns backend.main
   (:require [aero.core :as aero]
+            [backend.config]
             [backend.routes]
             [clojure.java.io :as io]
             [clojure.tools.logging :as log]
