@@ -50,8 +50,14 @@
          outdated {:doc "Check outdated dependencies"
                    :task (clojure "-M:outdated")}
 
-         test {:doc "Run backend unit tests"
-               :task (clojure "-M:backend:test")}
+         test {:doc "Run linters (kondo, eastwood) and backend tests (Kaocha)"
+               :task (do
+                       (println "🔍 clj-kondo lint...")
+                       (shell "clojure -M:kondo --lint src test" {:continue true})
+                       (println "🟡 Eastwood lint...")
+                       (shell "clojure -M:eastwood" {:continue true})
+                       (println "✅ Tests (Kaocha)...")
+                       (shell "clojure -M:backend:kaocha"))}
 
          clean {:doc "Clean build artifacts"
                 :task (do

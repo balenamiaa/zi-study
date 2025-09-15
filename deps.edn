@@ -81,4 +81,26 @@
            :outdated
            {:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}
                    org.slf4j/slf4j-simple {:mvn/version "2.1.0-alpha1"}}
-            :main-opts ["-m" "antq.core"]}}}
+            :main-opts ["-m" "antq.core"]}
+
+           :kaocha
+           {:extra-paths ["src/clj" "test/clj" "test/cljc"]
+            :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}
+                         ring/ring-mock {:mvn/version "0.6.2"}
+                         org.clojure/test.check {:mvn/version "1.1.1"}}
+            :main-opts ["-m" "kaocha.runner"]}
+
+           :backend:test
+           {:extra-paths ["test/clj" "test/cljc"]
+            :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}
+                         ring/ring-mock {:mvn/version "0.6.2"}
+                         org.clojure/test.check {:mvn/version "1.1.1"}}
+            :main-opts ["-m" "kaocha.runner"]}
+
+           :kondo
+           {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2025.07.28"}}
+            :main-opts ["-m" "clj-kondo.main"]}
+
+           :eastwood
+           {:extra-deps {jonase/eastwood {:mvn/version "1.4.3"}}
+            :main-opts ["-m" "eastwood.lint"]}}}
