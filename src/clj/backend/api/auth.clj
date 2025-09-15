@@ -41,7 +41,7 @@
 
 (defn register [req]
   (let [params (or (get-in req [:parameters :body]) (:body req) (:body-params req))
-        {:keys [email password name remember?]} params
+        {:keys [email password name]} params
         email (normalize-email email)]
     (if (or (str/blank? email) (str/blank? password))
       (resp/bad-request {:error :invalid-params})
@@ -159,7 +159,7 @@
   ;; Decode header to find kid
   (let [[header _payload _sig] (str/split id-token #"\.")
         header-json (String. (.decode (java.util.Base64/getUrlDecoder) header) StandardCharsets/UTF_8)
-        {:keys [kid alg]} (json/parse-string header-json true)
+        {:keys [kid]} (json/parse-string header-json true)
         jwk (get-jwk-key kid)
         pub (jwk->rsa-public-key jwk)
         payload (jws/unsign id-token pub {:alg :rs256})

@@ -5,7 +5,7 @@
 
 (rf/reg-event-fx
  ::show
- (fn [{:keys [db]} [_ {:keys [id timeout-ms position] :as t}]]
+ (fn [{:keys [db]} [_ {:keys [id timeout-ms] :as t}]]
    (let [id (or id (random-uuid))
          ms (cond
               (nil? timeout-ms) default-timeout-ms
@@ -36,4 +36,3 @@
  ::dispatch-after
  (fn [{:keys [ms event]}]
    (js/setTimeout #(rf/dispatch event) ms)))
-

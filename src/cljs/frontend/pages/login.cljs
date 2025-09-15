@@ -5,8 +5,8 @@
             [frontend.state.nav :as nav]
             [frontend.ui.button :refer [Button]]
             [frontend.ui.card :refer [Card]]
-            [frontend.ui.field :refer [FieldWrapper TextInput PasswordInput Checkbox]]
             [frontend.ui.feedback :as feedback]
+            [frontend.ui.field :refer [FieldWrapper TextInput PasswordInput Checkbox]]
             [frontend.uix.hooks :refer [use-subscribe]]
             [re-frame.core :as rf]
             [reitit.frontend.easy :as rfe]
@@ -43,22 +43,22 @@
           ($ Card {:glass? true}
              ($ :div {:class "space-y-5"}
                 ($ FieldWrapper {:id "email" :label "Email"
-                                 :hint (when (and (not (empty? email)) (not email-valid?))
+                                 :hint (when (and (seq email) (not email-valid?))
                                          "Enter a valid email")}
                    ($ TextInput {:id "email" :full? true :start-icon Mail
                                  :type "email"
                                  :placeholder "you@domain.com"
-                                 :invalid? (and (not (empty? email)) (not email-valid?))
+                                 :invalid? (and (seq email) (not email-valid?))
                                  :value email :on-change #(set-email! (.. % -target -value))}))
 
                 ($ FieldWrapper {:id "password" :label "Password"
-                                 :hint (when (and (not (empty? password)) (not pass-valid?))
+                                 :hint (when (and (seq password) (not pass-valid?))
                                          "Password can't be empty.")}
                    ($ PasswordInput {:id "password" :full? true
                                      :show? show-pass? :toggle! set-show-pass!
                                      :start-icon Lock
                                      :placeholder "••••••••"
-                                     :invalid? (and (not (empty? password)) (not pass-valid?))
+                                     :invalid? (and (seq password) (not pass-valid?))
                                      :value password :on-change #(set-password! (.. % -target -value))}))
 
                 ($ Checkbox {:label "Remember me for 30 days"

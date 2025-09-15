@@ -1,8 +1,8 @@
 (ns frontend.pages.profile
   (:require ["lucide-react" :refer [Camera User Lock Save Info]]
             [frontend.state.auth :as auth]
-            [frontend.state.user :as user]
             [frontend.state.ui-fx :as ui-fx]
+            [frontend.state.user :as user]
             [frontend.ui.avatar :refer [Avatar]]
             [frontend.ui.button :refer [Button]]
             [frontend.ui.card :refer [Card CardHeader CardFooter]]
@@ -52,13 +52,13 @@
                    ($ :p nil "Use a clear, centered image for best results.")
                    ($ :p nil "We optimize and crop images automatically.")))
              ($ CardFooter nil
-                 ($ :div {:class "flex items-center gap-3"}
-                    ($ :div {:class "text-xs text-base-content/60"}
-                       "PNG is used internally for consistency.")
-                    (when (seq avatar)
-                      ($ :button {:class "btn btn-xs btn-outline"
-                                  :on-click #(rf/dispatch [::user/remove-avatar])}
-                         "Remove photo")))))
+                ($ :div {:class "flex items-center gap-3"}
+                   ($ :div {:class "text-xs text-base-content/60"}
+                      "PNG is used internally for consistency.")
+                   (when (seq avatar)
+                     ($ :button {:class "btn btn-xs btn-outline"
+                                 :on-click #(rf/dispatch [::user/remove-avatar])}
+                        "Remove photo")))))
 
           ;; Profile info
           ($ Card {:glass? true}
@@ -100,7 +100,7 @@
                                        (if (not= nw nw2)
                                          (rf/dispatch [:profile/passwords-mismatch])
                                          (rf/dispatch [::user/change-password {:current cur :new nw :confirm nw2}
-                                                      [:profile/clear-passwords]])))}
+                                                       [:profile/clear-passwords]])))}
                    "Update password"))))
 
        ;; Clear password fields after success

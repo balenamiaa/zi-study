@@ -1,7 +1,6 @@
 (ns frontend.components.theme-switcher
   (:require ["lucide-react" :refer [Monitor Sun Moon]]
             [frontend.state.ui :as state-ui]
-            [frontend.state.router :as state-router]
             [frontend.uix.hooks :as hooks]
             [re-frame.core :as rf]
             [uix.core :as uix :refer [$ defui]]))

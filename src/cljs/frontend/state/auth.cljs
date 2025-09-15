@@ -73,7 +73,7 @@
 
 (rf/reg-event-fx
  ::logout-failure
- (fn [{:keys [db]} [_ resp]]
+ (fn [{:keys [db]} [_ _resp]]
    {:db db
     ::ui-fx/toast {:text "Logout failed" :variant :error}}))
 
@@ -95,7 +95,7 @@
 
 (rf/reg-event-fx
  ::upload-avatar-failure
- (fn [_ [_ resp]]
+ (fn [_ [_ _resp]]
    {::ui-fx/toast {:text "Avatar upload failed" :variant :error}}))
 
 (rf/reg-event-fx

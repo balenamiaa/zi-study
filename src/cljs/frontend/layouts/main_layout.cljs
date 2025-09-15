@@ -1,9 +1,8 @@
 (ns frontend.layouts.main-layout
-  (:require ["lucide-react" :refer [Menu Zap User UserCircle Settings LogOut Heart Image]]
+  (:require ["lucide-react" :refer [Menu Zap UserCircle LogOut Heart]]
             [frontend.components.theme-switcher :refer [theme-switcher]]
             [frontend.routes :as routes :refer [topbar-nav-links]]
             [frontend.state.auth :as auth]
-            [frontend.state.user :as user]
             [frontend.ui.avatar :refer [Avatar]]
             [frontend.ui.dropdown :refer [Dropdown]]
             [frontend.ui.feedback :refer [Toasts]]

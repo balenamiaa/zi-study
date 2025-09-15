@@ -6,7 +6,7 @@
 
 (defn- handler []
   (routes/app {:db nil
-               :env {:session {:secret (apply str (repeat 32 "a"))}}}))
+               :env {:session {:secret "0123456789ABCDEF"}}}))
 
 (deftest csrf-token-endpoint
   (testing "/api/auth/csrf returns token"
@@ -18,4 +18,3 @@
       (is (= 200 (:status resp)))
       (is (string? (:token body)))
       (is (pos? (count (:token body)))))))
-

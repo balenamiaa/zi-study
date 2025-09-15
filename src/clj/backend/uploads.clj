@@ -9,7 +9,8 @@
   (or (get-in req [:env :uploads :root]) "uploads"))
 
 (defn sanitize-ext [filename]
-  (some-> filename (str/split #"\\.") last str/lower-case))
+  (when-let [m (re-find #"\.([^.]+)$" (str filename))]
+    (-> (nth m 1) str/lower-case)))
 
 (defn ensure-dir! [^java.io.File dir]
   (.mkdirs dir)
@@ -34,4 +35,3 @@
       {:url (str "/uploads/" category "/" new-name)
        :path (.getPath dest)
        :filename new-name})))
-
