@@ -1,0 +1,11 @@
+{
+  "editor.hover.delay": 1500,
+  "calva.outputDestinations": {
+    "evalResults": "terminal",
+    "evalOutput": "terminal",
+    "otherOutput": "terminal"
+  },
+  "calva.autoOpenResultOutputDestination": true,
+  "calva.autoOpenJackInTerminal": false,
+  "calva.autoOpenREPLWindow": false,
+}

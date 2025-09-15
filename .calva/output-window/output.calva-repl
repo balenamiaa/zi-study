@@ -1922,3 +1922,17 @@ clj꞉user꞉> (reset)
 ; 21:38:59.275 [nREPL-session-580fa85b-6e8b-44f6-803e-3c1e7672bbb3] INFO  backend.main -- Starting Jetty server on http://localhost:3333
 :resumed
 clj꞉user꞉> 
+
+clj꞉frontend.pages.register꞉> 
+
+clj꞉frontend.pages.register꞉> 
+
+clj꞉frontend.pages.register꞉> 
+
+clj꞉frontend.pages.register꞉> 
+
+clj꞉frontend.pages.register꞉> 
+
+clj꞉frontend.pages.register꞉> (+ 1 1)
+
+clj꞉frontend.pages.register꞉> 
